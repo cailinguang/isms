@@ -1,0 +1,271 @@
+<html>
+<head>
+    <meta charset="utf-8">
+    <title>Tree Unit Test</title>
+    <link rel="stylesheet" href="../dist/qunit/qunit-2.0.0.css">
+    <link rel="stylesheet"
+          href="../dist/jstree/themes/default/style.min.css">
+</head>
+<body>
+<div id="qunit"></div>
+<div id="qunit-fixture"></div>
+<div id="test-tree"></div>
+<script src="../dist/qunit/qunit-2.0.0.js"></script>
+<script src="../dist/jquery/jquery-3.0.0.min.js"></script>
+<script src="../dist/jstree/jstree.min.js"></script>
+<script src="../dist/handlebars/handlebars-v4.0.5.js"></script>
+<script src="../js/tree.js"></script>
+<script>
+    var mock_requester = {};
+    mock_requester.last_request = {};
+    mock_requester.setNextResponse = function (response) {
+        mock_requester.last_request = {};
+        mock_requester.next_response = response;
+    };
+    mock_requester.request = function (uri, action, payload, callback) {
+        this.last_request = {
+            uri: uri,
+            action: action,
+            payload: payload,
+        };
+        callback(this.next_response);
+    };
+
+    var mock_error_reporter = {};
+    mock_error_reporter.addError = function (error_msg) {
+        this.last_error = error_msg;
+    }
+
+
+    function createMetadata() {
+        return {
+            type1: {
+                create: {
+                    uri: "/api/nodes",
+                    action: "POST",
+                    label: "Create Type2 Node"
+                }
+            },
+            type2: {
+                remove: {
+                    uri: "/api/nodes/{{id}}",
+                    action: "DELETE",
+                    label: "Delete"
+                }
+            },
+            type3: {
+                rename: {
+                    uri: "/api/nodes/{{id}}",
+                    action: "PATCH",
+                    label: "Rename"
+                },
+
+            },
+            type4: {
+                move: {
+                    uri: "/api/nodes/{{id}}",
+                    action: "PATCH",
+                    allowed_parent_types: ["type3"]
+                },
+            },
+        };
+    }
+
+    var p1 = {
+        id: "p1",
+        parent: "#",
+        text: "p1",
+        data: {
+            type: "type1"
+        }
+    };
+    var c1 = {
+        id: "c1",
+        parent: "p1",
+        text: "c1",
+        data: {
+            type: "type2"
+        }
+    };
+    var p2 = {
+        id: "p2",
+        parent: "#",
+        text: "p2",
+        data: {
+            type: "type3"
+        }
+    };
+    var p3 = {
+        id: "p3",
+        parent: "#",
+        text: "p3",
+        data: {
+            type: "type3"
+        }
+    };
+    var c2 = {
+        id: "c2",
+        parent: "p2",
+        text: "c2",
+        data: {
+            type: "type4",
+        },
+    }
+
+    function setupTree(data) {
+        var tree = IsmsTree.createNew("#test-tree", mock_requester,
+                mock_error_reporter);
+        tree.reload(createMetadata(), data);
+        return tree;
+    }
+
+    QUnit.test("Create Node Test", function (assert) {
+        tree = setupTree([p1]);
+        assert.ok(tree != null, "Tree.createNew returns a tree instance.");
+
+        mock_requester.setNextResponse({
+            success: true,
+            data: [p1, c1],
+            metadata: createMetadata()
+        });
+        tree.handleCreate({}, p1, 1);
+        assert.deepEqual(mock_requester.last_request, {
+            uri: "/api/nodes",
+            action: "POST",
+            payload: {
+                parent_id: "p1"
+            }
+        });
+
+        mock_requester.last_request = {};
+        tree.handleCreate({}, c1, 1);
+        assert.deepEqual(mock_requester.last_request, {});
+    });
+
+    QUnit.test("Remove Node Test", function (assert) {
+        tree = setupTree([p1, c1]);
+        mock_requester.setNextResponse({
+            success: true,
+            data: [p1],
+            metadata: createMetadata()
+        });
+        tree.handleRemove(c1, {}, 1);
+        assert.deepEqual(mock_requester.last_request, {
+            uri: "/api/nodes/c1",
+            action: "DELETE",
+            payload: {}
+        });
+        mock_requester.last_request = {};
+        tree.handleRemove(p1, {}, 1);
+        assert.deepEqual(mock_requester.last_request, {});
+    });
+
+    QUnit.test("Rename Node Test", function (assert) {
+        tree = setupTree([p1, p2]);
+        var p2_new = {
+            id: "p2",
+            parent: "#",
+            text: "p2_new",
+            data: {
+                type: "type3"
+            }
+        };
+        mock_requester.setNextResponse({
+            success: true,
+            data: [p1, p2_new],
+            metadata: createMetadata()
+        });
+        tree.handleRename(p2_new, {}, 1);
+        assert.deepEqual(mock_requester.last_request, {
+            uri: "/api/nodes/p2",
+            action: "PATCH",
+            payload: {
+                text: "p2_new"
+            }
+        });
+        mock_requester.last_request = {};
+        tree.handleRename(p1, {}, 1);
+        assert.deepEqual(mock_requester.last_request, {});
+    });
+
+    QUnit.test("Move Node Test", function (assert) {
+        tree = setupTree([p1, p2, p3, c1, c2]);
+        var c2_moved = {
+            id: "c2",
+            parent: "p3",
+            text: "c2",
+            date: {
+                type: "type4"
+            }
+        }
+        mock_requester.setNextResponse({
+            success: true,
+            data: [p1, p2, p3, c1, c2_moved],
+            metadata: createMetadata()
+        });
+        tree.handleMove(c2, p3, 1);
+        assert.deepEqual(mock_requester.last_request, {
+            uri: "/api/nodes/c2",
+            action: "PATCH",
+            payload: {
+                parent_id: "p3",
+                node_position: 1
+            }
+        });
+        mock_requester.last_request = {};
+        tree.handleRename(c1, {}, 1);
+        assert.deepEqual(mock_requester.last_request, {});
+    });
+
+    function assertMenuItem(assert, menu, items) {
+        keys = [];
+        for (var key in menu) {
+            if (menu.hasOwnProperty(key)) {
+                assert.ok(items.indexOf(key) >= 0);
+                keys.push(key);
+            }
+        }
+        for (var index in items) {
+            assert.ok(keys.indexOf(items[index]) >= 0);
+        }
+    }
+
+    QUnit.test("Create Context Menu Test", function (assert) {
+        tree = setupTree([]);
+        m1 = tree.createContextMenu(p1);
+        assertMenuItem(assert, m1, ["create"]);
+        assert.ok(m1.create.label, "Create Type2 Node");
+        m2 = tree.createContextMenu(p2);
+        assertMenuItem(assert, m2, ["rename"]);
+        assert.ok(m2.rename.label, "Rename");
+        m3 = tree.createContextMenu(p3);
+        assertMenuItem(assert, m3, ["rename"]);
+        assert.ok(m3.rename.label, "Rename");
+        m4 = tree.createContextMenu(c1);
+        assertMenuItem(assert, m4, ["remove"]);
+        assert.ok(m4.remove.label, "Delete");
+        m5 = tree.createContextMenu(c2);
+        assertMenuItem(assert, m5, []);
+    });
+
+    QUnit.test("Report Error Test", function (assert) {
+        tree = setupTree([p1]);
+        assert.ok(tree != null, "Tree.createNew returns a tree instance.");
+        mock_requester.setNextResponse({
+            success: false,
+            error_msg: "Failed to create new node."
+        });
+        tree.handleCreate({}, p1, 1);
+        assert.deepEqual(mock_requester.last_request, {
+            uri: "/api/nodes",
+            action: "POST",
+            payload: {
+                parent_id: "p1"
+            }
+        });
+        assert.ok(mock_error_reporter.last_error,
+                "Failed to create new node.");
+    });
+</script>
+</body>
+</html>

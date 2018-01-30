@@ -1,0 +1,12 @@
+<script src="/dist/jquery/jquery-3.0.0.min.js"></script>
+<script src="/dist/jquery/jquery.form.js"></script>
+<script src="/dist/bootstrap-3.3.5/js/bootstrap.min.js"></script>
+<script src="/dist/handlebars/handlebars-v4.0.5.js"></script>
+<script src="/dist/jquery-ui-1.12.0/jquery-ui.min.js"></script>
+<script src="/dist/jstree/jstree.min.js"></script>
+<script src="/dist/chart/Chart.bundle.js"></script>
+<script src="/js/common.js"></script>
+<script src="/js/evidence.js"></script>
+<script src="/js/ismsview.js"></script>
+<script src="/js/tree.js"></script>
+<#include "alert_dialog.ftl">

@@ -1,0 +1,105 @@
+<html>
+<head>
+    <meta charset="utf-8">
+    <title>UI Test</title>
+    <link rel="stylesheet" href="../dist/jquery-ui-1.12.0/jquery-ui.min.css"/>
+<body>
+<script id="date-template" type="text/x-handlebars-template">
+    <ul><input type="text" id="{date}}"/></ul>
+    <ul>{{sub_view}}</ul>
+    <ul><a href='javascript:void(0)' onclick='{{dialog}}'>Open</a></ul>
+</script>
+<script id="text-template" type="text/x-handlebars-template">
+    <h1>HELLO!</h1>
+</script>
+<script id="dialog-template" type="text/x-handlebars-template">
+    <div id="dialog2" title="Basic dialog">
+        <p>This is the default dialog which is useful for displaying information. The dialog window can be moved,
+            resized and closed with the 'x' icon.</p>
+        <ul><a href='javascript:void(0)' onclick='{{dialog}}'>Open</a></ul>
+    </div>
+</script>
+<script id="dialog-template2" type="text/x-handlebars-template">
+    <div id="dialog3" title="Basic dialog 2">
+        ANOTHER!
+    </div>
+</script>
+<div id="dialogs"></div>
+<div id="test">
+    {{root}}
+</div>
+<script src="https://code.jquery.com/jquery-1.12.4.min.js"></script>
+<!--<script src="../dist/jquery/jquery-3.0.0.min.js"></script>-->
+<script src="../dist/handlebars/handlebars-v4.0.5.js"></script>
+<!--<script src="../dist/jquery-ui-1.12.0/jquery-ui.min.js"></script>-->
+<script>
+    root = {
+        view: {
+            id: "root",
+            template: "date-template",
+            date: {
+                id: "date"
+            },
+            view: {
+                id: "sub_view",
+                template: "text-template"
+            },
+            dialog: {
+                id: "dialog",
+                template: "dialog-template",
+                dialog: {
+                    id: "dialog",
+                    template: "dialog-template2",
+                }
+            }
+        }
+    };
+    function renderElementTree(root, parent_id) {
+        var result = {};
+        for (var key in root) {
+            var value = root[key];
+            if (value == null) {
+                continue;
+            }
+            var full_id = parent_id + "_" + value.id;
+            if (key == "view") {
+                var template = Handlebars.compile($("#" + value.template).html());
+                result[value.id] = new Handlebars.SafeString(template(renderElementTree(value, full_id)));
+            }
+            if (key == "date") {
+                result[value.id] = full_id;
+            }
+            if (key == "dialog") {
+                result[value.id] = new Handlebars.SafeString('openDialog("' + full_id + '")');
+                window.dialog_views[full_id] = {view: {id: full_id, template: value.template, dialog: value.dialog}};
+            }
+        }
+        return result;
+    }
+    function setupJQueryUI(root, parent_id) {
+        for (var key in root) {
+            var value = root[key];
+            var full_id = parent_id + "_" + value.id;
+            if (key == "view") {
+                setupJQueryUI(value, full_id);
+            }
+            if (key == "date") {
+                $("#" + full_id).datepicker();
+            }
+        }
+    }
+    function render(id, root) {
+        var template = Handlebars.compile($("#" + id).html());
+        $("#" + id).html(template(renderElementTree(root, id)));
+        setupJQueryUI(root, id);
+    }
+    function openDialog(id) {
+        var template = Handlebars.compile("<div id='" + id + "'>" + "{{" + id + "}}</div>");
+        $("#dialogs").append(template(renderElementTree(window.dialog_views[id], "dialog")));
+        $("#" + id).dialog({modal: true});
+    }
+    window.dialog_views = {};
+    render("test", root);
+</script>
+</body>
+</html>

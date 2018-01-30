@@ -1,0 +1,33 @@
+<html>
+<head>
+    <meta charset="utf-8">
+    <title>Tree Test</title>
+    <link rel="stylesheet"
+          href="../dist/jstree/themes/default/style.min.css">
+</head>
+<body>
+<div id="test-tree">
+</div>
+<script src="/dist/jquery/jquery-3.0.0.min.js"></script>
+<script src="/dist/jstree/jstree.min.js"></script>
+<script src="/dist/handlebars/handlebars-v4.0.5.js"></script>
+<script src="/js/tree.js"></script>
+<script src="/js/requester.js"></script>
+<script>
+    var requester = IsmsRequester.createNew();
+    var tree = IsmsTree.createNew("#test-tree", requester, null);
+    requester.request(
+            "/api/standards/vda/1",
+            "GET",
+            {},
+            function (response) {
+                if (response.success) {
+                    tree.reload(response.metadata, response.data);
+                } else {
+                    window.alert(response.error_msg);
+                }
+            }
+    );
+</script>
+</body>
+</html>

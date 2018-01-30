@@ -1,0 +1,254 @@
+<html>
+<head>
+    <meta charset="utf-8">
+    <title>UI Test</title>
+    <link rel="stylesheet" href="../dist/jquery-ui-1.12.0/jquery-ui.min.css"/>
+    <link rel="stylesheet" href="../dist/bootstrap-3.3.5/css/bootstrap.min.css"/>
+    <link rel="stylesheet" href="../dist/bootstrap-3.3.5/css/bootstrap-theme.min.css"/>
+<body>
+<div id="dialogs"></div>
+<div id="test"></div>
+<script id="t1" type="text/x-handlebars-template">
+    {{#each resources}}
+    {{#with resource}}
+    <a href="javascript:void(0)" onclick="edit('{{uri}}')"><h2>{{uri}}</h2></a>
+    <div id="{{uri}}">
+        <table class="table table-striped">
+            <tr>
+                <td>Name</td>
+                <td>{{name}}</td>
+            </tr>
+            {{#each address_list}}
+            <tr>
+                <td>Address</td>
+                <td>{{address}}</td>
+            </tr>
+            {{/each}}
+            <tr>
+                <td colspan="2" style="padding-left: 20px">
+                    {{#t1 resources}}{{/t1}}
+                </td>
+            </tr>
+        </table>
+    </div>
+    {{/with}}
+    {{/each}}
+</script>
+<script id="t1_edit" type="text/x-handlebars-template">
+    {{#with resource}}
+    <div id="dialog_{{uri}}" title="Edit">
+        <table class="table table-striped">
+            <tr>
+                <td>Name</td>
+                <td colspan="2"><input type="text" value="{{name}}"/></td>
+            </tr>
+            {{#each address_list}}
+            <tr id='{{../uri}}_{{id}}'>
+                <td>Address</td>
+                <td>{{address}}</td>
+                <td align="right"><a href="javascript:void(0)"
+                                     onclick="removeProperty('dialog_{{../uri}}', '{{../uri}}', '{{id}}')">Remove</a>
+                </td>
+            </tr>
+            {{/each}}
+            <tr>
+                <td colspan="3" align="right"><a href="javascript:void(0)"
+                                                 onclick="openAddressDialog('dialog_{{../uri}}', '{{../uri}}', '{{id}}')">Add
+                    New Address</a></td>
+            </tr>
+        </table>
+    </div>
+    {{/with}}
+</script>
+<script id="address" type="text/x-handlebars-template">
+    <div id="address_dialog_{{uri}}" title="Address">
+
+        <table class="table table-striped">
+            <tr>
+                <td>Search</td>
+                <td><input type="text" name="address_search" label="Search"/></td>
+                <td>
+                    <button>Search</button>
+                </td>
+            </tr>
+            <tr>
+                <td>SHA</td>
+                <td>200000</td>
+                <td>
+                    <button>Add</button>
+                </td>
+            </tr>
+            <tr>
+                <td>MTV</td>
+                <td>200100</td>
+                <td>
+                    <button>Add</button>
+                </td
+            </tr>
+        </table>
+    </div>
+</script>
+<script src="../dist/jquery/jquery-3.0.0.min.js"></script>
+<script src="../dist/handlebars/handlebars-v4.0.5.js"></script>
+<script src="../dist/jquery-ui-1.12.0/jquery-ui.min.js"></script>
+<script src="../dist/bootstrap-3.3.5/js/bootstrap.min.js"></script>
+<script type="text/javascript">
+    function openAddressDialog(dialog_uri, uri, id) {
+        var template = Handlebars.compile($("#address").html());
+        $("#dialogs").append(template({uri: uri}));
+        $("#address_dialog_" + uri).dialog({modal: true});
+    }
+    function removeProperty(dialog_uri, uri, id) {
+        if (typeof window.my_updates[uri] == 'undefined') {
+            window.my_updates[uri] = {};
+        }
+        $("#" + uri + "_" + id).remove();
+        var res = window.my_resources[uri];
+        for (var i = 0; i < res.properties.length; ++i) {
+            var prop = res.properties[i];
+            if (prop.id == id) {
+                res.properties.splice(i, 1);
+            }
+        }
+    }
+    function edit(uri) {
+        var template = Handlebars.compile($("#t1_edit").html());
+        $("#dialogs").append(template(
+                convertToViewModel(
+                        [{resource: window.my_resources[uri]}])[0]));
+        $("#dialog_" + uri).dialog({
+            modal: true, width: 600, height: 300,
+            buttons: {
+                "Save": function () {
+                    $(this).dialog("close");
+                },
+                Cancel: function () {
+                    $(this).dialog("close");
+                },
+            },
+            close: function () {
+                refresh();
+            },
+        });
+    }
+    Handlebars.registerHelper('t1', function (context, options) {
+        if (typeof context == 'undefined') {
+            return;
+        }
+        var template = Handlebars.compile($("#t1").html());
+        return template({resources: context});
+    });
+    model = [
+        {
+            resource: {
+                uri: "res1",
+                properties: [
+                    {
+                        name: "name",
+                        id: "123",
+                        value: "Tom",
+                        cardinality: 1,
+                        type: "enum",
+                        enum_values: ["A", "B", "C"],
+                        is_list: false
+                    },
+                    {name: "address", id: "124", value: "SHA", cardinality: 100, type: string, is_list: true},
+                    {name: "address", id: "129", value: "MTV", cardinality: 100, type: string, is_list: true},
+                ],
+                resources: [
+                    {
+                        resource: {
+                            uri: "res3",
+                            properties: [
+                                {name: "name", id: "127", value: "Ranran", cardinality: 1},
+                                {name: "address", id: "128", value: "SHA", cardinality: 100},
+                            ],
+                            resources: [
+                                {
+                                    resource: {
+                                        uri: "res4",
+                                        properties: [
+                                            {name: "name", id: "127", value: "Ranran", cardinality: 1},
+                                            {name: "address", id: "128", value: "SHA", cardinality: 100},
+                                        ]
+                                    }
+                                }
+                            ]
+                        }
+                    }
+                ]
+            }
+        },
+        {
+
+            resource: {
+                uri: "res2",
+                properties: [
+                    {name: "name", id: "125", value: "Anna", cardinality: 1},
+                    {name: "address", id: "126", value: "PWC", cardinality: 100},
+                ]
+            }
+        },
+    ];
+    function convertToViewModel(resources) {
+        var views = [];
+        for (var i = 0; i < resources.length; ++i) {
+            var resource = resources[i].resource;
+            if (typeof resource == 'undefined') {
+                continue;
+            }
+            var view = {};
+            view.uri = resource.uri;
+            if (typeof resource.properties != 'undefined') {
+                for (var j = 0; j < resource.properties.length; ++j) {
+                    var prop = resource.properties[j];
+                    if (typeof prop == 'undefined') {
+                        continue;
+                    }
+                    if (prop.cardinality == 1) {
+                        view[prop.name] = prop.value;
+                    } else {
+                        var list_name = prop.name + "_list";
+                        if (view[list_name] == null) {
+                            view[list_name] = [];
+                        }
+                        var tuple = {};
+                        tuple[prop.name] = prop.value;
+                        tuple["id"] = prop.id;
+                        view[list_name].push(tuple);
+                    }
+                }
+            }
+            if (typeof resource.resources != 'undefined') {
+                view["resources"] = convertToViewModel(resource.resources);
+            }
+            var tuple = {}
+            tuple["resource"] = view;
+            views.push(tuple);
+        }
+        return views;
+    }
+    function saveModel(resources) {
+        for (var i = 0; i < resources.length; ++i) {
+            var resource = resources[i].resource;
+            if (typeof resource == 'undefined') {
+                continue;
+            }
+            window.my_resources[resource.uri] = resource;
+            if (typeof resource.resources != 'undefined') {
+                saveModel(resource.resources);
+            }
+        }
+    }
+    window.my_resources = {};
+    window.my_updates = {};
+
+    function refresh() {
+        saveModel(model);
+        var template = Handlebars.compile($("#t1").html());
+        $("#test").html(template({resources: convertToViewModel(model)}));
+    }
+    refresh();
+</script>
+</body>
+</html>
