@@ -98,6 +98,13 @@ public class WebController {
         return "evidence_library";
     }
 
+    @RequestMapping({"evidences_tree"})
+    public String getEvidencesTree(ModelMap map, Authentication authentication) {
+        setupAuth(map, authentication);
+        setReadonlyStatus(map, authentication, false);
+        return "evidence_tree_library";
+    }
+
     @RequestMapping({"create_standard"})
     public String createStandard(@RequestParam("type") String type, ModelMap map, Authentication authentication)
             throws ModelException, RepositoryException {
