@@ -9,7 +9,8 @@
                 <li id="nav_basic_info"><a href="/basic_info">基础信息</a></li>
                 <li id="nav_standard_library"><a href="/standards">标准库</a></li>
                 <li id="nav_evaluation_library"><a href="/evaluations">安全评审</a></li>
-                <li id="nav_evidence_library"><a href="/evidences_tree">证据库</a></li>
+                <li id="nav_evidence_library"><a href="/evidences">证据库</a></li>
+                <li id="nav_evidence_library_tree"><a href="/evidences_tree">证据库1</a></li>
             </ul>
             <ul class="nav navbar-nav navbar-right">
             <#if auth??>

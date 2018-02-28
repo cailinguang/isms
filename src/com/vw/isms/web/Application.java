@@ -98,10 +98,10 @@ public class Application {
     public static void main(String[] args)
             throws RepositoryException {
         ConfigurableApplicationContext context = SpringApplication.run(Application.class, args);
-        try {
+        /*try {
             updateDatabase(context);
         } catch (Exception localException) {
-        }
+        }*/
         if (System.getProperty("resetAdmin") != null) {
             UserRepository repo = (UserRepository) context.getBean(UserRepository.class);
             try {

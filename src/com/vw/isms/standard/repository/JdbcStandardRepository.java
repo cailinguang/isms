@@ -8,11 +8,7 @@ import com.vw.isms.property.EvidenceSetProperty;
 import com.vw.isms.property.FloatProperty;
 import com.vw.isms.property.Property;
 import com.vw.isms.property.StringProperty;
-import com.vw.isms.standard.model.Evidence;
-import com.vw.isms.standard.model.Standard;
-import com.vw.isms.standard.model.StandardNode;
-import com.vw.isms.standard.model.StandardNodeType;
-import com.vw.isms.standard.model.StandardType;
+import com.vw.isms.standard.model.*;
 import com.vw.isms.util.IdUtil;
 import java.io.PrintStream;
 import java.sql.PreparedStatement;
@@ -1341,5 +1337,32 @@ public class JdbcStandardRepository
             t.printStackTrace();
             throw new RepositoryException(t.getMessage());
         }
+    }
+
+    @Override
+    public void createDataType(DataClass dataClass) {
+        SimpleJdbcInsertion insertion = new SimpleJdbcInsertion();
+        insertion.withSchema("APP").withTable("ISMS_DATA_CLASS")
+                .withColumnValue("CLASS_ID",dataClass.getClassId())
+                .withColumnValue("CLASS_TYPE",dataClass.getClassType())
+                .withColumnValue("PARENT_ID",dataClass.getParentId())
+                .withColumnValue("CLASS_NAME",dataClass.getClassName());
+        insertion.insert(this.jdbcTemplate);
+    }
+
+    @Override
+    public List<DataClass> queryDataClass(DataClass query) {
+        SimpleJdbcQuery<DataClass> query1 = new SimpleJdbcQuery<DataClass>() {
+            @Override
+            public DataClass mapRow(ResultSet resultSet, int i) throws SQLException {
+                DataClass dataClass = new DataClass();
+                dataClass.setClassId(resultSet.getLong("CLASS_ID"));
+                dataClass.setClassName(resultSet.getString("CLASS_NAME"));
+                dataClass.setClassType(resultSet.getString("CLASS_TYPE"));
+                dataClass.setParentId(resultSet.getLong("PARENT_ID"));
+                return dataClass;
+            }
+        };
+        return null;
     }
 }

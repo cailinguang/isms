@@ -6,9 +6,12 @@ import com.vw.isms.property.EnumProperty;
 import com.vw.isms.property.EvidenceSetProperty;
 import com.vw.isms.property.FloatProperty;
 import com.vw.isms.property.StringProperty;
+import com.vw.isms.standard.model.DataClass;
 import com.vw.isms.standard.model.Evidence;
 import com.vw.isms.standard.model.Standard;
 import com.vw.isms.standard.model.StandardNode;
+
+import java.util.List;
 
 public abstract interface StandardRepository
 {
@@ -94,4 +97,17 @@ public abstract interface StandardRepository
   
   public abstract void deleteEvidence(long paramLong)
     throws RepositoryException;
+
+    /**
+     * 创建数据分类
+     * @param dataClass
+     */
+  public abstract void createDataType(DataClass dataClass);
+
+    /**
+     * 查询分类结果
+     * @param query 条件
+     * @return
+     */
+  public abstract List<DataClass> queryDataClass(DataClass query);
 }

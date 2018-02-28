@@ -7,24 +7,25 @@
 <body>
 <div class="container">
 <#include "header.ftl">
+
     <div class="row">
-        <div class="col-lg-9">
-            <div class="input-group">
-                <input id="search_string" type="text" class="form-control" style="width:90%">
-                <div class="input-group-btn">
-                    <button id="search_button" type="button" class="btn btn-default">查找</button>
+        <div class="col-md-3">
+            <div id="evidence_tree" style="overflow:hidden; height:600px;overflow-y:auto;"></div>
+        </div>
+        <div class="col-md-9">
+            <div class="row">
+                <div class="input-group">
+                    <input id="search_string" type="text" class="form-control" placeholder="Search for...">
+                    <span class="input-group-btn">
+                        <button id="search_button" class="btn btn-default" type="button">查找</button>
+                    </span>
                 </div>
             </div>
+            <br/>
+            <div class="row" id="standard_search_results"></div>
         </div>
     </div>
-    <div id="standard_search_results"></div>
-    <#if !readonly>
-	    <div>
-	        <button style="font-size: 11px" id="upload" class="btn btn-default">上传</button>
-	        <h4>已上传证据</h4>
-	        <div id="newly_uploaded"></div>
-	    </div>
-	</#if>
+
 </div>
 <div title="修改证据" style="display:none" id="evidence_update_dialog">
     <form>
@@ -59,20 +60,19 @@
             </#if>
         </tr>
         {{/each}}
-        <td></td>
-        <td></td>
-        <td align="center">
-            {{#if hasPrevPage}}<a id="prevPage" href="javascript:void(0)">前一页</a>{{/if}}
-            <span style="margin-left: 60px";></span>
-            {{#if hasNextPage}}<a id="nextPage" href="javascript:void(0)">后一页</a>{{/if}}
-        </td>
+        <tr>
+            <td colspan="3" align="right">
+                {{#if hasPrevPage}}<a id="prevPage" href="javascript:void(0)" style="margin-right:20px;">前一页</a>{{/if}}
+                {{#if hasNextPage}}<a id="nextPage" href="javascript:void(0)" style="margin-left:30px;">后一页</a>{{/if}}
+            </td>
+        </tr>
     </table>
 </script>
 
 <#include "upload_evidence.ftl">
 <#include "common_js.ftl">
 <script type="text/javascript">
-    $("#nav_evidence_library").addClass("active");
+    $("#nav_evidence_library_tree").addClass("active");
     var search_results_template = Handlebars.compile($("#evidences").html());
 
     function setupDeleteAction(ui, result) {
