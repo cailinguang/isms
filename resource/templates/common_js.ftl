@@ -9,4 +9,5 @@
 <script src="/js/evidence.js"></script>
 <script src="/js/ismsview.js"></script>
 <script src="/js/tree.js"></script>
+<script src="/js/dataTree.js"></script>
 <#include "alert_dialog.ftl">

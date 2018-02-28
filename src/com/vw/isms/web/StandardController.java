@@ -10,6 +10,7 @@ import com.vw.isms.standard.event.StandardNodeDeleteEvent;
 import com.vw.isms.standard.event.StandardNodeMoveEvent;
 import com.vw.isms.standard.event.StandardNodePropertiesUpdateEvent;
 import com.vw.isms.standard.event.StandardNodeRenameEvent;
+import com.vw.isms.standard.model.DataClass;
 import com.vw.isms.standard.model.Evidence;
 import com.vw.isms.standard.model.Standard;
 import com.vw.isms.standard.model.StandardNode;
@@ -249,5 +250,13 @@ public class StandardController {
         } catch (RepositoryException e) {
             throw new EventProcessingException(e);
         }
+    }
+
+    @RequestMapping(value = {"/api/data_type/{dataType}/all"}, method = {org.springframework.web.bind.annotation.RequestMethod.GET}, produces = {"application/json"})
+    @ResponseBody
+    public Object dataTypeAll(@PathVariable String dataType){
+        DataClass query = new DataClass();
+        query.setClassType(dataType);
+        return this.repository.queryDataClass(query);
     }
 }

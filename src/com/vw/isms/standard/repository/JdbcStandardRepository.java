@@ -1352,7 +1352,7 @@ public class JdbcStandardRepository
 
     @Override
     public List<DataClass> queryDataClass(DataClass query) {
-        SimpleJdbcQuery<DataClass> query1 = new SimpleJdbcQuery<DataClass>() {
+        SimpleJdbcQuery<DataClass> simpleJdbcQuery = new SimpleJdbcQuery<DataClass>() {
             @Override
             public DataClass mapRow(ResultSet resultSet, int i) throws SQLException {
                 DataClass dataClass = new DataClass();
@@ -1363,6 +1363,10 @@ public class JdbcStandardRepository
                 return dataClass;
             }
         };
-        return null;
+        simpleJdbcQuery.withSchema("APP").withTable("ISMS_DATA_CLASS").withColumn("*");
+        if(!StringUtils.isEmpty(query.getClassType())){
+            simpleJdbcQuery.withKey("CLASS_TYPE",query.getClassType());
+        }
+        return simpleJdbcQuery.query(this.namedTemplate);
     }
 }

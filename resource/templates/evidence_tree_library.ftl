@@ -75,6 +75,13 @@
     $("#nav_evidence_library_tree").addClass("active");
     var search_results_template = Handlebars.compile($("#evidences").html());
 
+    //init tree
+    var tree = new IsmsDataTree({
+        viewId:'#evidence_tree',
+        type:'EVIDENCE'
+    });
+    tree.render();
+
     function setupDeleteAction(ui, result) {
         var action = ui.find("[evidence='" + result.id + "'][action='delete']");
         action.unbind();
