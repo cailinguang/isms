@@ -252,11 +252,40 @@ public class StandardController {
         }
     }
 
-    @RequestMapping(value = {"/api/data_type/{dataType}/all"}, method = {org.springframework.web.bind.annotation.RequestMethod.GET}, produces = {"application/json"})
+    @RequestMapping(value = {"/api/data_type/{classType}"}, method = {org.springframework.web.bind.annotation.RequestMethod.GET}, produces = {"application/json"})
     @ResponseBody
-    public Object dataTypeAll(@PathVariable String dataType){
+    public Object dataTypeAll(@PathVariable String classType){
         DataClass query = new DataClass();
-        query.setClassType(dataType);
+        query.setClassType(classType);
         return this.repository.queryDataClass(query);
+    }
+
+    private DataClass createDataClassFromReq(StandardNodeRequest req,String classType){
+        DataClass dataClass = new DataClass();
+        dataClass.setPosition(Integer.parseInt(req.getNodePosition()));
+        dataClass.setParentId(Long.parseLong(req.getParentId()));
+        dataClass.setClassType(classType);
+        dataClass.setClassName(req.getText());
+        return dataClass;
+    }
+
+    @RequestMapping(value = {"/api/data_type/{classType}/nodes"}, method = {org.springframework.web.bind.annotation.RequestMethod.POST}, produces = {"application/json"})
+    @ResponseBody
+    public Object createDataClass(@PathVariable String classType, @RequestBody StandardNodeRequest req)
+            throws EventProcessingException {
+        DataClass dataClass = createDataClassFromReq(req,classType);
+        dataClass.setClassId(IdUtil.next());
+        this.repository.createDataType(dataClass);
+        return dataTypeAll(classType);
+    }
+
+    @RequestMapping(value = {"/api/data_type/{classType}/nodes/{id}"}, method = {org.springframework.web.bind.annotation.RequestMethod.PATCH}, produces = {"application/json"})
+    @ResponseBody
+    public Object updateDataClass(@PathVariable String classType, @PathVariable Long id, @RequestBody StandardNodeRequest req)
+            throws EventProcessingException {
+        DataClass dataClass = createDataClassFromReq(req,classType);
+        dataClass.setClassId(id);
+        this.repository.updateDataType(dataClass);
+        return dataTypeAll(classType);
     }
 }

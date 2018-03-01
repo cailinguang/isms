@@ -11,6 +11,13 @@ public abstract class SimpleJdbcQuery<T>
   extends SimpleJdbcOperation
   implements RowMapper<T>
 {
+    protected String orderBy;
+
+    public SimpleJdbcQuery<T> withOrderBy(String orderBy){
+        this.orderBy = orderBy;
+        return this;
+    }
+
   public List<T> query(NamedParameterJdbcTemplate jdbcTemplate)
   {
     return jdbcTemplate.query(getSql(), this.keys, this);
@@ -41,6 +48,9 @@ public abstract class SimpleJdbcQuery<T>
     builder.append(this.table);
     builder.append(" WHERE ");
     builder.append(StringUtils.collectionToDelimitedString(GetNamedParameters(this.keys.keySet()), " AND "));
+    if(this.orderBy!=null&&this.orderBy.length()>0){
+        builder.append(" order by ").append(this.orderBy);
+    }
     return builder.toString();
   }
 }

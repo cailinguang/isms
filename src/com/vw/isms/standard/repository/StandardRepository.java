@@ -104,6 +104,8 @@ public abstract interface StandardRepository
      */
   public abstract void createDataType(DataClass dataClass);
 
+    void updateDataType(DataClass dataClass);
+
     /**
      * 查询分类结果
      * @param query 条件

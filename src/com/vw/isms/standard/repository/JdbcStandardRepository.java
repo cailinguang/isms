@@ -1346,8 +1346,20 @@ public class JdbcStandardRepository
                 .withColumnValue("CLASS_ID",dataClass.getClassId())
                 .withColumnValue("CLASS_TYPE",dataClass.getClassType())
                 .withColumnValue("PARENT_ID",dataClass.getParentId())
-                .withColumnValue("CLASS_NAME",dataClass.getClassName());
+                .withColumnValue("CLASS_NAME",dataClass.getClassName())
+                .withColumnValue("POSITION",dataClass.getPosition());
         insertion.insert(this.jdbcTemplate);
+    }
+
+    @Override
+    public void updateDataType(DataClass dataClass) {
+        SimpleJdbcUpdate insertion = new SimpleJdbcUpdate();
+        insertion.withSchema("APP").withTable("ISMS_DATA_CLASS").withKey("CLASS_ID",dataClass.getClassId())
+                .withColumnValue("CLASS_TYPE",dataClass.getClassType())
+                .withColumnValue("PARENT_ID",dataClass.getParentId())
+                .withColumnValue("CLASS_NAME",dataClass.getClassName())
+                .withColumnValue("POSITION",dataClass.getPosition());
+        insertion.update(this.namedTemplate);
     }
 
     @Override
@@ -1360,6 +1372,7 @@ public class JdbcStandardRepository
                 dataClass.setClassName(resultSet.getString("CLASS_NAME"));
                 dataClass.setClassType(resultSet.getString("CLASS_TYPE"));
                 dataClass.setParentId(resultSet.getLong("PARENT_ID"));
+                dataClass.setPosition(resultSet.getInt("POSITION"));
                 return dataClass;
             }
         };
@@ -1367,6 +1380,7 @@ public class JdbcStandardRepository
         if(!StringUtils.isEmpty(query.getClassType())){
             simpleJdbcQuery.withKey("CLASS_TYPE",query.getClassType());
         }
+        simpleJdbcQuery.withOrderBy("POSITION");
         return simpleJdbcQuery.query(this.namedTemplate);
     }
 }
