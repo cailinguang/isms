@@ -281,11 +281,27 @@ public class StandardController {
 
     @RequestMapping(value = {"/api/data_type/{classType}/nodes/{id}"}, method = {org.springframework.web.bind.annotation.RequestMethod.PATCH}, produces = {"application/json"})
     @ResponseBody
-    public Object updateDataClass(@PathVariable String classType, @PathVariable Long id, @RequestBody StandardNodeRequest req)
+    public Object updateDataClass(@PathVariable String classType, @PathVariable Long id, @RequestBody StandardNodeRequest req,String move)
             throws EventProcessingException {
-        DataClass dataClass = createDataClassFromReq(req,classType);
-        dataClass.setClassId(id);
-        this.repository.updateDataType(dataClass);
+        if(req.getChildren()!=null){
+            for(String key:req.getChildren()){
+                DataClass children = this.repository.queryDataClass(Long.parseLong(key));
+                children.setParentId(Long.parseLong(req.getParentId()));
+                this.repository.updateDataType(children);
+            }
+        }else{
+            DataClass dataClass = createDataClassFromReq(req,classType);
+            dataClass.setClassId(id);
+            this.repository.updateDataType(dataClass);
+        }
+        return dataTypeAll(classType);
+    }
+
+    @RequestMapping(value = {"/api/data_type/{classType}/nodes/{id}"}, method = {org.springframework.web.bind.annotation.RequestMethod.DELETE}, produces = {"application/json"})
+    @ResponseBody
+    public Object deleteDataClass(@PathVariable String classType, @PathVariable Long id)
+            throws EventProcessingException {
+        this.repository.deleteDataType(classType,id);
         return dataTypeAll(classType);
     }
 }

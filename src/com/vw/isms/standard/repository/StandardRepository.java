@@ -104,7 +104,11 @@ public abstract interface StandardRepository
      */
   public abstract void createDataType(DataClass dataClass);
 
-    void updateDataType(DataClass dataClass);
+  void updateDataType(DataClass dataClass);
+
+  DataClass queryDataClass(long classId);
+
+  public void deleteDataType(String classType, Long classId);
 
     /**
      * 查询分类结果

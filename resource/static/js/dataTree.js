@@ -50,14 +50,15 @@ IsmsDataTree.prototype.render = function () {
                 }
             });
 
-
-            me.reloadData(datas);
             //open and select  root node  on jstree ready.
             me.view.on('ready.jstree',function (e,data) {
-                me.view.jstree(true).open_node('1');
-                me.view.jstree(true).select_node('1');
+                setTimeout(function () {
+                    me.view.jstree(true).open_node('1');
+                    me.view.jstree(true).select_node('1');
+                },500);
             });
 
+            me.reloadData(datas);
 
             me.view.on("rename_node.jstree", function (e, data) {
                 var node = data.node;
@@ -65,14 +66,14 @@ IsmsDataTree.prototype.render = function () {
                     text: data.text,
                     parentId: node.parent,
                     nodePosition:node.original.position
-                }, tree.handleResponse, tree.reloadOldTree);
+                }, me.reloadData.bind(me), me.reloadOldTree.bind(me));
             });
             me.view.on("move_node.jstree", function (e, data) {
                 var node = data.node;
-                IsmsRequester.requestJsonWithFail(Handlebars.compile('')(node), 'PATCH', {
+                IsmsRequester.requestJsonWithFail(me.url+'/nodes/'+node.id, 'PATCH', {
                     parentId: node.parent,
-                    children: $(tree).jstree().get_node(node.parent).children
-                }, tree.handleResponse, tree.reloadOldTree);
+                    children: me.view.jstree().get_node(node.parent).children
+                }, me.reloadData.bind(me), me.reloadOldTree.bind(me));
             });
 
         }
@@ -114,16 +115,9 @@ IsmsDataTree.prototype.handleRename = function (node, node_parent, node_position
 }
 
 IsmsDataTree.prototype.handleRemove = function (node, node_parent, node_position) {
-    var type = tree.metadata[node.data.type];
-    if (type == null) {
-        return false;
-    }
-    if (type.remove == null) {
-        return false;
-    }
-    tree.last_parent_id = node_parent.id;
-    IsmsRequester.requestJsonWithFail(Handlebars.compile(type.remove.uri)(node), 'DELETE',
-        {}, tree.handleResponse, tree.reloadOldTree);
+    var me = this;
+    IsmsRequester.requestJsonWithFail(me.url+'/nodes/'+node.id, 'DELETE',
+        {}, me.reloadData.bind(me), me.reloadOldTree.bind(me));
     return true;
 }
 
@@ -132,7 +126,7 @@ IsmsDataTree.prototype.toJSTree = function (datas) {
     var nodes = [];
     for(var i in datas){
         var data = datas[i];
-        nodes.push({id:data.classId,parent:data.parentId||'#',text:data.className,position:data.position});
+        nodes.push({id:data.classId,parent:data.parentId=='0'?'#':data.parentId,text:data.className,position:data.position});
     }
     return nodes;
 }
@@ -144,6 +138,6 @@ IsmsDataTree.prototype.reloadData = function (datas) {
 }
 
 IsmsDataTree.prototype.reloadOldTree = function () {
-    $(tree.id).jstree(true).settings.core.data = this.datas;
-    $(tree.id).jstree(true).refresh();
+    this.view.jstree(true).settings.core.data = this.toJSTree(this.datas);
+    this.view.jstree(true).refresh();
 }

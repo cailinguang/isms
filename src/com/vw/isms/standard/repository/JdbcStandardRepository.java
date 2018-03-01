@@ -1363,6 +1363,36 @@ public class JdbcStandardRepository
     }
 
     @Override
+    public DataClass queryDataClass(long classId){
+        SimpleJdbcQuery<DataClass> simpleJdbcQuery = new SimpleJdbcQuery<DataClass>() {
+            @Override
+            public DataClass mapRow(ResultSet resultSet, int i) throws SQLException {
+                DataClass dataClass = new DataClass();
+                dataClass.setClassId(resultSet.getLong("CLASS_ID"));
+                dataClass.setClassName(resultSet.getString("CLASS_NAME"));
+                dataClass.setClassType(resultSet.getString("CLASS_TYPE"));
+                dataClass.setParentId(resultSet.getLong("PARENT_ID"));
+                dataClass.setPosition(resultSet.getInt("POSITION"));
+                return dataClass;
+            }
+        };
+        simpleJdbcQuery.withSchema("APP").withTable("ISMS_DATA_CLASS").withColumn("*");
+        simpleJdbcQuery.withKey("CLASS_ID",classId);
+        return simpleJdbcQuery.queryForObject(this.namedTemplate);
+    }
+
+    @Override
+    public void deleteDataType(String classType,Long classId) {
+        if(classType.equals(DataClass.TYPE_EVIDENCE)){
+            //TODO
+        }
+
+        SimpleJdbcDelete delete = new SimpleJdbcDelete();
+        delete.withSchema("APP").withTable("ISMS_DATA_CLASS").withKey("CLASS_ID",classId);
+        delete.delete(this.namedTemplate);
+    }
+
+    @Override
     public List<DataClass> queryDataClass(DataClass query) {
         SimpleJdbcQuery<DataClass> simpleJdbcQuery = new SimpleJdbcQuery<DataClass>() {
             @Override
