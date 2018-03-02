@@ -1,12 +1,42 @@
-var EvidenceUploader = function () {
+var EvidenceUploader = function (classType) {
     this.container = $("#upload-evidence");
     this.form = $("#upload-evidence-form");
     this.upload = $("#upload-evidence-button");
     this.result = $("#update-evidence-result");
+    this.treeInput = $("#choice-lassType");
+    this.classId = $("#classId");
+    this.tree = $("#upload-tree");
     this.evidence = undefined;
+    this.classType = classType;
 }
 
 EvidenceUploader.prototype.openDialog = function (auto_close, newEvidenceCallback) {
+    //init tree
+    this.treeInput.on('click',function () {
+        //init tree
+        new IsmsDataTree({
+            view: this.tree,
+            type: this.classType,
+            readonly:true,
+            selectionCallback:function (node) {
+                this.tree.dialog('close');
+                this.treeInput.val(node.text);
+                this.classId.val(node.id);
+            }.bind(this)
+        }).render();;
+
+        this.tree.dialog({
+            modal: true,
+            height: 400,
+            width: 500,
+            buttons: {
+                Close: function () {
+                    $(this).dialog("close");
+                },
+            },
+        });
+    }.bind(this));
+
     this.upload.unbind();
     this.upload.click(function (e) {
         e.preventDefault();

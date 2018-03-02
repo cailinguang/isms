@@ -1210,6 +1210,45 @@ public class JdbcStandardRepository
         }
     }
 
+    @Override
+    public PagingResult<Evidence> queryEvidenceTree(EvidenceSearchRequest search)
+            throws RepositoryException
+    {
+        try
+        {
+            Map<String, Object> values = new HashMap();
+            StringBuilder builder = new StringBuilder();
+            builder.append("SELECT * FROM APP.ISMS_EVIDENCE where 1=1 ");
+            if (!StringUtils.isEmpty(search.getNamePattern()))
+            {
+                values.put("namePattern", "%" + search.getNamePattern().toLowerCase() + "%");
+                builder.append(" and (LOWER(NAME) like :namePattern OR LOWER(DESCRIPTION) like :namePattern)");
+            }
+            if(search.getClassId()!=null){
+                values.put("classId", search.getClassId());
+                builder.append(" and exists(select 1 from APP.ISMS_DATA_CLASS_FILE where file_id = evidence_id and class_id=:classId)");
+            }
+
+            return this.namedTemplate.query(builder.toString(), values, new PagingResultSetExtractor<Evidence>(search.getPageNumber(), search.getItemPerPage()) {
+                @Override
+                public Evidence mapRow(ResultSet rs) throws SQLException {
+                    Evidence ev = new Evidence();
+                    ev.setId(rs.getLong("EVIDENCE_ID"));
+                    ev.setName(rs.getString("NAME"));
+                    ev.setDescription(rs.getString("DESCRIPTION"));
+                    ev.setPath(rs.getString("PATH"));
+                    ev.setContentType(rs.getString("CONTENT_TYPE"));
+                    return ev;
+                }
+            });
+        }
+        catch (Throwable t)
+        {
+            t.printStackTrace();
+            throw new RepositoryException(t.getMessage());
+        }
+    }
+
     public PagingResult<Evidence> queryEvidenceByName(String name)
             throws RepositoryException
     {
@@ -1383,6 +1422,19 @@ public class JdbcStandardRepository
 
     @Override
     public void deleteDataType(String classType,Long classId) {
+        DataClass dataClass = this.queryDataClass(classId);
+        if(dataClass==null){
+            throw new IllegalArgumentException("classId not exits!");
+        }
+        if(dataClass.getParentId()==0){
+            throw new RuntimeException("cannot delete root node!");
+        }
+        DataClass query = new DataClass();
+        query.setParentId(dataClass.getClassId());
+        if(this.queryDataClass(query).size()>0){
+            throw new RuntimeException("cannot delete node with childrens!");
+        }
+
         if(classType.equals(DataClass.TYPE_EVIDENCE)){
             //TODO
         }
@@ -1410,7 +1462,20 @@ public class JdbcStandardRepository
         if(!StringUtils.isEmpty(query.getClassType())){
             simpleJdbcQuery.withKey("CLASS_TYPE",query.getClassType());
         }
-        simpleJdbcQuery.withOrderBy("POSITION");
+        if(query.getParentId()!=null){
+            simpleJdbcQuery.withKey("PARENT_ID",query.getParentId());
+        }
+
+        simpleJdbcQuery.withOrderBy("PARENT_ID,POSITION ");
         return simpleJdbcQuery.query(this.namedTemplate);
+    }
+
+    @Override
+    public void createDataMappingRelation(Long classId, Long dataId) {
+        SimpleJdbcInsertion insertion = new SimpleJdbcInsertion();
+        insertion.withSchema("APP").withTable("ISMS_DATA_CLASS_FILE")
+                .withColumnValue("CLASS_ID",classId)
+                .withColumnValue("FILE_ID",dataId);
+        insertion.insert(this.jdbcTemplate);
     }
 }

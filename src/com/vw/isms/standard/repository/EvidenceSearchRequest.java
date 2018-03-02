@@ -5,6 +5,7 @@ public class EvidenceSearchRequest
   public String namePattern;
   private int pageNumber;
   private int itemPerPage;
+  private Long classId;
   
   public int getPageNumber()
   {
@@ -35,4 +36,12 @@ public class EvidenceSearchRequest
   {
     this.namePattern = namePattern;
   }
+
+    public Long getClassId() {
+        return classId;
+    }
+
+    public void setClassId(Long classId) {
+        this.classId = classId;
+    }
 }

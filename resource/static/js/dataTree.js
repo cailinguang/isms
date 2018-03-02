@@ -2,9 +2,13 @@ var IsmsDataTree = function (options) {
     this.viewId = options.viewId;
     this.type = options.type;
     this.url = options.url || '/api/data_type/'+this.type;
+    this.selectionCallback = options.selectionCallback;
 
-    this.view = $(this.viewId);
+    this.readonly = options.readonly||false;
+
+    this.view = options.view || $(this.viewId);
     this.datas = null;
+    this.selectNodes = [];
 }
 
 IsmsDataTree.prototype.render = function () {
@@ -14,10 +18,11 @@ IsmsDataTree.prototype.render = function () {
         "GET",
         {},
         function (datas) {
+            me.datas = datas;
             me.view.jstree({
                 'core': {
                     'multiple':false,
-                    'data': [],
+                    'data': me.toJSTree(datas),
                     "check_callback": function (operation, node,
                                                 node_parent, node_position, more) {
                         if (operation == "move_node") {
@@ -52,13 +57,23 @@ IsmsDataTree.prototype.render = function () {
 
             //open and select  root node  on jstree ready.
             me.view.on('ready.jstree',function (e,data) {
-                setTimeout(function () {
-                    me.view.jstree(true).open_node('1');
+                me.view.jstree(true).open_node('1');
+                if(!me.readonly){
                     me.view.jstree(true).select_node('1');
-                },500);
+                }
             });
 
-            me.reloadData(datas);
+            me.view.on('changed.jstree', function (e, data) {
+                var i, j, r = [];
+                for(i = 0, j = data.selected.length; i < j; i++) {
+                    r.push(data.instance.get_node(data.selected[i]));
+                }
+                me.selectNodes = r;
+
+                if(data.selected.length>0){
+                    me.selectionCallback(me.selectNodes[0]);
+                }
+            });
 
             me.view.on("rename_node.jstree", function (e, data) {
                 var node = data.node;
@@ -82,14 +97,26 @@ IsmsDataTree.prototype.render = function () {
 
 //return contextMenu items
 IsmsDataTree.prototype.createContextMenu = function(node){
-    if(node.parent=='#') return [];
+
+    if(this.readonly){
+        return [];
+    }
 
     var tmp = $.jstree.defaults.contextmenu.items();
     delete tmp.ccp;
+
+    if(node.parent=='#'){
+        delete tmp.rename;
+        delete tmp.remove;
+    }
+
     return tmp;
 }
 //return node is can move
 IsmsDataTree.prototype.handleMove = function (node, node_parent, node_position) {
+    if(this.readonly){
+        return false;
+    }
     if (node_parent.id == "#") {
         return false;
     }
@@ -119,6 +146,13 @@ IsmsDataTree.prototype.handleRemove = function (node, node_parent, node_position
     IsmsRequester.requestJsonWithFail(me.url+'/nodes/'+node.id, 'DELETE',
         {}, me.reloadData.bind(me), me.reloadOldTree.bind(me));
     return true;
+}
+
+IsmsDataTree.prototype.getSelectNodeId = function(){
+    if(this.selectNodes.length>0){
+        return this.selectNodes[0].id;
+    }
+    return null;
 }
 
 

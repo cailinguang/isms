@@ -83,8 +83,11 @@ public abstract interface StandardRepository
   
   public abstract Evidence getEvidence(long paramLong)
     throws RepositoryException;
-  
-  public abstract PagingResult<Evidence> queryEvidenceByName(String paramString)
+
+    PagingResult<Evidence> queryEvidenceTree(EvidenceSearchRequest search)
+            throws RepositoryException;
+
+    public abstract PagingResult<Evidence> queryEvidenceByName(String paramString)
     throws RepositoryException;
   
   public abstract void createEvidence(Evidence paramEvidence)
@@ -116,4 +119,6 @@ public abstract interface StandardRepository
      * @return
      */
   public abstract List<DataClass> queryDataClass(DataClass query);
+
+  public abstract void createDataMappingRelation(Long classId,Long dataId);
 }

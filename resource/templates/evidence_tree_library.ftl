@@ -7,17 +7,22 @@
 <body>
 <div class="container">
 <#include "header.ftl">
-
     <div class="row">
         <div class="col-md-3">
             <div id="evidence_tree" style="overflow:hidden; height:600px;overflow-y:auto;"></div>
         </div>
         <div class="col-md-9">
             <div class="row">
+                <ol class="breadcrumb" id="tree_title">
+                </ol>
+            </div>
+
+            <div class="row">
                 <div class="input-group">
                     <input id="search_string" type="text" class="form-control" placeholder="Search for...">
                     <span class="input-group-btn">
                         <button id="search_button" class="btn btn-default" type="button">查找</button>
+                        <button id="upload_button" class="btn btn-default" type="button">上传</button>
                     </span>
                 </div>
             </div>
@@ -54,7 +59,7 @@
             </td>
             <td><a href="/download_evidence/{{id}}" download="{{name}}">{{name}}</a></td>
             <#if !readonly>
-	            <td align="center">
+	            <td style="padding-right:0px;">
 	                <button class="btn btn-default" evidence="{{this.id}}" action="delete">删除</button>
 	            </td>
             </#if>
@@ -78,9 +83,26 @@
     //init tree
     var tree = new IsmsDataTree({
         viewId:'#evidence_tree',
-        type:'EVIDENCE'
+        type:'EVIDENCE',
+        selectionCallback:function (node) {
+            //set title
+            $("#tree_title").html('').prepend('<li class="active">'+node.text+'</li>');
+            if(node.parent!='#'){
+                while(true){
+                    var node = tree.view.jstree(true).get_node(node.parent);
+                    $("#tree_title").prepend('<li><a href="javacript:void(0);" onclick="clickTreeTitleNode(\''+node.id+'\');">'+node.text+'</a></li>');
+                    if(node.parent=='#') break;
+                }
+            }
+            updateSearchResults("", 0);
+        }
     });
     tree.render();
+
+    function clickTreeTitleNode(id) {
+        tree.view.jstree(true).deselect_all();
+        tree.view.jstree(true).select_node(id);
+    }
 
     function setupDeleteAction(ui, result) {
         var action = ui.find("[evidence='" + result.id + "'][action='delete']");
@@ -138,12 +160,13 @@
 
     function updateSearchResults(namePattern, pageNumber) {
         IsmsRequester.requestJson(
-                "/api/properties/evidences",
+                "/api/properties/evidences_tree",
                 "POST",
                 {
                     namePattern: namePattern,
                     itemPerPage: 10,
-                    pageNumber: pageNumber
+                    pageNumber: pageNumber,
+                    classId:tree.getSelectNodeId()
                 },
                 function (response) {
                     if (response.pageNumber > 0) {
@@ -177,8 +200,8 @@
 
     var newly_uploaded = [];
 
-    $("#upload").click(function () {
-        var uploader = new EvidenceUploader();
+    $("#upload_button").click(function () {
+        var uploader = new EvidenceUploader('EVIDENCE');
         uploader.openDialog(true, function (evidence) {
             if (typeof evidence != 'undefined') {
                 newly_uploaded.push(evidence);
@@ -188,8 +211,6 @@
             }
         });
     });
-
-    updateSearchResults("", 0);
 </script>
 </body>
 </html>

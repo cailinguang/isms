@@ -32,11 +32,7 @@ import org.apache.commons.io.FilenameUtils;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.util.FileCopyUtils;
 import org.springframework.util.StringUtils;
-import org.springframework.web.bind.annotation.PathVariable;
-import org.springframework.web.bind.annotation.RequestBody;
-import org.springframework.web.bind.annotation.RequestMapping;
-import org.springframework.web.bind.annotation.ResponseBody;
-import org.springframework.web.bind.annotation.RestController;
+import org.springframework.web.bind.annotation.*;
 import org.springframework.web.multipart.MultipartFile;
 import org.springframework.web.multipart.MultipartHttpServletRequest;
 
@@ -239,6 +235,7 @@ public class StandardController {
         ev.setPath(path);
         ev.setContentType(mpf.getContentType());
         this.repository.createEvidence(ev);
+        this.repository.createDataMappingRelation(Long.parseLong(request.getParameter("classId")),ev.getId());
         return ev;
     }
 
@@ -303,5 +300,16 @@ public class StandardController {
             throws EventProcessingException {
         this.repository.deleteDataType(classType,id);
         return dataTypeAll(classType);
+    }
+
+    @RequestMapping(value = {"/api/properties/evidences_tree"}, method = {org.springframework.web.bind.annotation.RequestMethod.POST}, produces = {"application/json"})
+    @ResponseBody
+    public PagingResult<Evidence> queryTreeEvidences(@RequestBody EvidenceSearchRequest req)
+            throws EventProcessingException {
+        try {
+            return this.repository.queryEvidenceTree(req);
+        } catch (RepositoryException e) {
+            throw new EventProcessingException(e);
+        }
     }
 }

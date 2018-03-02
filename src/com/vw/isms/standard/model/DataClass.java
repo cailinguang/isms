@@ -22,7 +22,7 @@ public class DataClass {
 
     private long classId;
     private String classType; //分类类型：EVIDENCE/DATA/INFORMATION_SECURITY
-    private long parentId;
+    private Long parentId;
     private String className;
     private int position;
 
@@ -42,11 +42,11 @@ public class DataClass {
         this.classType = classType;
     }
 
-    public long getParentId() {
+    public Long getParentId() {
         return parentId;
     }
 
-    public void setParentId(long parentId) {
+    public void setParentId(Long parentId) {
         this.parentId = parentId;
     }
 
