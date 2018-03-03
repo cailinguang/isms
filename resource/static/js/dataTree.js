@@ -4,11 +4,15 @@ var IsmsDataTree = function (options) {
     this.url = options.url || '/api/data_type/'+this.type;
     this.selectionCallback = options.selectionCallback;
 
-    this.readonly = options.readonly||false;
 
     this.view = options.view || $(this.viewId);
     this.datas = null;
     this.selectNodes = [];
+
+    this.readonly = options.readonly != undefined ? options.readonly :  false;//default false
+    this.openRoot = options.openRoot != undefined ? options.openRoot : true;//default true
+    this.selectRoot = options.selectRoot != undefined ? options.selectRoot : true;//default true
+    this.initSelectNode = options.initSelectNode;
 }
 
 IsmsDataTree.prototype.render = function () {
@@ -57,10 +61,11 @@ IsmsDataTree.prototype.render = function () {
 
             //open and select  root node  on jstree ready.
             me.view.on('ready.jstree',function (e,data) {
-                me.view.jstree(true).open_node('1');
-                if(!me.readonly){
-                    me.view.jstree(true).select_node('1');
+                var _tree = me.view.jstree(true);
+                if(me.initSelectNode){
+                    _tree.select_node(me.initSelectNode,true);
                 }
+
             });
 
             me.view.on('changed.jstree', function (e, data) {
@@ -148,9 +153,9 @@ IsmsDataTree.prototype.handleRemove = function (node, node_parent, node_position
     return true;
 }
 
-IsmsDataTree.prototype.getSelectNodeId = function(){
+IsmsDataTree.prototype.getSelectNode = function(){
     if(this.selectNodes.length>0){
-        return this.selectNodes[0].id;
+        return this.selectNodes[0];
     }
     return null;
 }
@@ -160,7 +165,17 @@ IsmsDataTree.prototype.toJSTree = function (datas) {
     var nodes = [];
     for(var i in datas){
         var data = datas[i];
-        nodes.push({id:data.classId,parent:data.parentId=='0'?'#':data.parentId,text:data.className,position:data.position});
+        var node = {id:data.classId,text:data.className,position:data.position};
+        if(data.parentId=='0'){
+            node.parent = '#';
+
+            node.state = {};
+            if(this.openRoot) node.state.opened = true;
+            if(this.selectRoot) node.state.selected = true;
+        }else {
+            node.parent = data.parentId;
+        }
+        nodes.push(node);
     }
     return nodes;
 }

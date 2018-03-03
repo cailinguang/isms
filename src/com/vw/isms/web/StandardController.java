@@ -25,6 +25,7 @@ import java.io.IOException;
 import java.util.Iterator;
 import java.util.List;
 import java.util.UUID;
+import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 
 import org.apache.commons.io.FileUtils;
@@ -75,7 +76,7 @@ public class StandardController {
         }
     }
 
-    @RequestMapping(value = {"/api/properties/evidences"}, method = {org.springframework.web.bind.annotation.RequestMethod.POST}, produces = {"application/json"})
+    /*@RequestMapping(value = {"/api/properties/evidences"}, method = {org.springframework.web.bind.annotation.RequestMethod.POST}, produces = {"application/json"})
     @ResponseBody
     public PagingResult<Evidence> queryEvidences(@RequestBody EvidenceSearchRequest req)
             throws EventProcessingException {
@@ -84,16 +85,17 @@ public class StandardController {
         } catch (RepositoryException e) {
             throw new EventProcessingException(e);
         }
-    }
+    }*/
 
     @RequestMapping(value = {"/api/properties/evidences/{evidenceId}"}, method = {org.springframework.web.bind.annotation.RequestMethod.PATCH}, produces = {"application/json"})
     @ResponseBody
-    public GenericResponse updateEvidences(@PathVariable Long evidenceId, @RequestBody Evidence ev)
+    public GenericResponse updateEvidences(@PathVariable Long evidenceId, @RequestBody Evidence ev, HttpServletRequest request)
             throws EventProcessingException {
         try {
             Evidence src = this.repository.getEvidence(evidenceId.longValue());
             src.setDescription(ev.getDescription());
             this.repository.updateEvidence(src);
+            this.repository.createDataMappingRelation(ev.getClassId(),evidenceId);
             return GenericResponse.success();
         } catch (RepositoryException e) {
             throw new EventProcessingException(e);
@@ -201,11 +203,12 @@ public class StandardController {
 
     @RequestMapping(value = {"/api/properties/evidences/{evidenceId}"}, method = {org.springframework.web.bind.annotation.RequestMethod.DELETE}, produces = {"application/json"})
     @ResponseBody
-    public GenericResponse deleteEvidence(@PathVariable Long evidenceId)
+    public GenericResponse deleteEvidence(@PathVariable Long evidenceId,@RequestBody EvidenceSearchRequest req)
             throws RepositoryException, IOException {
         Evidence src = this.repository.getEvidence(evidenceId.longValue());
         String absPath = this.repository.getEvidencePath(src.getPath());
         this.repository.deleteEvidence(evidenceId.longValue());
+        this.repository.deleteDataMappingRelation(req.getClassId(),evidenceId);
         FileUtils.forceDelete(new File(absPath));
         return GenericResponse.success();
     }
@@ -222,9 +225,17 @@ public class StandardController {
         if (StringUtils.isEmpty(mpf.getOriginalFilename())) {
             throw new EventProcessingException("No file uploaded.");
         }
+
+        String classId = request.getParameter("classId");
+        if(classId==null||classId.equals("")){
+            throw new EventProcessingException("No evidence classification selected.");
+        }
+
         if (!this.repository.queryEvidenceByName(FilenameUtils.getName(mpf.getOriginalFilename())).getResults().isEmpty()) {
             throw new EventProcessingException("A file of the same name already exists.");
         }
+
+
         String path = UUID.randomUUID().toString();
         String absPath = this.repository.getEvidencePath(path);
         FileCopyUtils.copy(mpf.getBytes(), new File(absPath));
@@ -235,7 +246,7 @@ public class StandardController {
         ev.setPath(path);
         ev.setContentType(mpf.getContentType());
         this.repository.createEvidence(ev);
-        this.repository.createDataMappingRelation(Long.parseLong(request.getParameter("classId")),ev.getId());
+        this.repository.createDataMappingRelation(Long.parseLong(classId),ev.getId());
         return ev;
     }
 
@@ -302,7 +313,7 @@ public class StandardController {
         return dataTypeAll(classType);
     }
 
-    @RequestMapping(value = {"/api/properties/evidences_tree"}, method = {org.springframework.web.bind.annotation.RequestMethod.POST}, produces = {"application/json"})
+    @RequestMapping(value = {"/api/properties/evidences"}, method = {org.springframework.web.bind.annotation.RequestMethod.POST}, produces = {"application/json"})
     @ResponseBody
     public PagingResult<Evidence> queryTreeEvidences(@RequestBody EvidenceSearchRequest req)
             throws EventProcessingException {

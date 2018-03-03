@@ -10,6 +10,8 @@ public class Evidence
   private String description;
   private String path;
   private String contentType;
+
+  private long classId;
   
   public String getContentType()
   {
@@ -60,5 +62,13 @@ public class Evidence
   public void setPath(String path)
   {
     this.path = path;
+  }
+
+  public long getClassId() {
+    return classId;
+  }
+
+  public void setClassId(long classId) {
+    this.classId = classId;
   }
 }

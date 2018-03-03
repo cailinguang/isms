@@ -173,7 +173,7 @@ IsmsResourceEditView.prototype.setupCollection = function (container, prop) {
             function (e) {
                 var collection_ui = e.data.collection_ui;
                 var prop = e.data.prop;
-                var uploader = new EvidenceUploader();
+                var uploader = new EvidenceUploader('EVIDENCE');
                 uploader.openDialog(true, function (evidence) {
                     if (typeof evidence != 'undefined') {
                         // TODO: duplicated code.

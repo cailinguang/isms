@@ -1435,8 +1435,9 @@ public class JdbcStandardRepository
             throw new RuntimeException("cannot delete node with childrens!");
         }
 
-        if(classType.equals(DataClass.TYPE_EVIDENCE)){
-            //TODO
+        int countClassFile = queryDataMappingSizeByClassId(classId);
+        if(countClassFile>0){
+            throw new RuntimeException("cannot delete node containing files!");
         }
 
         SimpleJdbcDelete delete = new SimpleJdbcDelete();
@@ -1472,10 +1473,25 @@ public class JdbcStandardRepository
 
     @Override
     public void createDataMappingRelation(Long classId, Long dataId) {
+
+        SimpleJdbcDelete delete = new SimpleJdbcDelete();
+        delete.withSchema("APP").withTable("ISMS_DATA_CLASS_FILE").withKey("FILE_ID",dataId);
+        delete.delete(this.namedTemplate);
+
         SimpleJdbcInsertion insertion = new SimpleJdbcInsertion();
         insertion.withSchema("APP").withTable("ISMS_DATA_CLASS_FILE")
                 .withColumnValue("CLASS_ID",classId)
                 .withColumnValue("FILE_ID",dataId);
         insertion.insert(this.jdbcTemplate);
+    }
+
+    @Override
+    public int queryDataMappingSizeByClassId(Long classId){
+        return this.jdbcTemplate.queryForObject("select count(*) from APP.ISMS_DATA_CLASS_FILE where CLASS_ID=?",new Object[]{classId},Integer.class);
+    }
+
+    @Override
+    public void deleteDataMappingRelation(Long classId, Long dataId){
+        this.jdbcTemplate.update("delete from APP.ISMS_DATA_CLASS_FILE where CLASS_ID=? and FILE_ID=?",new Object[]{classId,dataId});
     }
 }

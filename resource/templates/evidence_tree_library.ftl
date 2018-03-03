@@ -32,8 +32,14 @@
     </div>
 
 </div>
+
+<div title="Choice" style="display:none" id="update-upload-tree"></div>
 <div title="修改证据" style="display:none" id="evidence_update_dialog">
     <form>
+        <label>Evidence Classification:</label>
+        <input class="form-control" name="classTypeTxt" id="update-choice-lassType">
+        <input class="form-control" name="classId" id="update-classId" type="hidden"/>
+
         <label for="evidence_description">描述</label>
         <textarea id="evidence_description" class="form-control"></textarea>
     </form>
@@ -43,34 +49,40 @@
 </div>
 <script id="evidences" type="text/x-handlebars-template">
     <table class="table table-hover">
-        <tr>
-            <th>描述</th>
-            <th>文件</th>
-            <th></th>
-        </tr>
-        {{#each results}}
-        <tr item_id="{{id}}">
-            <td><span property="description">{{description}}</span>
-            	<#if !readonly>
-	                <span style="padding:10px; font-size: 8px">
-						<a href="javascript:void(0)" action="edit">[edit]</a>
-					</span>
-				</#if>
-            </td>
-            <td><a href="/download_evidence/{{id}}" download="{{name}}">{{name}}</a></td>
-            <#if !readonly>
-	            <td style="padding-right:0px;">
-	                <button class="btn btn-default" evidence="{{this.id}}" action="delete">删除</button>
-	            </td>
-            </#if>
-        </tr>
-        {{/each}}
-        <tr>
-            <td colspan="3" align="right">
-                {{#if hasPrevPage}}<a id="prevPage" href="javascript:void(0)" style="margin-right:20px;">前一页</a>{{/if}}
-                {{#if hasNextPage}}<a id="nextPage" href="javascript:void(0)" style="margin-left:30px;">后一页</a>{{/if}}
-            </td>
-        </tr>
+        <thead>
+            <tr>
+                <th>描述</th>
+                <th>文件</th>
+                <th></th>
+            </tr>
+        </thead>
+        <tbody>
+            {{#each results}}
+            <tr item_id="{{id}}">
+                <td><span property="description">{{description}}</span>
+                    <#if !readonly>
+                        <span style="padding:10px; font-size: 8px">
+                            <a href="javascript:void(0)" action="edit">[edit]</a>
+                        </span>
+                    </#if>
+                </td>
+                <td><a href="/download_evidence/{{id}}" download="{{name}}">{{name}}</a></td>
+                <#if !readonly>
+                    <td style="padding-right:0px;">
+                        <button class="btn btn-default" evidence="{{this.id}}" action="delete">删除</button>
+                    </td>
+                </#if>
+            </tr>
+            {{/each}}
+        </tbody>
+        <tfoot>
+            <tr>
+                <td colspan="3" align="right">
+                    {{#if hasPrevPage}}<a id="prevPage" href="javascript:void(0)" style="margin-right:20px;">前一页</a>{{/if}}
+                    {{#if hasNextPage}}<a id="nextPage" href="javascript:void(0)" style="margin-left:30px;">后一页</a>{{/if}}
+                </td>
+            </tr>
+        </tfoot>
     </table>
 </script>
 
@@ -85,6 +97,7 @@
         viewId:'#evidence_tree',
         type:'EVIDENCE',
         selectionCallback:function (node) {
+            $("#search_string").val('');
             //set title
             $("#tree_title").html('').prepend('<li class="active">'+node.text+'</li>');
             if(node.parent!='#'){
@@ -111,7 +124,7 @@
             IsmsRequester.requestJson(
                     "/api/properties/evidences/" + result.id,
                     "DELETE",
-                    {},
+                    {classId:result.classId},
                     function(response) {
                         ui.find("[item_id='" + result.id + "']").remove();
                     }
@@ -131,9 +144,37 @@
                         {
                             descSpan: descSpan,
                             item: item,
+                            node:tree.getSelectNode()
                         },
                         function (e) {
-                            $("#evidence_description").prop("value", e.data.item.description);
+                            $("#update-classId").val(e.data.node.id);
+                            $("#update-choice-lassType").val(e.data.node.text).on('click',function () {
+                                new IsmsDataTree({
+                                    view: $("#update-upload-tree"),
+                                    type: "EVIDENCE",
+                                    readonly:true,
+                                    selectRoot:false,
+                                    initSelectNode:e.data.node.id,
+                                    selectionCallback:function (node) {
+                                        $("#update-upload-tree").dialog('close');
+                                        $("#update-classId").val(node.id);
+                                        $("#update-choice-lassType").val(node.text);
+                                    }
+                                }).render();;
+
+                                $("#update-upload-tree").dialog({
+                                    modal: true,
+                                    height: 400,
+                                    width: 500,
+                                    buttons: {
+                                        Close: function () {
+                                            $(this).dialog("close");
+                                        },
+                                    },
+                                });
+                            });
+
+                            $("#evidence_description").prop("value", e.data.descSpan.html());
                             $("#evidence_update").unbind();
                             $("#evidence_update").click(
                                     e.data,
@@ -144,6 +185,7 @@
                                                 "PATCH",
                                                 {
                                                     description: desc,
+                                                    classId:$("#update-classId").val()
                                                 },
                                                 function (response) {
                                                     e.data.descSpan.html(desc);
@@ -159,14 +201,15 @@
     }
 
     function updateSearchResults(namePattern, pageNumber) {
+        var node = tree.getSelectNode();
         IsmsRequester.requestJson(
-                "/api/properties/evidences_tree",
+                "/api/properties/evidences",
                 "POST",
                 {
                     namePattern: namePattern,
                     itemPerPage: 10,
                     pageNumber: pageNumber,
-                    classId:tree.getSelectNodeId()
+                    classId:node.id
                 },
                 function (response) {
                     if (response.pageNumber > 0) {
@@ -187,6 +230,7 @@
                         });
                     }
                     for (var i = 0; i < response.results.length; ++i) {
+                        response.results[i].classId = node.id;
                         setupDeleteAction($("#standard_search_results"), response.results[i]);
                     }
                 }
@@ -198,18 +242,17 @@
         updateSearchResults(namePattern, 0);
     });
 
-    var newly_uploaded = [];
 
     $("#upload_button").click(function () {
         var uploader = new EvidenceUploader('EVIDENCE');
         uploader.openDialog(true, function (evidence) {
             if (typeof evidence != 'undefined') {
-                newly_uploaded.push(evidence);
-                $("#newly_uploaded").html(search_results_template({results: newly_uploaded}));
-                setupUI($("#newly_uploaded"), newly_uploaded);
-                setupDeleteAction($("#newly_uploaded"), evidence);
+
+                $("#standard_search_results tbody").prepend($(search_results_template({results: [evidence]})).find('tr:eq(-2)'))
+                setupUI($("#standard_search_results"), [evidence]);
+                setupDeleteAction($("#standard_search_results"), evidence);
             }
-        });
+        },tree.getSelectNode());
     });
 </script>
 </body>

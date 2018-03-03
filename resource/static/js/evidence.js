@@ -10,7 +10,12 @@ var EvidenceUploader = function (classType) {
     this.classType = classType;
 }
 
-EvidenceUploader.prototype.openDialog = function (auto_close, newEvidenceCallback) {
+EvidenceUploader.prototype.openDialog = function (auto_close, newEvidenceCallback,node) {
+    if(node){
+        this.treeInput.val(node.text);
+        this.classId.val(node.id);
+    }
+
     //init tree
     this.treeInput.on('click',function () {
         //init tree
@@ -18,6 +23,8 @@ EvidenceUploader.prototype.openDialog = function (auto_close, newEvidenceCallbac
             view: this.tree,
             type: this.classType,
             readonly:true,
+            selectRoot:false,
+            initSelectNode:node?node.id:undefined,
             selectionCallback:function (node) {
                 this.tree.dialog('close');
                 this.treeInput.val(node.text);
@@ -44,6 +51,7 @@ EvidenceUploader.prototype.openDialog = function (auto_close, newEvidenceCallbac
         this.result.html("Uploading...");
         this.form.ajaxForm({
             success: function (evidence) {
+                evidence.classId = this.classId;
                 this.evidence = evidence;
                 this.result.html(evidence.name + " has been uploaded successfully.");
                 newEvidenceCallback(evidence);
@@ -61,9 +69,9 @@ EvidenceUploader.prototype.openDialog = function (auto_close, newEvidenceCallbac
     }.bind(this));
     this.container.dialog({
         modal: true,
-        height: this.container.attr("height"),
-        width: this.container.attr("width"),
-        position: { my: "top", at: "top+250"},
+        height: 500,
+        width: 400,
+        //position: { my: "top", at: "top+250"},
         buttons: {
             Close: function () {
                 $(this).dialog("close");

@@ -121,4 +121,8 @@ public abstract interface StandardRepository
   public abstract List<DataClass> queryDataClass(DataClass query);
 
   public abstract void createDataMappingRelation(Long classId,Long dataId);
+
+    int queryDataMappingSizeByClassId(Long classId);
+
+  void deleteDataMappingRelation(Long classId, Long dataId);
 }
