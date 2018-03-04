@@ -260,6 +260,11 @@ public class StandardController {
         }
     }
 
+    /**
+     * 数据分类树数据
+     * @param classType
+     * @return
+     */
     @RequestMapping(value = {"/api/data_type/{classType}"}, method = {org.springframework.web.bind.annotation.RequestMethod.GET}, produces = {"application/json"})
     @ResponseBody
     public Object dataTypeAll(@PathVariable String classType){
@@ -277,6 +282,13 @@ public class StandardController {
         return dataClass;
     }
 
+    /**
+     * 新增数据分类
+     * @param classType
+     * @param req
+     * @return
+     * @throws EventProcessingException
+     */
     @RequestMapping(value = {"/api/data_type/{classType}/nodes"}, method = {org.springframework.web.bind.annotation.RequestMethod.POST}, produces = {"application/json"})
     @ResponseBody
     public Object createDataClass(@PathVariable String classType, @RequestBody StandardNodeRequest req)
@@ -287,6 +299,15 @@ public class StandardController {
         return dataTypeAll(classType);
     }
 
+    /**
+     * 更新数据分类
+     * @param classType
+     * @param id
+     * @param req
+     * @param move
+     * @return
+     * @throws EventProcessingException
+     */
     @RequestMapping(value = {"/api/data_type/{classType}/nodes/{id}"}, method = {org.springframework.web.bind.annotation.RequestMethod.PATCH}, produces = {"application/json"})
     @ResponseBody
     public Object updateDataClass(@PathVariable String classType, @PathVariable Long id, @RequestBody StandardNodeRequest req,String move)
@@ -305,6 +326,13 @@ public class StandardController {
         return dataTypeAll(classType);
     }
 
+    /**
+     * 删除数据分类
+     * @param classType
+     * @param id
+     * @return
+     * @throws EventProcessingException
+     */
     @RequestMapping(value = {"/api/data_type/{classType}/nodes/{id}"}, method = {org.springframework.web.bind.annotation.RequestMethod.DELETE}, produces = {"application/json"})
     @ResponseBody
     public Object deleteDataClass(@PathVariable String classType, @PathVariable Long id)
@@ -313,6 +341,12 @@ public class StandardController {
         return dataTypeAll(classType);
     }
 
+    /**
+     * 查询证据,根据数据分类id查询
+     * @param req
+     * @return
+     * @throws EventProcessingException
+     */
     @RequestMapping(value = {"/api/properties/evidences"}, method = {org.springframework.web.bind.annotation.RequestMethod.POST}, produces = {"application/json"})
     @ResponseBody
     public PagingResult<Evidence> queryTreeEvidences(@RequestBody EvidenceSearchRequest req)
@@ -322,5 +356,217 @@ public class StandardController {
         } catch (RepositoryException e) {
             throw new EventProcessingException(e);
         }
+    }
+
+    /**
+     * 查询数据分类分级,根据数据分类id查询
+     * @param req
+     * @return
+     * @throws EventProcessingException
+     */
+    @RequestMapping(value = {"/api/properties/datas"}, method = {org.springframework.web.bind.annotation.RequestMethod.POST}, produces = {"application/json"})
+    @ResponseBody
+    public PagingResult<Evidence> queryTreeDatas(@RequestBody EvidenceSearchRequest req)
+            throws EventProcessingException {
+        try {
+            return this.repository.queryDatasTree(req);
+        } catch (RepositoryException e) {
+            throw new EventProcessingException(e);
+        }
+    }
+
+    /**
+     * 上传数据分类分级
+     * @param request
+     * @param response
+     * @return
+     * @throws EventProcessingException
+     * @throws RepositoryException
+     * @throws IOException
+     */
+    @RequestMapping(value = {"/api/upload_data"}, method = {org.springframework.web.bind.annotation.RequestMethod.POST})
+    @ResponseBody
+    public Evidence uploadData(MultipartHttpServletRequest request, HttpServletResponse response)
+            throws EventProcessingException, RepositoryException, IOException {
+        Iterator<String> iter = request.getFileNames();
+        if (!iter.hasNext()) {
+            throw new EventProcessingException("No file uploaded.");
+        }
+        MultipartFile mpf = request.getFile((String) iter.next());
+        if (StringUtils.isEmpty(mpf.getOriginalFilename())) {
+            throw new EventProcessingException("No file uploaded.");
+        }
+
+        String classId = request.getParameter("classId");
+        if(classId==null||classId.equals("")){
+            throw new EventProcessingException("No evidence classification selected.");
+        }
+
+        if (this.repository.queryDataCountByName(FilenameUtils.getName(mpf.getOriginalFilename()))>0) {
+            throw new EventProcessingException("A file of the same name already exists.");
+        }
+
+
+        String path = UUID.randomUUID().toString();
+        String absPath = this.repository.getEvidencePath(path);
+        FileCopyUtils.copy(mpf.getBytes(), new File(absPath));
+        Evidence ev = new Evidence();
+        ev.setId(IdUtil.next());
+        ev.setName(FilenameUtils.getName(mpf.getOriginalFilename()));
+        ev.setDescription(request.getParameter("description"));
+        ev.setPath(path);
+        ev.setContentType(mpf.getContentType());
+        this.repository.createData(ev);
+        this.repository.createDataMappingRelation(Long.parseLong(classId),ev.getId());
+        return ev;
+    }
+
+    /**
+     * 更新数据分级分类
+     * @param evidenceId
+     * @param ev
+     * @param request
+     * @return
+     * @throws EventProcessingException
+     */
+    @RequestMapping(value = {"/api/properties/data/{evidenceId}"}, method = {org.springframework.web.bind.annotation.RequestMethod.PATCH}, produces = {"application/json"})
+    @ResponseBody
+    public GenericResponse updateData(@PathVariable Long evidenceId, @RequestBody Evidence ev, HttpServletRequest request)
+            throws EventProcessingException {
+        try {
+            Evidence src = this.repository.getData(evidenceId.longValue());
+            src.setDescription(ev.getDescription());
+            this.repository.updateData(src);
+            this.repository.createDataMappingRelation(ev.getClassId(),evidenceId);
+            return GenericResponse.success();
+        } catch (RepositoryException e) {
+            throw new EventProcessingException(e);
+        }
+    }
+
+    /**
+     * 删除数据分级分类
+     * @param evidenceId
+     * @param req
+     * @return
+     * @throws RepositoryException
+     * @throws IOException
+     */
+    @RequestMapping(value = {"/api/properties/data/{evidenceId}"}, method = {org.springframework.web.bind.annotation.RequestMethod.DELETE}, produces = {"application/json"})
+    @ResponseBody
+    public GenericResponse deleteData(@PathVariable Long evidenceId,@RequestBody EvidenceSearchRequest req)
+            throws RepositoryException, IOException {
+        Evidence src = this.repository.getData(evidenceId.longValue());
+        String absPath = this.repository.getEvidencePath(src.getPath());
+        this.repository.deleteData(evidenceId.longValue());
+        this.repository.deleteDataMappingRelation(req.getClassId(),evidenceId);
+        FileUtils.forceDelete(new File(absPath));
+        return GenericResponse.success();
+    }
+
+    /**
+     * 查询信息安全对标,根据数据分类id查询
+     * @param req
+     * @return
+     * @throws EventProcessingException
+     */
+    @RequestMapping(value = {"/api/properties/securities"}, method = {org.springframework.web.bind.annotation.RequestMethod.POST}, produces = {"application/json"})
+    @ResponseBody
+    public PagingResult<Evidence> queryTreeSecurities(@RequestBody EvidenceSearchRequest req)
+            throws EventProcessingException {
+        try {
+            return this.repository.querySecuritiesTree(req);
+        } catch (RepositoryException e) {
+            throw new EventProcessingException(e);
+        }
+    }
+
+    /**
+     * 上传信息安全对标
+     * @param request
+     * @param response
+     * @return
+     * @throws EventProcessingException
+     * @throws RepositoryException
+     * @throws IOException
+     */
+    @RequestMapping(value = {"/api/upload_security"}, method = {org.springframework.web.bind.annotation.RequestMethod.POST})
+    @ResponseBody
+    public Evidence uploadSecurity(MultipartHttpServletRequest request, HttpServletResponse response)
+            throws EventProcessingException, RepositoryException, IOException {
+        Iterator<String> iter = request.getFileNames();
+        if (!iter.hasNext()) {
+            throw new EventProcessingException("No file uploaded.");
+        }
+        MultipartFile mpf = request.getFile((String) iter.next());
+        if (StringUtils.isEmpty(mpf.getOriginalFilename())) {
+            throw new EventProcessingException("No file uploaded.");
+        }
+
+        String classId = request.getParameter("classId");
+        if(classId==null||classId.equals("")){
+            throw new EventProcessingException("No evidence classification selected.");
+        }
+
+        if (this.repository.querySecurityCountByName(FilenameUtils.getName(mpf.getOriginalFilename()))>0) {
+            throw new EventProcessingException("A file of the same name already exists.");
+        }
+
+
+        String path = UUID.randomUUID().toString();
+        String absPath = this.repository.getEvidencePath(path);
+        FileCopyUtils.copy(mpf.getBytes(), new File(absPath));
+        Evidence ev = new Evidence();
+        ev.setId(IdUtil.next());
+        ev.setName(FilenameUtils.getName(mpf.getOriginalFilename()));
+        ev.setDescription(request.getParameter("description"));
+        ev.setPath(path);
+        ev.setContentType(mpf.getContentType());
+        this.repository.createSecurity(ev);
+        this.repository.createDataMappingRelation(Long.parseLong(classId),ev.getId());
+        return ev;
+    }
+
+    /**
+     * 更新信息安全对标
+     * @param evidenceId
+     * @param ev
+     * @param request
+     * @return
+     * @throws EventProcessingException
+     */
+    @RequestMapping(value = {"/api/properties/security/{evidenceId}"}, method = {org.springframework.web.bind.annotation.RequestMethod.PATCH}, produces = {"application/json"})
+    @ResponseBody
+    public GenericResponse updateSecurity(@PathVariable Long evidenceId, @RequestBody Evidence ev, HttpServletRequest request)
+            throws EventProcessingException {
+        try {
+            Evidence src = this.repository.getSecurity(evidenceId.longValue());
+            src.setDescription(ev.getDescription());
+            this.repository.updateSecurity(src);
+            this.repository.createDataMappingRelation(ev.getClassId(),evidenceId);
+            return GenericResponse.success();
+        } catch (RepositoryException e) {
+            throw new EventProcessingException(e);
+        }
+    }
+
+    /**
+     * 删除信息安全对标
+     * @param evidenceId
+     * @param req
+     * @return
+     * @throws RepositoryException
+     * @throws IOException
+     */
+    @RequestMapping(value = {"/api/properties/security/{evidenceId}"}, method = {org.springframework.web.bind.annotation.RequestMethod.DELETE}, produces = {"application/json"})
+    @ResponseBody
+    public GenericResponse deleteSecurity(@PathVariable Long evidenceId,@RequestBody EvidenceSearchRequest req)
+            throws RepositoryException, IOException {
+        Evidence src = this.repository.getSecurity(evidenceId.longValue());
+        String absPath = this.repository.getEvidencePath(src.getPath());
+        this.repository.deleteSecurity(evidenceId.longValue());
+        this.repository.deleteDataMappingRelation(req.getClassId(),evidenceId);
+        FileUtils.forceDelete(new File(absPath));
+        return GenericResponse.success();
     }
 }

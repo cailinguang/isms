@@ -98,13 +98,6 @@ public class WebController {
         return "evidence_library";
     }
 
-    @RequestMapping({"evidences_tree"})
-    public String getEvidencesTree(ModelMap map, Authentication authentication) {
-        setupAuth(map, authentication);
-        setReadonlyStatus(map, authentication, false);
-        return "evidence_tree_library";
-    }
-
     @RequestMapping({"create_standard"})
     public String createStandard(@RequestParam("type") String type, ModelMap map, Authentication authentication)
             throws ModelException, RepositoryException {
@@ -207,5 +200,80 @@ public class WebController {
             return "redirect:reset_password?success=true";
         }
         return "reset_password";
+    }
+
+    /**
+     * 证据库页面
+     * @param map
+     * @param authentication
+     * @return
+     */
+    @RequestMapping({"evidences_tree"})
+    public String getEvidencesTree(ModelMap map, Authentication authentication) {
+        setupAuth(map, authentication);
+        setReadonlyStatus(map, authentication, false);
+        return "evidence_tree_library";
+    }
+
+    /**
+     * 数据分级分类页面
+     * @param map
+     * @param authentication
+     * @return
+     */
+    @RequestMapping({"data_tree"})
+    public String getDataTree(ModelMap map, Authentication authentication) {
+        setupAuth(map, authentication);
+        setReadonlyStatus(map, authentication, false);
+        return "data_tree_library";
+    }
+
+    /**
+     * 下载数据
+     * @param id
+     * @param map
+     * @param authentication
+     * @return
+     * @throws RepositoryException
+     */
+    @RequestMapping(value = {"download_data/{id}"}, method = {org.springframework.web.bind.annotation.RequestMethod.GET})
+    public ResponseEntity<FileSystemResource> downloadData(@PathVariable("id") long id, ModelMap map, Authentication authentication)
+            throws RepositoryException {
+        setupAuth(map, authentication);
+        Evidence ev = this.repository.getData(id);
+        MediaType mediaType = MediaType.valueOf(ev.getContentType());
+        FileSystemResource res = new FileSystemResource(new File(this.repository.getEvidencePath(ev.getPath())));
+        return ResponseEntity.status(HttpStatus.OK).contentType(mediaType).body(res);
+    }
+
+    /**
+     * 信息安全对标页面
+     * @param map
+     * @param authentication
+     * @return
+     */
+    @RequestMapping({"security_tree"})
+    public String getSecurityTree(ModelMap map, Authentication authentication) {
+        setupAuth(map, authentication);
+        setReadonlyStatus(map, authentication, false);
+        return "security_tree_library";
+    }
+
+    /**
+     * 下载信息安全对标
+     * @param id
+     * @param map
+     * @param authentication
+     * @return
+     * @throws RepositoryException
+     */
+    @RequestMapping(value = {"download_security/{id}"}, method = {org.springframework.web.bind.annotation.RequestMethod.GET})
+    public ResponseEntity<FileSystemResource> downloadSecurity(@PathVariable("id") long id, ModelMap map, Authentication authentication)
+            throws RepositoryException {
+        setupAuth(map, authentication);
+        Evidence ev = this.repository.getSecurity(id);
+        MediaType mediaType = MediaType.valueOf(ev.getContentType());
+        FileSystemResource res = new FileSystemResource(new File(this.repository.getEvidencePath(ev.getPath())));
+        return ResponseEntity.status(HttpStatus.OK).contentType(mediaType).body(res);
     }
 }

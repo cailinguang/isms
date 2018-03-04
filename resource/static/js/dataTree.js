@@ -73,9 +73,9 @@ IsmsDataTree.prototype.render = function () {
                 for(i = 0, j = data.selected.length; i < j; i++) {
                     r.push(data.instance.get_node(data.selected[i]));
                 }
-                me.selectNodes = r;
 
                 if(data.selected.length>0){
+                    me.selectNodes = r;
                     me.selectionCallback(me.selectNodes[0]);
                 }
             });
@@ -162,6 +162,7 @@ IsmsDataTree.prototype.getSelectNode = function(){
 
 
 IsmsDataTree.prototype.toJSTree = function (datas) {
+    var selectNode = this.getSelectNode();
     var nodes = [];
     for(var i in datas){
         var data = datas[i];
@@ -171,9 +172,13 @@ IsmsDataTree.prototype.toJSTree = function (datas) {
 
             node.state = {};
             if(this.openRoot) node.state.opened = true;
-            if(this.selectRoot) node.state.selected = true;
+            if(this.selectRoot && selectNode == null) node.state.selected = true;
         }else {
             node.parent = data.parentId;
+
+            if(selectNode!=null&&node.id==selectNode.id){
+                node.state = {selected:true};
+            }
         }
         nodes.push(node);
     }

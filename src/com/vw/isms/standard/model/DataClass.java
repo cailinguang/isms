@@ -18,7 +18,7 @@ public class DataClass {
 
     public static final String TYPE_EVIDENCE = "EVIDENCE";
     public static final String TYPE_DATA = "DATA";
-    public static final String TYPE_INFORMATION_SECURITY = "INFORMATION_SECURITY";
+    public static final String TYPE_INFORMATION_SECURITY = "SECURITY";
 
     private long classId;
     private String classType; //分类类型：EVIDENCE/DATA/INFORMATION_SECURITY

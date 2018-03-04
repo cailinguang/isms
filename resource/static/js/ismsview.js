@@ -252,15 +252,49 @@ var IsmsCollectionSearchView = function (collection, collection_ui, prop) {
     this.collection_ui = collection_ui;
     this.prop = prop;
     this.ui = undefined;
+
+    this.tree = null;
 }
 
 IsmsCollectionSearchView.prototype.openDialog = function () {
-    var t = TemplateManager.findTemplateForResource(this.prop.type, 'search');
-    if (typeof t == 'undefined') {
-        IsmsErrorReporter.reportError('Missing add template for ' + this.prop.type);
-        return false;
+    this.ui = $("#IsmsCollectionSearchView_search_div");
+    if(this.ui.length==0){
+        var t = TemplateManager.findTemplateForResource(this.prop.type, 'search');
+        if (typeof t == 'undefined') {
+            IsmsErrorReporter.reportError('Missing add template for ' + this.prop.type);
+            return false;
+        }
+        this.ui = $(t([])).attr('id','IsmsCollectionSearchView_search_div').appendTo("body");
     }
-    this.ui = $(t([])).appendTo("body");
+    //init tree
+    this.tree = new IsmsDataTree({
+        viewId:'#evidence_tree',
+        type:'EVIDENCE',
+        readonly:true,
+        selectionCallback:function (node) {
+            this.ui.find("[name='search_string']").val('');
+            //set title
+            $("#tree_title").html('').prepend('<li class="active">'+node.text+'</li>');
+            if(node.parent!='#'){
+                while(true){
+                    var me = this;
+
+                    var node = me.tree.view.jstree(true).get_node(node.parent);
+                    var li = $('<li><a href="javacript:void(0);" nodeId="'+node.id+'">'+node.text+'</a></li>');
+                    li.find('a').on('click',function () {
+                        var nodeId = $(this).attr('nodeId');
+                        me.tree.view.jstree(true).deselect_all();
+                        me.tree.view.jstree(true).select_node(id);
+                    });
+                    $("#tree_title").prepend(li);
+                    if(node.parent=='#') break;
+                }
+            }
+            this.refreshDialogItems("")
+        }.bind(this)
+    });
+    this.tree.render();
+
     var search_action = this.ui.find("[action='search']");
     var search_text = this.ui.find("[name='search_string']");
     if (search_action.length) {
@@ -271,11 +305,11 @@ IsmsCollectionSearchView.prototype.openDialog = function () {
             }.bind(this)
         );
     }
-    this.refreshDialogItems("")
+
     this.ui.dialog({
         modal: true,
-        height: this.ui.attr("height"),
-        width: this.ui.attr("width"),
+        height: 700,
+        width: 700,
         position: { my: "top", at: "top+150"},
         buttons: {
             Close: function () {
@@ -292,7 +326,8 @@ IsmsCollectionSearchView.prototype.refreshDialogItems = function (search_text, p
         {
             namePattern: search_text,
             itemPerPage: 5,
-            pageNumber: pageNumber
+            pageNumber: pageNumber,
+            classId: this.tree.getSelectNode().id
         },
         function (data) {
             if (data.pageNumber > 0) {

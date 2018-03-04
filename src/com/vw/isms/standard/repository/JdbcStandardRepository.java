@@ -1494,4 +1494,274 @@ public class JdbcStandardRepository
     public void deleteDataMappingRelation(Long classId, Long dataId){
         this.jdbcTemplate.update("delete from APP.ISMS_DATA_CLASS_FILE where CLASS_ID=? and FILE_ID=?",new Object[]{classId,dataId});
     }
+
+    @Override
+    public PagingResult<Evidence> queryDatasTree(EvidenceSearchRequest search)
+            throws RepositoryException
+    {
+        try
+        {
+            Map<String, Object> values = new HashMap();
+            StringBuilder builder = new StringBuilder();
+            builder.append("SELECT * FROM APP.ISMS_DATA where 1=1 ");
+            if (!StringUtils.isEmpty(search.getNamePattern()))
+            {
+                values.put("namePattern", "%" + search.getNamePattern().toLowerCase() + "%");
+                builder.append(" and (LOWER(NAME) like :namePattern OR LOWER(DESCRIPTION) like :namePattern)");
+            }
+            if(search.getClassId()!=null){
+                values.put("classId", search.getClassId());
+                builder.append(" and exists(select 1 from APP.ISMS_DATA_CLASS_FILE where file_id = evidence_id and class_id=:classId)");
+            }
+
+            return this.namedTemplate.query(builder.toString(), values, new PagingResultSetExtractor<Evidence>(search.getPageNumber(), search.getItemPerPage()) {
+                @Override
+                public Evidence mapRow(ResultSet rs) throws SQLException {
+                    Evidence ev = new Evidence();
+                    ev.setId(rs.getLong("EVIDENCE_ID"));
+                    ev.setName(rs.getString("NAME"));
+                    ev.setDescription(rs.getString("DESCRIPTION"));
+                    ev.setPath(rs.getString("PATH"));
+                    ev.setContentType(rs.getString("CONTENT_TYPE"));
+                    return ev;
+                }
+            });
+        }
+        catch (Throwable t)
+        {
+            t.printStackTrace();
+            throw new RepositoryException(t.getMessage());
+        }
+    }
+
+    @Override
+    public void createData(Evidence evidence)
+            throws RepositoryException
+    {
+        try
+        {
+            SimpleJdbcInsertion insertion = new SimpleJdbcInsertion();
+            insertion.withSchema("APP").withTable("ISMS_DATA")
+                    .withColumnValue("EVIDENCE_ID", Long.valueOf(evidence.getId()))
+                    .withColumnValue("NAME", evidence.getName())
+                    .withColumnValue("DESCRIPTION", evidence.getDescription())
+                    .withColumnValue("PATH", evidence.getPath())
+                    .withColumnValue("CONTENT_TYPE", evidence.getContentType());
+            insertion.insert(this.jdbcTemplate);
+        }
+        catch (Throwable t)
+        {
+            t.printStackTrace();
+            throw new RepositoryException(t.getMessage());
+        }
+    }
+
+    @Override
+    public Evidence getData(long evidenceId)
+            throws RepositoryException
+    {
+        SimpleJdbcQuery<Evidence> query = new SimpleJdbcQuery()
+        {
+            public Evidence mapRow(ResultSet rs, int rowNum)
+                    throws SQLException
+            {
+                Evidence ev = new Evidence();
+                ev.setId(rs.getLong("EVIDENCE_ID"));
+                ev.setContentType(rs.getString("CONTENT_TYPE"));
+                ev.setDescription(rs.getString("DESCRIPTION"));
+                ev.setName(rs.getString("NAME"));
+                ev.setPath(rs.getString("PATH"));
+                return ev;
+            }
+        };
+        try
+        {
+            query.withSchema("APP").withTable("ISMS_DATA").withKey("EVIDENCE_ID", Long.valueOf(evidenceId)).withColumn("*");
+            return (Evidence)query.queryForObject(this.namedTemplate);
+        }
+        catch (Throwable t)
+        {
+            t.printStackTrace();
+            throw new RepositoryException(t.getMessage());
+        }
+    }
+
+    @Override
+    public void updateData(Evidence evidence)
+            throws RepositoryException
+    {
+        try
+        {
+            SimpleJdbcUpdate update = new SimpleJdbcUpdate();
+            update.withSchema("APP").withTable("ISMS_DATA").withKey("EVIDENCE_ID", Long.valueOf(evidence.getId()))
+                    .withColumnValue("DESCRIPTION", evidence.getDescription());
+            update.update(this.namedTemplate);
+        }
+        catch (Throwable t)
+        {
+            t.printStackTrace();
+            throw new RepositoryException(t.getMessage());
+        }
+    }
+
+    @Override
+    public void deleteData(long evidenceId)
+            throws RepositoryException
+    {
+        try
+        {
+            SimpleJdbcDelete deleteStandard = new SimpleJdbcDelete();
+            deleteStandard.withSchema("APP").withTable("ISMS_DATA").withKey("EVIDENCE_ID",
+                    Long.valueOf(evidenceId));
+            deleteStandard.delete(this.namedTemplate);
+        }
+        catch (Throwable t)
+        {
+            t.printStackTrace();
+            throw new RepositoryException(t.getMessage());
+        }
+    }
+
+    @Override
+    public int queryDataCountByName(String name)
+            throws RepositoryException
+    {
+        return this.jdbcTemplate.queryForObject("SELECT COUNT(*) from APP.ISMS_DATA where name=?",new Object[]{name},Integer.class);
+    }
+
+
+
+    @Override
+    public PagingResult<Evidence> querySecuritiesTree(EvidenceSearchRequest search)
+            throws RepositoryException
+    {
+        try
+        {
+            Map<String, Object> values = new HashMap();
+            StringBuilder builder = new StringBuilder();
+            builder.append("SELECT * FROM APP.ISMS_SECURITY where 1=1 ");
+            if (!StringUtils.isEmpty(search.getNamePattern()))
+            {
+                values.put("namePattern", "%" + search.getNamePattern().toLowerCase() + "%");
+                builder.append(" and (LOWER(NAME) like :namePattern OR LOWER(DESCRIPTION) like :namePattern)");
+            }
+            if(search.getClassId()!=null){
+                values.put("classId", search.getClassId());
+                builder.append(" and exists(select 1 from APP.ISMS_DATA_CLASS_FILE where file_id = evidence_id and class_id=:classId)");
+            }
+
+            return this.namedTemplate.query(builder.toString(), values, new PagingResultSetExtractor<Evidence>(search.getPageNumber(), search.getItemPerPage()) {
+                @Override
+                public Evidence mapRow(ResultSet rs) throws SQLException {
+                    Evidence ev = new Evidence();
+                    ev.setId(rs.getLong("EVIDENCE_ID"));
+                    ev.setName(rs.getString("NAME"));
+                    ev.setDescription(rs.getString("DESCRIPTION"));
+                    ev.setPath(rs.getString("PATH"));
+                    ev.setContentType(rs.getString("CONTENT_TYPE"));
+                    return ev;
+                }
+            });
+        }
+        catch (Throwable t)
+        {
+            t.printStackTrace();
+            throw new RepositoryException(t.getMessage());
+        }
+    }
+
+    @Override
+    public void createSecurity(Evidence evidence)
+            throws RepositoryException
+    {
+        try
+        {
+            SimpleJdbcInsertion insertion = new SimpleJdbcInsertion();
+            insertion.withSchema("APP").withTable("ISMS_SECURITY")
+                    .withColumnValue("EVIDENCE_ID", Long.valueOf(evidence.getId()))
+                    .withColumnValue("NAME", evidence.getName())
+                    .withColumnValue("DESCRIPTION", evidence.getDescription())
+                    .withColumnValue("PATH", evidence.getPath())
+                    .withColumnValue("CONTENT_TYPE", evidence.getContentType());
+            insertion.insert(this.jdbcTemplate);
+        }
+        catch (Throwable t)
+        {
+            t.printStackTrace();
+            throw new RepositoryException(t.getMessage());
+        }
+    }
+
+    @Override
+    public Evidence getSecurity(long evidenceId)
+            throws RepositoryException
+    {
+        SimpleJdbcQuery<Evidence> query = new SimpleJdbcQuery()
+        {
+            public Evidence mapRow(ResultSet rs, int rowNum)
+                    throws SQLException
+            {
+                Evidence ev = new Evidence();
+                ev.setId(rs.getLong("EVIDENCE_ID"));
+                ev.setContentType(rs.getString("CONTENT_TYPE"));
+                ev.setDescription(rs.getString("DESCRIPTION"));
+                ev.setName(rs.getString("NAME"));
+                ev.setPath(rs.getString("PATH"));
+                return ev;
+            }
+        };
+        try
+        {
+            query.withSchema("APP").withTable("ISMS_SECURITY").withKey("EVIDENCE_ID", Long.valueOf(evidenceId)).withColumn("*");
+            return (Evidence)query.queryForObject(this.namedTemplate);
+        }
+        catch (Throwable t)
+        {
+            t.printStackTrace();
+            throw new RepositoryException(t.getMessage());
+        }
+    }
+
+    @Override
+    public void updateSecurity(Evidence evidence)
+            throws RepositoryException
+    {
+        try
+        {
+            SimpleJdbcUpdate update = new SimpleJdbcUpdate();
+            update.withSchema("APP").withTable("ISMS_SECURITY").withKey("EVIDENCE_ID", Long.valueOf(evidence.getId()))
+                    .withColumnValue("DESCRIPTION", evidence.getDescription());
+            update.update(this.namedTemplate);
+        }
+        catch (Throwable t)
+        {
+            t.printStackTrace();
+            throw new RepositoryException(t.getMessage());
+        }
+    }
+
+    @Override
+    public void deleteSecurity(long evidenceId)
+            throws RepositoryException
+    {
+        try
+        {
+            SimpleJdbcDelete deleteStandard = new SimpleJdbcDelete();
+            deleteStandard.withSchema("APP").withTable("ISMS_SECURITY").withKey("EVIDENCE_ID",
+                    Long.valueOf(evidenceId));
+            deleteStandard.delete(this.namedTemplate);
+        }
+        catch (Throwable t)
+        {
+            t.printStackTrace();
+            throw new RepositoryException(t.getMessage());
+        }
+    }
+
+    @Override
+    public int querySecurityCountByName(String name)
+            throws RepositoryException
+    {
+        return this.jdbcTemplate.queryForObject("SELECT COUNT(*) from APP.ISMS_SECURITY where name=?",new Object[]{name},Integer.class);
+    }
 }

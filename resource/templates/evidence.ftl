@@ -34,16 +34,26 @@
 </script>
 <script id="evidences_add_template" type="text/x-handlebars-template"
         resource="evidences" view="search">
-    <div title="Add Evidence" width="600">
-        <div class="input-group">
-            <input name="search_string" type="text" class="form-control">
-            <div class="input-group-addon">
-                <span action="search" class="glyphicon glyphicon-search"></span>
+    <div title="Add Evidence">
+            <div class="col-md-4">
+                <div id="evidence_tree" style="overflow:hidden; height:550px;overflow-y:auto;"></div>
             </div>
+            <div class="col-md-8">
+                <div class="row">
+                    <ol class="breadcrumb" id="tree_title">
+                    </ol>
+                </div>
 
-        </div>
-        <div property="evidences">
-            {{> evidence_add_items}}
-        </div>
+                <div class="input-group">
+                    <input name="search_string" type="text" class="form-control">
+                    <div class="input-group-addon">
+                        <span action="search" class="glyphicon glyphicon-search"></span>
+                    </div>
+
+                </div>
+                <div property="evidences">
+                    {{> evidence_add_items}}
+                </div>
+            </div>
     </div>
 </script>

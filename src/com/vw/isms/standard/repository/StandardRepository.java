@@ -125,4 +125,40 @@ public abstract interface StandardRepository
     int queryDataMappingSizeByClassId(Long classId);
 
   void deleteDataMappingRelation(Long classId, Long dataId);
+
+    PagingResult<Evidence> queryDatasTree(EvidenceSearchRequest search)
+            throws RepositoryException;
+
+  PagingResult<Evidence> querySecuritiesTree(EvidenceSearchRequest search)
+          throws RepositoryException;
+
+  void createData(Evidence evidence)
+          throws RepositoryException;
+
+  void createSecurity(Evidence evidence)
+          throws RepositoryException;
+
+  Evidence getData(long evidenceId)
+          throws RepositoryException;
+
+  Evidence getSecurity(long evidenceId)
+          throws RepositoryException;
+
+  void updateData(Evidence evidence)
+          throws RepositoryException;
+
+  void updateSecurity(Evidence evidence)
+          throws RepositoryException;
+
+  void deleteData(long evidenceId)
+          throws RepositoryException;
+
+  void deleteSecurity(long evidenceId)
+          throws RepositoryException;
+
+  int queryDataCountByName(String name)
+          throws RepositoryException;
+
+  int querySecurityCountByName(String name)
+          throws RepositoryException;
 }

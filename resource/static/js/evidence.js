@@ -51,7 +51,7 @@ EvidenceUploader.prototype.openDialog = function (auto_close, newEvidenceCallbac
         this.result.html("Uploading...");
         this.form.ajaxForm({
             success: function (evidence) {
-                evidence.classId = this.classId;
+                evidence.classId = this.classId.val();
                 this.evidence = evidence;
                 this.result.html(evidence.name + " has been uploaded successfully.");
                 newEvidenceCallback(evidence);
