@@ -6,10 +6,7 @@ import com.vw.isms.property.EnumProperty;
 import com.vw.isms.property.EvidenceSetProperty;
 import com.vw.isms.property.FloatProperty;
 import com.vw.isms.property.StringProperty;
-import com.vw.isms.standard.model.DataClass;
-import com.vw.isms.standard.model.Evidence;
-import com.vw.isms.standard.model.Standard;
-import com.vw.isms.standard.model.StandardNode;
+import com.vw.isms.standard.model.*;
 
 import java.util.List;
 
@@ -161,4 +158,8 @@ public abstract interface StandardRepository
 
   int querySecurityCountByName(String name)
           throws RepositoryException;
+
+    List<String> queryNetworkSecurityTargets();
+
+    List<NetworkEvaluation> queryNetworkSecurityByTarget(String target);
 }

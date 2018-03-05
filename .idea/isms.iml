@@ -12,6 +12,5 @@
     <orderEntry type="inheritedJdk" />
     <orderEntry type="sourceFolder" forTests="false" />
     <orderEntry type="library" name="isms" level="project" />
-    <orderEntry type="library" name="spring-boot-starter-1.3.5.RELEASE" level="project" />
   </component>
 </module>

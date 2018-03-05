@@ -276,4 +276,47 @@ public class WebController {
         FileSystemResource res = new FileSystemResource(new File(this.repository.getEvidencePath(ev.getPath())));
         return ResponseEntity.status(HttpStatus.OK).contentType(mediaType).body(res);
     }
+
+
+    /**
+     * 网络安全法
+     * @param map
+     * @param authentication
+     * @return
+     */
+    @RequestMapping({"network_security"})
+    public String getNetworkSecurity(ModelMap map, Authentication authentication) {
+        setupAuth(map, authentication);
+        setReadonlyStatus(map, authentication, false);
+        return "network_security";
+    }
+
+    /**
+     * view网络安全法
+     * @param map
+     * @param authentication
+     * @return
+     */
+    @RequestMapping({"view_security/{target}"})
+    public String getViewSecurity(ModelMap map, Authentication authentication,@PathVariable String target) {
+        setupAuth(map, authentication);
+        setReadonlyStatus(map, authentication, false);
+        map.put("target",target);
+        return "view_security";
+    }
+
+    /**
+     * import网络安全法
+     * @param map
+     * @param authentication
+     * @return
+     */
+    @RequestMapping({"import_security/{target}"})
+    public String getImportSecurity(ModelMap map, Authentication authentication,@PathVariable String target) {
+        setupAuth(map, authentication);
+        setReadonlyStatus(map, authentication, false);
+        map.put("target",target);
+        return "import_security";
+    }
+
 }

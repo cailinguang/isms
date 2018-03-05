@@ -1764,4 +1764,31 @@ public class JdbcStandardRepository
     {
         return this.jdbcTemplate.queryForObject("SELECT COUNT(*) from APP.ISMS_SECURITY where name=?",new Object[]{name},Integer.class);
     }
+
+    @Override
+    public List<String> queryNetworkSecurityTargets(){
+        return this.jdbcTemplate.queryForList("select DISTINCT t.EVALUATION_TARGET FROM APP.ISMS_NETWORK_EVALUATION t",String.class);
+    }
+
+    @Override
+    public List<NetworkEvaluation> queryNetworkSecurityByTarget(String target){
+        SimpleJdbcQuery<NetworkEvaluation> query = new SimpleJdbcQuery<NetworkEvaluation>() {
+            @Override
+            public NetworkEvaluation mapRow(ResultSet resultSet, int i) throws SQLException {
+                NetworkEvaluation networkEvaluation = new NetworkEvaluation();
+                networkEvaluation.setEvaluationId(resultSet.getLong("EVALUATION_ID"));
+                networkEvaluation.setEvaluationTarget(resultSet.getString("EVALUATION_TARGET"));
+                networkEvaluation.setEvaluationIndex(resultSet.getString("EVALUATION_INDEX"));
+                networkEvaluation.setControlItem(resultSet.getString("CONTROL_ITEM"));
+                networkEvaluation.setResult(resultSet.getString("RESULT"));
+                networkEvaluation.setConformity(resultSet.getString("CONFORMITY"));
+                networkEvaluation.setRemark(resultSet.getString("REMARK"));
+                networkEvaluation.setOrder(resultSet.getInt("ORDER"));
+                return networkEvaluation;
+            }
+        };
+        query.withSchema("APP").withTable("ISMS_NETWORK_EVALUATION").withKey("EVALUATION_TARGET",target);
+
+        return query.query(this.namedTemplate);
+    }
 }

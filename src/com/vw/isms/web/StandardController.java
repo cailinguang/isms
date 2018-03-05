@@ -569,4 +569,16 @@ public class StandardController {
         FileUtils.forceDelete(new File(absPath));
         return GenericResponse.success();
     }
+
+    @RequestMapping(value = {"/api/properties/network-security/"}, method = {org.springframework.web.bind.annotation.RequestMethod.GET}, produces = {"application/json"})
+    @ResponseBody
+    public Object queryNetworkSecurityTarget() throws RepositoryException, IOException {
+        return this.repository.queryNetworkSecurityTargets();
+    }
+
+    @RequestMapping(value = {"/api/properties/network-security/{target}"}, method = {org.springframework.web.bind.annotation.RequestMethod.GET}, produces = {"application/json"})
+    @ResponseBody
+    public Object queryTargetInfos(@PathVariable String target) throws RepositoryException, IOException {
+        return this.repository.queryNetworkSecurityByTarget(target);
+    }
 }
