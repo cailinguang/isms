@@ -15,6 +15,14 @@
     <div id="security-content"></div>
 </div>
 
+<div id="security-import" style="display: none;">
+    <form id="import-form" method="POST" action="/api/upload_evidence" enctype="multipart/form-data">
+        <label>File:</label>
+        <input class="form-control-file" name="file" id="file" type="file"/><br/>
+        <input class="btn btn-primary" type="submit" value="Import"/>
+    </form>
+</div>
+
 <script id="security-template" type="text/x-handlebars-template">
     <table class="table table-condensed table-bordered">
         <thead>
@@ -155,6 +163,21 @@
             location.reload();
        });
 
+    });
+
+    //import
+    $("#import").on('click',function () {
+        $("security-import").container.dialog({
+            modal: true,
+            height: 500,
+            width: 400,
+            //position: { my: "top", at: "top+250"},
+            buttons: {
+                Close: function () {
+                    $(this).dialog("close");
+                },
+            },
+        });
     });
 
 
