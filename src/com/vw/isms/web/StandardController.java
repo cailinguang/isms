@@ -581,4 +581,11 @@ public class StandardController {
     public Object queryTargetInfos(@PathVariable String target) throws RepositoryException, IOException {
         return this.repository.queryNetworkSecurityByTarget(target);
     }
+
+    @RequestMapping(value = {"/api/properties/network-security/{target}"}, method = {org.springframework.web.bind.annotation.RequestMethod.POST}, produces = {"application/json"})
+    @ResponseBody
+    public GenericResponse updateTargetInfos(@PathVariable String target,@RequestBody NetworkSecurityRequest req) throws RepositoryException, IOException {
+        this.repository.updateNetworkSecuritys(req.getNetworkEvaluations());
+        return GenericResponse.success();
+    }
 }

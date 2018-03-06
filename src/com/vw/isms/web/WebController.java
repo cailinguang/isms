@@ -297,8 +297,8 @@ public class WebController {
      * @param authentication
      * @return
      */
-    @RequestMapping({"view_security/{target}"})
-    public String getViewSecurity(ModelMap map, Authentication authentication,@PathVariable String target) {
+    @RequestMapping({"view_security"})
+    public String getViewSecurity(ModelMap map, Authentication authentication,@RequestParam String target) {
         setupAuth(map, authentication);
         setReadonlyStatus(map, authentication, false);
         map.put("target",target);
@@ -312,7 +312,7 @@ public class WebController {
      * @return
      */
     @RequestMapping({"import_security/{target}"})
-    public String getImportSecurity(ModelMap map, Authentication authentication,@PathVariable String target) {
+    public String getImportSecurity(ModelMap map, Authentication authentication,@RequestParam String target) {
         setupAuth(map, authentication);
         setReadonlyStatus(map, authentication, false);
         map.put("target",target);

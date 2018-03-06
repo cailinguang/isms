@@ -15,15 +15,21 @@
 <script id="security-template" type="text/x-handlebars-template">
     {{#each this}}
     <div class="col-md-3">
-        <div class="panel panel-info">
+        <div class="panel panel-default">
+            <div class="panel-body">
+                <button type="button" class="btn btn-link btn-block" onclick="location.href='/view_security?target={{this}}'">{{this}}</button>
+            </div>
+        </div>
+
+        <#--<div class="panel panel-info">
             <div class="panel-heading">
                 <h3 class="panel-title">{{this}}</h3>
             </div>
             <div class="panel-body">
-                <button type="button" class="btn btn-link" action="view" onclick="location.href='/view-security/{{this}}'">View</button>
-                <button type="button" class="btn btn-link" action="import" onclick="location.href='/import-security/{{this}}'">Import</button>
+                <button type="button" class="btn btn-link" action="view" onclick="location.href='/view_security?target={{this}}'">View</button>
+                <button type="button" class="btn btn-link" action="import" onclick="location.href='/import_security?target={{this}}'">Import</button>
             </div>
-        </div>
+        </div>-->
     </div>
     {{/each}}
 </script>

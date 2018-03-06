@@ -162,4 +162,6 @@ public abstract interface StandardRepository
     List<String> queryNetworkSecurityTargets();
 
     List<NetworkEvaluation> queryNetworkSecurityByTarget(String target);
+
+    void updateNetworkSecuritys(List<NetworkEvaluation> networkEvaluations);
 }

@@ -1791,4 +1791,22 @@ public class JdbcStandardRepository
 
         return query.query(this.namedTemplate);
     }
+
+    @Override
+    public void updateNetworkSecuritys(List<NetworkEvaluation> networkEvaluations){
+        String sql = "update APP.ISMS_NETWORK_EVALUATION set RESULT=?,CONFORMITY=?,REMARK=? where EVALUATION_ID=?";
+        this.jdbcTemplate.batchUpdate(sql, new BatchPreparedStatementSetter() {
+            public int getBatchSize() {
+                return networkEvaluations.size();
+                //这个方法设定更新记录数，通常List里面存放的都是我们要更新的，所以返回list.size();
+            }
+            public void setValues(PreparedStatement ps, int i)throws SQLException {
+                NetworkEvaluation net = networkEvaluations.get(i);
+                ps.setString(1, net.getResult());
+                ps.setString(2, net.getConformity());
+                ps.setString(3, net.getRemark());
+                ps.setLong(4, net.getEvaluationId());
+            }
+        });
+    }
 }
