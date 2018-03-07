@@ -15,8 +15,9 @@
     <div id="security-content"></div>
 </div>
 
-<div id="security-import" style="display: none;">
-    <form id="import-form" method="POST" action="/api/upload_evidence" enctype="multipart/form-data">
+<div id="security-import" style="display: none;" title="Import">
+    <p id="import-result"></p>
+    <form id="import-form" method="POST" action="/api/properties/network-security/${target}/import" enctype="multipart/form-data">
         <label>File:</label>
         <input class="form-control-file" name="file" id="file" type="file"/><br/>
         <input class="btn btn-primary" type="submit" value="Import"/>
@@ -167,11 +168,33 @@
 
     //import
     $("#import").on('click',function () {
-        $("security-import").container.dialog({
+        var $importDiv = $("#security-import");
+        var $form = $("#import-form");
+
+        $form.find("input[type='submit']").unbind('click')
+        .bind('click',function (e) {
+            e.preventDefault();
+            e.stopImmediatePropagation();
+            $form.prev().html("Uploading...");
+            $form.ajaxForm({
+                success: function (evidence) {
+                    $form.prev().html(evidence.name + " has been uploaded successfully.");
+                    $importDiv.dialog("close");
+                },
+                error: function (xhr, status, error) {
+                    resp = JSON.parse(xhr.responseText);
+                    $form.prev().html("Upload Failed: " + resp.message);
+                },
+                dataType: "json"
+            }).submit();
+            e.preventDefault();
+        });
+
+        $importDiv.dialog({
             modal: true,
-            height: 500,
+            height: 300,
             width: 400,
-            //position: { my: "top", at: "top+250"},
+            position: { my: "top", at: "top+250"},
             buttons: {
                 Close: function () {
                     $(this).dialog("close");

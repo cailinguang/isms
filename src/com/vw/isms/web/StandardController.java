@@ -10,10 +10,7 @@ import com.vw.isms.standard.event.StandardNodeDeleteEvent;
 import com.vw.isms.standard.event.StandardNodeMoveEvent;
 import com.vw.isms.standard.event.StandardNodePropertiesUpdateEvent;
 import com.vw.isms.standard.event.StandardNodeRenameEvent;
-import com.vw.isms.standard.model.DataClass;
-import com.vw.isms.standard.model.Evidence;
-import com.vw.isms.standard.model.Standard;
-import com.vw.isms.standard.model.StandardNode;
+import com.vw.isms.standard.model.*;
 import com.vw.isms.standard.repository.EvidenceSearchRequest;
 import com.vw.isms.standard.repository.PagingResult;
 import com.vw.isms.standard.repository.StandardRepository;
@@ -588,4 +585,28 @@ public class StandardController {
         this.repository.updateNetworkSecuritys(req.getNetworkEvaluations());
         return GenericResponse.success();
     }
+
+    @RequestMapping(value = {"/api/properties/network-security/{target}/import"}, method = {org.springframework.web.bind.annotation.RequestMethod.POST})
+    @ResponseBody
+    public GenericResponse importNetworkSecurity(@PathVariable String target,MultipartHttpServletRequest request) throws Exception {
+        Iterator<String> iter = request.getFileNames();
+        if (!iter.hasNext()) {
+            throw new EventProcessingException("No file uploaded.");
+        }
+        MultipartFile mpf = request.getFile((String) iter.next());
+        if (StringUtils.isEmpty(mpf.getOriginalFilename())) {
+            throw new EventProcessingException("No file uploaded.");
+        }
+        List<NetworkEvaluation> results = ResolveExcel.resolveNetrowkEvaluation(mpf.getInputStream());
+        if(results==null||results.size()==0){
+            throw new EventProcessingException("no item find from excel.");
+        }
+        this.repository.importNetworkSecuritys(results);
+
+        return GenericResponse.success();
+    }
+
+
+
+
 }
