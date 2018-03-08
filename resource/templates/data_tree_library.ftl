@@ -36,7 +36,7 @@
 <div title="Choice" style="display:none" id="update-upload-tree"></div>
 <div title="修改证据" style="display:none" id="evidence_update_dialog">
     <form>
-        <label>Evidence Classification:</label>
+        <label>Evidence Directory:</label>
         <input class="form-control" name="classTypeTxt" id="update-choice-lassType">
         <input class="form-control" name="classId" id="update-classId" type="hidden"/>
 
@@ -51,14 +51,17 @@
     <table class="table table-hover">
         <thead>
             <tr>
-                <th>描述</th>
-                <th>文件</th>
-                <th></th>
+                <th style="width:40%;">文件名</th>
+                <th style="width:30%;">描述</th>
+                <th style="width:10%;">上传人</th>
+                <th style="width:10%;">部门</th>
+                <th style="width:10%;"></th>
             </tr>
         </thead>
         <tbody>
             {{#each results}}
             <tr item_id="{{id}}">
+                <td><a href="/download_data/{{id}}" download="{{name}}">{{name}}</a></td>
                 <td><span property="description">{{description}}</span>
                     <#if !readonly>
                         <span style="padding:10px; font-size: 8px">
@@ -66,7 +69,8 @@
                         </span>
                     </#if>
                 </td>
-                <td><a href="/download_data/{{id}}" download="{{name}}">{{name}}</a></td>
+                <td>{{userName}}</td>
+                <td></td>
                 <#if !readonly>
                     <td style="padding-right:0px;">
                         <button class="btn btn-default" evidence="{{this.id}}" action="delete">删除</button>
@@ -77,7 +81,7 @@
         </tbody>
         <tfoot>
             <tr>
-                <td colspan="3" align="right">
+                <td colspan="5" align="right">
                     {{#if hasPrevPage}}<a id="prevPage" href="javascript:void(0)" style="margin-right:20px;">前一页</a>{{/if}}
                     {{#if hasNextPage}}<a id="nextPage" href="javascript:void(0)" style="margin-left:30px;">后一页</a>{{/if}}
                 </td>

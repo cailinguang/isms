@@ -1,7 +1,7 @@
 <div title="Upload Data" style="display:none" id="upload-evidence">
     <p id="update-evidence-result"></p>
     <form id="upload-evidence-form" method="POST" action="/api/upload_data" enctype="multipart/form-data">
-        <label>Data Classification:</label>
+        <label>Data Directory:</label>
         <input class="form-control" name="classTypeTxt" id="choice-lassType">
         <input class="form-control" name="classId" id="classId" type="hidden"/>
 

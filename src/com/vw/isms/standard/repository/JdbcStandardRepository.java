@@ -8,6 +8,7 @@ import com.vw.isms.property.EvidenceSetProperty;
 import com.vw.isms.property.FloatProperty;
 import com.vw.isms.property.Property;
 import com.vw.isms.property.StringProperty;
+import com.vw.isms.standard.Data;
 import com.vw.isms.standard.model.*;
 import com.vw.isms.util.IdUtil;
 import java.io.PrintStream;
@@ -1499,7 +1500,7 @@ public class JdbcStandardRepository
     }
 
     @Override
-    public PagingResult<Evidence> queryDatasTree(EvidenceSearchRequest search)
+    public PagingResult<Data> queryDatasTree(EvidenceSearchRequest search)
             throws RepositoryException
     {
         try
@@ -1517,15 +1518,16 @@ public class JdbcStandardRepository
                 builder.append(" and exists(select 1 from APP.ISMS_DATA_CLASS_FILE where file_id = evidence_id and class_id=:classId)");
             }
 
-            return this.namedTemplate.query(builder.toString(), values, new PagingResultSetExtractor<Evidence>(search.getPageNumber(), search.getItemPerPage()) {
+            return this.namedTemplate.query(builder.toString(), values, new PagingResultSetExtractor<Data>(search.getPageNumber(), search.getItemPerPage()) {
                 @Override
-                public Evidence mapRow(ResultSet rs) throws SQLException {
-                    Evidence ev = new Evidence();
+                public Data mapRow(ResultSet rs) throws SQLException {
+                    Data ev = new Data();
                     ev.setId(rs.getLong("EVIDENCE_ID"));
                     ev.setName(rs.getString("NAME"));
                     ev.setDescription(rs.getString("DESCRIPTION"));
                     ev.setPath(rs.getString("PATH"));
                     ev.setContentType(rs.getString("CONTENT_TYPE"));
+                    ev.setUserName(rs.getString("USERNAME"));
                     return ev;
                 }
             });
@@ -1538,7 +1540,7 @@ public class JdbcStandardRepository
     }
 
     @Override
-    public void createData(Evidence evidence)
+    public void createData(Data evidence)
             throws RepositoryException
     {
         try
@@ -1549,7 +1551,8 @@ public class JdbcStandardRepository
                     .withColumnValue("NAME", evidence.getName())
                     .withColumnValue("DESCRIPTION", evidence.getDescription())
                     .withColumnValue("PATH", evidence.getPath())
-                    .withColumnValue("CONTENT_TYPE", evidence.getContentType());
+                    .withColumnValue("CONTENT_TYPE", evidence.getContentType())
+                    .withColumnValue("USERNAME",evidence.getUserName());
             insertion.insert(this.jdbcTemplate);
         }
         catch (Throwable t)
@@ -1560,27 +1563,28 @@ public class JdbcStandardRepository
     }
 
     @Override
-    public Evidence getData(long evidenceId)
+    public Data getData(long evidenceId)
             throws RepositoryException
     {
-        SimpleJdbcQuery<Evidence> query = new SimpleJdbcQuery()
+        SimpleJdbcQuery<Data> query = new SimpleJdbcQuery()
         {
-            public Evidence mapRow(ResultSet rs, int rowNum)
+            public Data mapRow(ResultSet rs, int rowNum)
                     throws SQLException
             {
-                Evidence ev = new Evidence();
+                Data ev = new Data();
                 ev.setId(rs.getLong("EVIDENCE_ID"));
                 ev.setContentType(rs.getString("CONTENT_TYPE"));
                 ev.setDescription(rs.getString("DESCRIPTION"));
                 ev.setName(rs.getString("NAME"));
                 ev.setPath(rs.getString("PATH"));
+                ev.setUserName(rs.getString("USERNAME"));
                 return ev;
             }
         };
         try
         {
             query.withSchema("APP").withTable("ISMS_DATA").withKey("EVIDENCE_ID", Long.valueOf(evidenceId)).withColumn("*");
-            return (Evidence)query.queryForObject(this.namedTemplate);
+            return (Data)query.queryForObject(this.namedTemplate);
         }
         catch (Throwable t)
         {
@@ -1590,7 +1594,7 @@ public class JdbcStandardRepository
     }
 
     @Override
-    public void updateData(Evidence evidence)
+    public void updateData(Data evidence)
             throws RepositoryException
     {
         try

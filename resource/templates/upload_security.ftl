@@ -1,7 +1,7 @@
 <div title="Upload Security" style="display:none" id="upload-evidence">
     <p id="update-evidence-result"></p>
     <form id="upload-evidence-form" method="POST" action="/api/upload_security" enctype="multipart/form-data">
-        <label>Security Classification:</label>
+        <label>Security Directory:</label>
         <input class="form-control" name="classTypeTxt" id="choice-lassType">
         <input class="form-control" name="classId" id="classId" type="hidden"/>
 

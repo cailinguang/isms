@@ -36,7 +36,7 @@
 <div title="Choice" style="display:none" id="update-upload-tree"></div>
 <div title="修改证据" style="display:none" id="evidence_update_dialog">
     <form>
-        <label>Evidence Classification:</label>
+        <label>Evidence Directory:</label>
         <input class="form-control" name="classTypeTxt" id="update-choice-lassType">
         <input class="form-control" name="classId" id="update-classId" type="hidden"/>
 
@@ -51,14 +51,19 @@
     <table class="table table-hover">
         <thead>
             <tr>
-                <th>描述</th>
+                <th style="width:50px !important;">序号</th>
+                <th style="width:100px !important;">证据分类</th>
                 <th>文件</th>
-                <th></th>
+                <th>描述</th>
+                <th style="width:50px !important;"></th>
             </tr>
         </thead>
         <tbody>
             {{#each results}}
             <tr item_id="{{id}}">
+                <td>{{calculateIndex @index}}</td>
+                <td>{{classType}}</td>
+                <td><a href="/download_evidence/{{id}}" download="{{name}}">{{name}}</a></td>
                 <td><span property="description">{{description}}</span>
                     <#if !readonly>
                         <span style="padding:10px; font-size: 8px">
@@ -66,7 +71,6 @@
                         </span>
                     </#if>
                 </td>
-                <td><a href="/download_evidence/{{id}}" download="{{name}}">{{name}}</a></td>
                 <#if !readonly>
                     <td style="padding-right:0px;">
                         <button class="btn btn-default" evidence="{{this.id}}" action="delete">删除</button>
@@ -77,7 +81,7 @@
         </tbody>
         <tfoot>
             <tr>
-                <td colspan="3" align="right">
+                <td colspan="5" align="right">
                     {{#if hasPrevPage}}<a id="prevPage" href="javascript:void(0)" style="margin-right:20px;">前一页</a>{{/if}}
                     {{#if hasNextPage}}<a id="nextPage" href="javascript:void(0)" style="margin-left:30px;">后一页</a>{{/if}}
                 </td>
@@ -90,6 +94,13 @@
 <#include "common_js.ftl">
 <script type="text/javascript">
     $("#nav_evidence_library_tree").addClass("active");
+    Handlebars.registerHelper({'calculateIndex':function(index,options){
+        var index = index+1;
+        if(options.data.root.pageNumber!=undefined){
+            return options.data.root.pageNumber*options.data.root.itemPerPage+index;
+        }
+
+    }});
     var search_results_template = Handlebars.compile($("#evidences").html());
 
     //init tree
@@ -188,7 +199,8 @@
                                                     classId:$("#update-classId").val()
                                                 },
                                                 function (response) {
-                                                    e.data.descSpan.html(desc);
+                                                    //e.data.descSpan.html(desc);
+                                                    updateSearchResults($("#search_string").prop("value"),window.pageNumber);
                                                     $("#evidence_update_dialog").dialog("close");
                                                 });
                                     }
@@ -199,9 +211,10 @@
             }
         }
     }
-
+    window.pageNumber = 0;
     function updateSearchResults(namePattern, pageNumber) {
         var node = tree.getSelectNode();
+        window.pageNumber = pageNumber;
         IsmsRequester.requestJson(
                 "/api/properties/evidences",
                 "POST",
@@ -215,6 +228,7 @@
                     if (response.pageNumber > 0) {
                         response.hasPrevPage = true;
                     }
+                    for(var i=0;i<response.results.length;i++) {response.results[i].classType=node.text;}
                     $("#standard_search_results").html(search_results_template(response));
                     setupUI($("#standard_search_results"), response.results);
                     var prevPage = $("#prevPage");
@@ -247,7 +261,7 @@
         var uploader = new EvidenceUploader('EVIDENCE');
         uploader.openDialog(true, function (evidence) {
             if (typeof evidence != 'undefined') {
-
+                evidence.classType=$("#choice-lassType").val();
                 $("#standard_search_results tbody").prepend($(search_results_template({results: [evidence]})).find('tr:eq(-2)'))
                 setupUI($("#standard_search_results"), [evidence]);
                 setupDeleteAction($("#standard_search_results"), evidence);

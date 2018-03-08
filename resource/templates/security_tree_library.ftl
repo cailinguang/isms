@@ -36,7 +36,7 @@
 <div title="Choice" style="display:none" id="update-upload-tree"></div>
 <div title="修改证据" style="display:none" id="evidence_update_dialog">
     <form>
-        <label>Evidence Classification:</label>
+        <label>Evidence Directory:</label>
         <input class="form-control" name="classTypeTxt" id="update-choice-lassType">
         <input class="form-control" name="classId" id="update-classId" type="hidden"/>
 

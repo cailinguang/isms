@@ -2,6 +2,7 @@ package com.vw.isms.web;
 
 import com.vw.isms.ModelException;
 import com.vw.isms.RepositoryException;
+import com.vw.isms.standard.Data;
 import com.vw.isms.standard.model.Evaluation;
 import com.vw.isms.standard.model.Evidence;
 import com.vw.isms.standard.model.Standard;
@@ -240,7 +241,7 @@ public class WebController {
     public ResponseEntity<FileSystemResource> downloadData(@PathVariable("id") long id, ModelMap map, Authentication authentication)
             throws RepositoryException {
         setupAuth(map, authentication);
-        Evidence ev = this.repository.getData(id);
+        Data ev = this.repository.getData(id);
         MediaType mediaType = MediaType.valueOf(ev.getContentType());
         FileSystemResource res = new FileSystemResource(new File(this.repository.getEvidencePath(ev.getPath())));
         return ResponseEntity.status(HttpStatus.OK).contentType(mediaType).body(res);

@@ -6,6 +6,7 @@ import com.vw.isms.property.EnumProperty;
 import com.vw.isms.property.EvidenceSetProperty;
 import com.vw.isms.property.FloatProperty;
 import com.vw.isms.property.StringProperty;
+import com.vw.isms.standard.Data;
 import com.vw.isms.standard.model.*;
 import com.vw.isms.web.DeptRequest;
 
@@ -124,25 +125,25 @@ public abstract interface StandardRepository
 
   void deleteDataMappingRelation(Long classId, Long dataId);
 
-    PagingResult<Evidence> queryDatasTree(EvidenceSearchRequest search)
+    PagingResult<Data> queryDatasTree(EvidenceSearchRequest search)
             throws RepositoryException;
 
   PagingResult<Evidence> querySecuritiesTree(EvidenceSearchRequest search)
           throws RepositoryException;
 
-  void createData(Evidence evidence)
+  void createData(Data evidence)
           throws RepositoryException;
 
   void createSecurity(Evidence evidence)
           throws RepositoryException;
 
-  Evidence getData(long evidenceId)
+  Data getData(long evidenceId)
           throws RepositoryException;
 
   Evidence getSecurity(long evidenceId)
           throws RepositoryException;
 
-  void updateData(Evidence evidence)
+  void updateData(Data evidence)
           throws RepositoryException;
 
   void updateSecurity(Evidence evidence)

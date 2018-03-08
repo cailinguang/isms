@@ -4,6 +4,7 @@ import com.vw.isms.EventProcessingException;
 import com.vw.isms.ModelException;
 import com.vw.isms.RepositoryException;
 import com.vw.isms.property.Properties;
+import com.vw.isms.standard.Data;
 import com.vw.isms.standard.event.StandardEventProcessor;
 import com.vw.isms.standard.event.StandardNodeCreationEvent;
 import com.vw.isms.standard.event.StandardNodeDeleteEvent;
@@ -28,6 +29,7 @@ import javax.servlet.http.HttpServletResponse;
 import org.apache.commons.io.FileUtils;
 import org.apache.commons.io.FilenameUtils;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.security.core.Authentication;
 import org.springframework.util.FileCopyUtils;
 import org.springframework.util.StringUtils;
 import org.springframework.web.bind.annotation.*;
@@ -225,7 +227,7 @@ public class StandardController {
 
         String classId = request.getParameter("classId");
         if(classId==null||classId.equals("")){
-            throw new EventProcessingException("No evidence classification selected.");
+            throw new EventProcessingException("No evidence directory selected.");
         }
 
         if (!this.repository.queryEvidenceByName(FilenameUtils.getName(mpf.getOriginalFilename())).getResults().isEmpty()) {
@@ -363,7 +365,7 @@ public class StandardController {
      */
     @RequestMapping(value = {"/api/properties/datas"}, method = {org.springframework.web.bind.annotation.RequestMethod.POST}, produces = {"application/json"})
     @ResponseBody
-    public PagingResult<Evidence> queryTreeDatas(@RequestBody EvidenceSearchRequest req)
+    public PagingResult<Data> queryTreeDatas(@RequestBody EvidenceSearchRequest req)
             throws EventProcessingException {
         try {
             return this.repository.queryDatasTree(req);
@@ -383,7 +385,7 @@ public class StandardController {
      */
     @RequestMapping(value = {"/api/upload_data"}, method = {org.springframework.web.bind.annotation.RequestMethod.POST})
     @ResponseBody
-    public Evidence uploadData(MultipartHttpServletRequest request, HttpServletResponse response)
+    public Data uploadData(MultipartHttpServletRequest request, HttpServletResponse response,Authentication authentication)
             throws EventProcessingException, RepositoryException, IOException {
         Iterator<String> iter = request.getFileNames();
         if (!iter.hasNext()) {
@@ -396,7 +398,7 @@ public class StandardController {
 
         String classId = request.getParameter("classId");
         if(classId==null||classId.equals("")){
-            throw new EventProcessingException("No evidence classification selected.");
+            throw new EventProcessingException("No evidence directory selected.");
         }
 
         if (this.repository.queryDataCountByName(FilenameUtils.getName(mpf.getOriginalFilename()))>0) {
@@ -407,12 +409,13 @@ public class StandardController {
         String path = UUID.randomUUID().toString();
         String absPath = this.repository.getEvidencePath(path);
         FileCopyUtils.copy(mpf.getBytes(), new File(absPath));
-        Evidence ev = new Evidence();
+        Data ev = new Data();
         ev.setId(IdUtil.next());
         ev.setName(FilenameUtils.getName(mpf.getOriginalFilename()));
         ev.setDescription(request.getParameter("description"));
         ev.setPath(path);
         ev.setContentType(mpf.getContentType());
+        ev.setUserName(authentication.getName());
         this.repository.createData(ev);
         this.repository.createDataMappingRelation(Long.parseLong(classId),ev.getId());
         return ev;
@@ -428,10 +431,10 @@ public class StandardController {
      */
     @RequestMapping(value = {"/api/properties/data/{evidenceId}"}, method = {org.springframework.web.bind.annotation.RequestMethod.PATCH}, produces = {"application/json"})
     @ResponseBody
-    public GenericResponse updateData(@PathVariable Long evidenceId, @RequestBody Evidence ev, HttpServletRequest request)
+    public GenericResponse updateData(@PathVariable Long evidenceId, @RequestBody Data ev, HttpServletRequest request)
             throws EventProcessingException {
         try {
-            Evidence src = this.repository.getData(evidenceId.longValue());
+            Data src = this.repository.getData(evidenceId.longValue());
             src.setDescription(ev.getDescription());
             this.repository.updateData(src);
             this.repository.createDataMappingRelation(ev.getClassId(),evidenceId);
@@ -453,7 +456,7 @@ public class StandardController {
     @ResponseBody
     public GenericResponse deleteData(@PathVariable Long evidenceId,@RequestBody EvidenceSearchRequest req)
             throws RepositoryException, IOException {
-        Evidence src = this.repository.getData(evidenceId.longValue());
+        Data src = this.repository.getData(evidenceId.longValue());
         String absPath = this.repository.getEvidencePath(src.getPath());
         this.repository.deleteData(evidenceId.longValue());
         this.repository.deleteDataMappingRelation(req.getClassId(),evidenceId);
@@ -502,7 +505,7 @@ public class StandardController {
 
         String classId = request.getParameter("classId");
         if(classId==null||classId.equals("")){
-            throw new EventProcessingException("No evidence classification selected.");
+            throw new EventProcessingException("No evidence directory selected.");
         }
 
         if (this.repository.querySecurityCountByName(FilenameUtils.getName(mpf.getOriginalFilename()))>0) {
