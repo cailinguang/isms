@@ -2,7 +2,7 @@
     <div class="container-fluid">
         <div class="isms_header">
             <div><img src="images/SAIClogo.png" alt="SAIC" style="float:left"></div>
-            <div><h1 style="padding: 40px">ISMS信息安全管理平台<small>&nbsp;&nbsp;test version</small></h1></div>
+            <div><h1 style="padding: 40px">ISMS信息安全管理平台<small>&nbsp;&nbsp;test version(内测版)</small></h1></div>
         </div>
         <div id="navbar" class="navbar-collapse collapse">
             <ul class="nav navbar-nav">
