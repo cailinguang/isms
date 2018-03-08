@@ -7,6 +7,7 @@ import com.vw.isms.property.EvidenceSetProperty;
 import com.vw.isms.property.FloatProperty;
 import com.vw.isms.property.StringProperty;
 import com.vw.isms.standard.model.*;
+import com.vw.isms.web.DeptRequest;
 
 import java.util.List;
 
@@ -166,4 +167,16 @@ public abstract interface StandardRepository
     void updateNetworkSecuritys(List<NetworkEvaluation> networkEvaluations);
 
     void importNetworkSecuritys(List<NetworkEvaluation> networkEvaluations);
+
+    PagingResult<Dept> queryDepts(DeptRequest req);
+
+    void createDept(Dept dept);
+
+    void updateDept(Dept dept);
+
+    Dept queryDeptByDeptId(String deptId);
+
+    int countDeptByDeptName(String deptName);
+
+    void deleteDeptByDeptId(String deptId);
 }

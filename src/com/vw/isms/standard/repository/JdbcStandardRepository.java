@@ -21,8 +21,11 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.Map.Entry;
+
+import com.vw.isms.web.DeptRequest;
 import org.springframework.jdbc.core.BatchPreparedStatementSetter;
 import org.springframework.jdbc.core.JdbcTemplate;
+import org.springframework.jdbc.core.RowMapper;
 import org.springframework.jdbc.core.namedparam.NamedParameterJdbcTemplate;
 import org.springframework.transaction.annotation.Transactional;
 import org.springframework.util.StringUtils;
@@ -1828,5 +1831,65 @@ public class JdbcStandardRepository
                 ps.setString(6, net.getControlItem());
             }
         });
+    }
+
+    @Override
+    public PagingResult<Dept> queryDepts(DeptRequest search) {
+        StringBuffer sql = new StringBuffer("select * from APP.ISMS_DEPT");
+        Map<String, Object> values = new HashMap();
+
+        if(!StringUtils.isEmpty(search.getDeptName())){
+            sql.append(" where DEPT_NAME like :deptName");
+            values.put("deptName","%"+search.getDeptName()+"%");
+        }
+
+        return this.namedTemplate.query(sql.toString(), values, new PagingResultSetExtractor<Dept>(search.getPageNumber(), search.getItemPerPage()) {
+            @Override
+            public Dept mapRow(ResultSet rs) throws SQLException {
+                Dept dept = new Dept();
+                dept.setDeptId(rs.getString("DEPT_ID"));
+                dept.setDeptName(rs.getString("DEPT_NAME"));
+                return dept;
+            }
+        });
+    }
+
+    @Override
+    public void createDept(Dept dept){
+        SimpleJdbcInsertion insertion = new SimpleJdbcInsertion();
+        insertion.withSchema("APP").withTable("ISMS_DEPT")
+                .withColumnValue("DEPT_ID",dept.getDeptId())
+                .withColumnValue("DEPT_NAME",dept.getDeptName());
+        insertion.insert(this.jdbcTemplate);
+    }
+
+    @Override
+    public void updateDept(Dept dept){
+        String sql = "update APP.ISMS_DEPT set DEPT_NAME=? where DEPT_ID=?";
+        this.jdbcTemplate.update(sql,dept.getDeptName(), dept.getDeptId());
+    }
+
+    @Override
+    public Dept queryDeptByDeptId(String deptId){
+        List<Dept> lists = this.jdbcTemplate.query("select * from APP.ISMS_DEPT where DEPT_ID=?", new RowMapper<Dept>() {
+            @Override
+            public Dept mapRow(ResultSet rs, int i) throws SQLException {
+                Dept dept = new Dept();
+                dept.setDeptId(rs.getString("DEPT_ID"));
+                dept.setDeptName(rs.getString("DEPT_NAME"));
+                return dept;
+            }
+        },new Object[]{deptId});
+        return lists.isEmpty()?null:lists.get(0);
+    }
+
+    @Override
+    public int countDeptByDeptName(String deptName){
+        return this.jdbcTemplate.queryForObject("select count(*) from APP.ISMS_DEPT where DEPT_NAME=?",new Object[]{deptName},Integer.class);
+    }
+
+    @Override
+    public void deleteDeptByDeptId(String deptId){
+        this.jdbcTemplate.update("delete from APP.ISMS_DEPT where DEPT_ID=?",deptId);
     }
 }

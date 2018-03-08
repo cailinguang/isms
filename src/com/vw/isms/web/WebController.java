@@ -306,17 +306,17 @@ public class WebController {
     }
 
     /**
-     * import网络安全法
+     * 部门管理
      * @param map
      * @param authentication
      * @return
      */
-    @RequestMapping({"import_security/{target}"})
-    public String getImportSecurity(ModelMap map, Authentication authentication,@RequestParam String target) {
+    @RequestMapping("dept")
+    public String getDept(ModelMap map, Authentication authentication){
         setupAuth(map, authentication);
         setReadonlyStatus(map, authentication, false);
-        map.put("target",target);
-        return "import_security";
+        return "dept";
     }
+
 
 }

@@ -2,7 +2,7 @@
     <div class="container-fluid">
         <div class="isms_header">
             <div><img src="images/SAIClogo.png" alt="SAIC" style="float:left"></div>
-            <div><h1 style="padding: 40px">ISMS信息安全管理平台</h1></div>
+            <div><h1 style="padding: 40px">ISMS信息安全管理平台<small>&nbsp;&nbsp;test version</small></h1></div>
         </div>
         <div id="navbar" class="navbar-collapse collapse">
             <ul class="nav navbar-nav">
@@ -12,9 +12,10 @@
                 <li id="nav_evidence_library_tree"><a href="/evidences_tree">证据库</a></li>
                 <li id="nav_data_library_tree"><a href="/data_tree">数据分类分级管理模块</a></li>
                 <li id="nav_security_library_tree"><a href="/security_tree">信息安全对标模块</a></li>
-                <li id="nav_evidence_library_tree"><a href="/evidences_tree">风险管理库</a></li>
+                <#--<li id="nav_evidence_library_tree"><a href="/evidences_tree">风险管理库</a></li>-->
                 <li id="nav_network_security_tree"><a href="/network_security">网络安全法</a></li>
                 <li id="nav_evidence_library_tree"><a href="/evidences_tree">审计日志</a></li>
+                <li id="nav_dept"><a href="/dept">部门管理</a></li>
             </ul>
             <ul class="nav navbar-nav navbar-right">
             <#if auth??>

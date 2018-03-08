@@ -607,6 +607,49 @@ public class StandardController {
     }
 
 
+    @RequestMapping(value = {"/api/depts"}, method = {org.springframework.web.bind.annotation.RequestMethod.POST}, produces = {"application/json"})
+    @ResponseBody
+    public Object getDepts(@RequestBody DeptRequest req){
+        return this.repository.queryDepts(req);
+    }
 
+    @RequestMapping(value = {"/api/dept"}, method = {org.springframework.web.bind.annotation.RequestMethod.POST}, produces = {"application/json"})
+    @ResponseBody
+    public Object createDept(@RequestBody Dept dept) throws Exception{
+        if(this.repository.queryDeptByDeptId(dept.getDeptId())!=null){
+            throw new EventProcessingException("DepartmentID already exist.");
+        }
+        if(this.repository.countDeptByDeptName(dept.getDeptName())!=0){
+            throw new EventProcessingException("DepartmentName already exist.");
+        }
 
+        this.repository.createDept(dept);
+        return GenericResponse.success();
+    }
+
+    @RequestMapping(value = {"/api/dept/{deptId}"}, method = {org.springframework.web.bind.annotation.RequestMethod.GET}, produces = {"application/json"})
+    @ResponseBody
+    public Object getDept(@PathVariable String deptId){
+        return this.repository.queryDeptByDeptId(deptId);
+    }
+
+    @RequestMapping(value = {"/api/dept/{deptId}"}, method = {org.springframework.web.bind.annotation.RequestMethod.PATCH}, produces = {"application/json"})
+    @ResponseBody
+    public Object updateDept(@PathVariable String deptId,@RequestBody Dept dept) throws Exception{
+        Dept oldDept = this.repository.queryDeptByDeptId(deptId);
+
+        if(!oldDept.getDeptName().equals(dept.getDeptName()) && this.repository.countDeptByDeptName(dept.getDeptName())!=0){
+            throw new EventProcessingException("DepartmentName already exist.");
+        }
+        dept.setDeptId(deptId);
+        this.repository.updateDept(dept);
+        return GenericResponse.success();
+    }
+
+    @RequestMapping(value = {"/api/dept/{deptId}"}, method = {org.springframework.web.bind.annotation.RequestMethod.DELETE}, produces = {"application/json"})
+    @ResponseBody
+    public Object deleteDept(@PathVariable String deptId){
+        this.repository.deleteDeptByDeptId(deptId);
+        return GenericResponse.success();
+    }
 }

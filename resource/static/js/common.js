@@ -26,7 +26,9 @@ var IsmsRequester = {
             });
         request.done(done);
         request.fail(function (jqXHR, textStatus) {
-            IsmsErrorReporter.reportError(jqXHR.statusText);
+            var responseJSON = jqXHR.responseJSON;
+
+            IsmsErrorReporter.reportError((responseJSON!=null?responseJSON.message:false) || jqXHR.statusText);
         });
     },
     requestJsonWithFail: function (url, action, data, done, fail) {
