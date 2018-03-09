@@ -33,6 +33,9 @@ public class ResolveExcel {
             if(item==null||item.equals("")){
                 continue;
             }
+            if(!"Y".equals(conformity)&&!"N".equals(conformity)){
+                conformity = "N";
+            }
             networkEvaluation.setEvaluationTarget(target);
             networkEvaluation.setEvaluationIndex(index);
             networkEvaluation.setControlItem(item);

@@ -7,7 +7,7 @@
 <body>
 <div class="container">
 <#include "header.ftl">
-    <div class="row">
+    <div>
         <div class="col-md-3">
             <div id="evidence_tree" style="overflow:hidden; height:600px;overflow-y:auto;"></div>
         </div>

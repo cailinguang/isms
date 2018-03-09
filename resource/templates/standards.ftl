@@ -7,7 +7,7 @@
 <body>
 <div class="container">
 <#include "header.ftl">
-    <div class="row">
+    <div>
         <div class="col-lg-9">
             <div class="input-group">
 

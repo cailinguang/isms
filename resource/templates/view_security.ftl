@@ -27,13 +27,13 @@
 <script id="security-template" type="text/x-handlebars-template">
     <table class="table table-condensed table-bordered">
         <thead>
-        <th style="width:50px;">序号</th>
-        <th style="width:100px;">评测对象</th>
-        <th style="width:100px;">测评指标</th>
-        <th>控制项</th>
-        <th style="width:150px;">结果记录</th>
-        <th style="width:150px;">符合情况</th>
-        <th style="width:150px;">备注</th>
+        <th style="width:5%;min-width:50px;">序号</th>
+        <th style="width:10%;min-width:80px;">评测对象</th>
+        <th style="width:10%;min-width:80px;">测评指标</th>
+        <th style="width:45%">控制项</th>
+        <th style="width:10%;min-width:80px;">结果记录</th>
+        <th style="width:10%;min-width:80px;">符合情况</th>
+        <th style="width:10%;">备注</th>
         </th>
         </thead>
         <tbody>
@@ -44,7 +44,9 @@
             <td>{{evaluationIndex}}</td>
             <td>{{controlItem}}</td>
             <td>{{result}}</td>
-            <td>{{conformity}}</td>
+            <td style="text-align:center;">
+                <input name="conformityCheckBox" type="checkbox" data-on-text="Y" data-off-text="N" data-size="small" {{#isEquals conformity 'Y' }}checked{{/isEquals }} />
+            </td>
             <td>{{remark}}</td>
         </tr>
         {{/each}}
@@ -69,6 +71,12 @@
                 throw new Error('Handlerbars Helper "computeAdd" can not deal with wrong expression:'+arguments);
             }
             return big;
+        },
+        'isEquals':function(one,two, options) {
+            if (one==two) {
+                return options.fn(this);
+            }
+            return options.inverse(this)
         }
     });
 
@@ -134,13 +142,25 @@
                 $(this).empty().append(textArea);
                 textArea.focus();
             };
-            var blurEvent = function () {
-                var val = $(this).children().html();
-                $(this).html(val);
-            };
             tdArray[i][4].on('click',clickEvent);
-            tdArray[i][5].on('click',clickEvent);
             tdArray[i][6].on('click',clickEvent);
+
+            //符合情况，选择
+            var conformityClickEvent = function () {
+                var val = $(this).html();
+                var checkbox = $('<input type="checkbox" checked />');
+                checkbox.on('blur',function () {
+                    
+                });
+                $(this).empty().append(checkbox);
+                checkbox.bootstrapSwitch({
+                    onText:"Y",
+                    offText:"N",
+                    size:'small'
+                })
+                checkbox.focus();
+            }
+            tdArray[i][5].find("[name='conformityCheckBox']").bootstrapSwitch();
         }
 
     });
@@ -156,7 +176,7 @@
            var networkEvaluation = {};
            networkEvaluation.evaluationId = tdArray[i][0].parent().attr('nid');
            networkEvaluation.result = tdArray[i][4].html();
-           networkEvaluation.conformity = tdArray[i][5].html();
+           networkEvaluation.conformity = tdArray[i][5].find("[name='conformityCheckBox']").bootstrapSwitch('state')?'Y':'N';
            networkEvaluation.remark = tdArray[i][6].html();
            data.networkEvaluations.push(networkEvaluation);
        }

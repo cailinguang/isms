@@ -272,7 +272,7 @@ public class WebController {
     public ResponseEntity<FileSystemResource> downloadSecurity(@PathVariable("id") long id, ModelMap map, Authentication authentication)
             throws RepositoryException {
         setupAuth(map, authentication);
-        Evidence ev = this.repository.getSecurity(id);
+        Data ev = this.repository.getSecurity(id);
         MediaType mediaType = MediaType.valueOf(ev.getContentType());
         FileSystemResource res = new FileSystemResource(new File(this.repository.getEvidencePath(ev.getPath())));
         return ResponseEntity.status(HttpStatus.OK).contentType(mediaType).body(res);

@@ -1639,7 +1639,7 @@ public class JdbcStandardRepository
 
 
     @Override
-    public PagingResult<Evidence> querySecuritiesTree(EvidenceSearchRequest search)
+    public PagingResult<Data> querySecuritiesTree(EvidenceSearchRequest search)
             throws RepositoryException
     {
         try
@@ -1657,15 +1657,16 @@ public class JdbcStandardRepository
                 builder.append(" and exists(select 1 from APP.ISMS_DATA_CLASS_FILE where file_id = evidence_id and class_id=:classId)");
             }
 
-            return this.namedTemplate.query(builder.toString(), values, new PagingResultSetExtractor<Evidence>(search.getPageNumber(), search.getItemPerPage()) {
+            return this.namedTemplate.query(builder.toString(), values, new PagingResultSetExtractor<Data>(search.getPageNumber(), search.getItemPerPage()) {
                 @Override
-                public Evidence mapRow(ResultSet rs) throws SQLException {
-                    Evidence ev = new Evidence();
+                public Data mapRow(ResultSet rs) throws SQLException {
+                    Data ev = new Data();
                     ev.setId(rs.getLong("EVIDENCE_ID"));
                     ev.setName(rs.getString("NAME"));
                     ev.setDescription(rs.getString("DESCRIPTION"));
                     ev.setPath(rs.getString("PATH"));
                     ev.setContentType(rs.getString("CONTENT_TYPE"));
+                    ev.setUserName(rs.getString("USERNAME"));
                     return ev;
                 }
             });
@@ -1678,7 +1679,7 @@ public class JdbcStandardRepository
     }
 
     @Override
-    public void createSecurity(Evidence evidence)
+    public void createSecurity(Data evidence)
             throws RepositoryException
     {
         try
@@ -1689,7 +1690,8 @@ public class JdbcStandardRepository
                     .withColumnValue("NAME", evidence.getName())
                     .withColumnValue("DESCRIPTION", evidence.getDescription())
                     .withColumnValue("PATH", evidence.getPath())
-                    .withColumnValue("CONTENT_TYPE", evidence.getContentType());
+                    .withColumnValue("CONTENT_TYPE", evidence.getContentType())
+                    .withColumnValue("USERNAME",evidence.getUserName());
             insertion.insert(this.jdbcTemplate);
         }
         catch (Throwable t)
@@ -1700,27 +1702,28 @@ public class JdbcStandardRepository
     }
 
     @Override
-    public Evidence getSecurity(long evidenceId)
+    public Data getSecurity(long evidenceId)
             throws RepositoryException
     {
-        SimpleJdbcQuery<Evidence> query = new SimpleJdbcQuery()
+        SimpleJdbcQuery<Data> query = new SimpleJdbcQuery()
         {
-            public Evidence mapRow(ResultSet rs, int rowNum)
+            public Data mapRow(ResultSet rs, int rowNum)
                     throws SQLException
             {
-                Evidence ev = new Evidence();
+                Data ev = new Data();
                 ev.setId(rs.getLong("EVIDENCE_ID"));
                 ev.setContentType(rs.getString("CONTENT_TYPE"));
                 ev.setDescription(rs.getString("DESCRIPTION"));
                 ev.setName(rs.getString("NAME"));
                 ev.setPath(rs.getString("PATH"));
+                ev.setUserName(rs.getString("USERNAME"));
                 return ev;
             }
         };
         try
         {
             query.withSchema("APP").withTable("ISMS_SECURITY").withKey("EVIDENCE_ID", Long.valueOf(evidenceId)).withColumn("*");
-            return (Evidence)query.queryForObject(this.namedTemplate);
+            return (Data)query.queryForObject(this.namedTemplate);
         }
         catch (Throwable t)
         {
@@ -1730,7 +1733,7 @@ public class JdbcStandardRepository
     }
 
     @Override
-    public void updateSecurity(Evidence evidence)
+    public void updateSecurity(Data evidence)
             throws RepositoryException
     {
         try

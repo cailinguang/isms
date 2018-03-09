@@ -1,7 +1,13 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <project version="4">
   <component name="DataSourceManagerImpl" format="xml" multifile-model="true">
-    <data-source source="LOCAL" name="db" uuid="4a5a5dbf-0535-4995-be2a-18521b3572e3">
+    <data-source source="LOCAL" name="C:db" uuid="4a5a5dbf-0535-4995-be2a-18521b3572e3">
+      <driver-ref>derby.embedded</driver-ref>
+      <synchronize>true</synchronize>
+      <jdbc-driver>org.apache.derby.jdbc.EmbeddedDriver</jdbc-driver>
+      <jdbc-url>jdbc:derby:C:/isms/db</jdbc-url>
+    </data-source>
+    <data-source source="LOCAL" name="E:tempdb" uuid="8fdc1466-7f7a-42aa-95b4-05f391fab401">
       <driver-ref>derby.embedded</driver-ref>
       <synchronize>true</synchronize>
       <jdbc-driver>org.apache.derby.jdbc.EmbeddedDriver</jdbc-driver>

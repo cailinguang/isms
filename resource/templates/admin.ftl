@@ -17,8 +17,8 @@
 </div>
 <div class="container">
 <#include "header.ftl">
-    <div class="row">
-        <div class="col-md-9 input-group">
+    <div>
+        <div class="input-group">
             <input id="search_string" type="text" class="form-control">
             <div class="input-group-btn">
                 <button id="search_button" class="btn btn-default">
@@ -36,9 +36,9 @@
             </div>
         </div>
     </div>
-    <div class="row">
-        <div id="search_results"></div>
-    </div>
+
+    <br/>
+    <div id="search_results"></div>
 </div>
 <script id="users" type="text/x-handlebars-template">
     <table id="user_table" class="table">
@@ -72,14 +72,10 @@
         </tr>
         {{/each}}
         <tr>
-            <td></td>
-            <td></td>
-            <td></td>
-            <td></td>
-            <td></td>
-            <td></td>
-            <td>{{#if hasPrevPage}}<a id="prevPage" href="javascript:void(0)">Prev</a>{{/if}}</td>
-            <td>{{#if hasNextPage}}<a id="nextPage" href="javascript:void(0)">Next</a>{{/if}}</td>
+            <td colspan="7" align="right">
+                {{#if hasPrevPage}}<a id="prevPage" href="javascript:void(0)" style="margin-right:20px;">Prev</a>{{/if}}
+                {{#if hasNextPage}}<a id="nextPage" href="javascript:void(0)" style="margin-left:30px;">Next</a>{{/if}}
+            </td>
         </tr>
     </table>
 </script>
@@ -101,6 +97,7 @@
 </script>
 <#include "common_js.ftl">
 <script type="text/javascript">
+    $("#nav_admin").addClass("active");
     Handlebars.registerHelper('ifCond', function(v1, v2, options) {
         if(v1 === v2) {
             return options.fn(this);
@@ -126,13 +123,13 @@
                     var prevPage = $("#prevPage");
                     if (prevPage.length && response.pageNumber > 0) {
                         prevPage.click(function () {
-                            updateSearchResults(namePattern, standardType, pageNumber - 1);
+                            updateSearchResults(namePattern,  pageNumber - 1);
                         });
                     }
                     var nextPage = $("#nextPage");
                     if (nextPage.length && response.hasNextPage) {
                         nextPage.click(function () {
-                            updateSearchResults(namePattern, standardType, pageNumber + 1);
+                            updateSearchResults(namePattern,  pageNumber + 1);
                         });
                     }
                     setupUserTable();

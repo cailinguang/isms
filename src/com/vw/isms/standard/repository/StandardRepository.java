@@ -128,25 +128,25 @@ public abstract interface StandardRepository
     PagingResult<Data> queryDatasTree(EvidenceSearchRequest search)
             throws RepositoryException;
 
-  PagingResult<Evidence> querySecuritiesTree(EvidenceSearchRequest search)
+  PagingResult<Data> querySecuritiesTree(EvidenceSearchRequest search)
           throws RepositoryException;
 
   void createData(Data evidence)
           throws RepositoryException;
 
-  void createSecurity(Evidence evidence)
+  void createSecurity(Data evidence)
           throws RepositoryException;
 
   Data getData(long evidenceId)
           throws RepositoryException;
 
-  Evidence getSecurity(long evidenceId)
+  Data getSecurity(long evidenceId)
           throws RepositoryException;
 
   void updateData(Data evidence)
           throws RepositoryException;
 
-  void updateSecurity(Evidence evidence)
+  void updateSecurity(Data evidence)
           throws RepositoryException;
 
   void deleteData(long evidenceId)

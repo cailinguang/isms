@@ -1,0 +1,14 @@
+<component name="ArtifactManager">
+  <artifact type="jar" name="vw-standard-0.2.0">
+    <output-path>$PROJECT_DIR$/out/artifacts/vw_standard_0_2_0</output-path>
+    <root id="archive" name="vw-standard-0.2.0.jar">
+      <element id="directory" name="META-INF">
+        <element id="file-copy" path="$PROJECT_DIR$/src/META-INF/MANIFEST.MF" />
+      </element>
+      <element id="directory" name="lib">
+        <element id="library" level="project" name="isms" />
+      </element>
+      <element id="module-output" name="isms" />
+    </root>
+  </artifact>
+</component>

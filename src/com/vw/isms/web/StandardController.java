@@ -472,7 +472,7 @@ public class StandardController {
      */
     @RequestMapping(value = {"/api/properties/securities"}, method = {org.springframework.web.bind.annotation.RequestMethod.POST}, produces = {"application/json"})
     @ResponseBody
-    public PagingResult<Evidence> queryTreeSecurities(@RequestBody EvidenceSearchRequest req)
+    public PagingResult<Data> queryTreeSecurities(@RequestBody EvidenceSearchRequest req)
             throws EventProcessingException {
         try {
             return this.repository.querySecuritiesTree(req);
@@ -492,7 +492,7 @@ public class StandardController {
      */
     @RequestMapping(value = {"/api/upload_security"}, method = {org.springframework.web.bind.annotation.RequestMethod.POST})
     @ResponseBody
-    public Evidence uploadSecurity(MultipartHttpServletRequest request, HttpServletResponse response)
+    public Data uploadSecurity(MultipartHttpServletRequest request, HttpServletResponse response,Authentication authentication)
             throws EventProcessingException, RepositoryException, IOException {
         Iterator<String> iter = request.getFileNames();
         if (!iter.hasNext()) {
@@ -516,12 +516,13 @@ public class StandardController {
         String path = UUID.randomUUID().toString();
         String absPath = this.repository.getEvidencePath(path);
         FileCopyUtils.copy(mpf.getBytes(), new File(absPath));
-        Evidence ev = new Evidence();
+        Data ev = new Data();
         ev.setId(IdUtil.next());
         ev.setName(FilenameUtils.getName(mpf.getOriginalFilename()));
         ev.setDescription(request.getParameter("description"));
         ev.setPath(path);
         ev.setContentType(mpf.getContentType());
+        ev.setUserName(authentication.getName());
         this.repository.createSecurity(ev);
         this.repository.createDataMappingRelation(Long.parseLong(classId),ev.getId());
         return ev;
@@ -540,7 +541,7 @@ public class StandardController {
     public GenericResponse updateSecurity(@PathVariable Long evidenceId, @RequestBody Evidence ev, HttpServletRequest request)
             throws EventProcessingException {
         try {
-            Evidence src = this.repository.getSecurity(evidenceId.longValue());
+            Data src = this.repository.getSecurity(evidenceId.longValue());
             src.setDescription(ev.getDescription());
             this.repository.updateSecurity(src);
             this.repository.createDataMappingRelation(ev.getClassId(),evidenceId);
@@ -562,7 +563,7 @@ public class StandardController {
     @ResponseBody
     public GenericResponse deleteSecurity(@PathVariable Long evidenceId,@RequestBody EvidenceSearchRequest req)
             throws RepositoryException, IOException {
-        Evidence src = this.repository.getSecurity(evidenceId.longValue());
+        Data src = this.repository.getSecurity(evidenceId.longValue());
         String absPath = this.repository.getEvidencePath(src.getPath());
         this.repository.deleteSecurity(evidenceId.longValue());
         this.repository.deleteDataMappingRelation(req.getClassId(),evidenceId);

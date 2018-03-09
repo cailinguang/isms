@@ -8,8 +8,6 @@
 <div class="container">
 <#include "header.ftl">
     <div id="security-content"></div>
-
-
 </div>
 
 <script id="security-template" type="text/x-handlebars-template">

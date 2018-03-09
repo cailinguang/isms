@@ -14,15 +14,15 @@
                 <li id="nav_security_library_tree"><a href="/security_tree">信息安全对标模块</a></li>
                 <#--<li id="nav_evidence_library_tree"><a href="/evidences_tree">风险管理库</a></li>-->
                 <li id="nav_network_security_tree"><a href="/network_security">网络安全法</a></li>
-                <li id="nav_evidence_library_tree"><a href="/evidences_tree">审计日志</a></li>
+                <#--<li id="nav_evidence_library_tree"><a href="/evidences_tree">审计日志</a></li>-->
                 <li id="nav_dept"><a href="/dept">部门管理</a></li>
+                <#if auth??>
+                <#if auth.principal.authorities?seq_contains("ROLE_ADMIN")>
+                    <li id="nav_admin"><a href="/admin">用户管理</a></li>
+                </#if>
+                </#if>
             </ul>
             <ul class="nav navbar-nav navbar-right">
-            <#if auth??>
-                <#if auth.principal.authorities?seq_contains("ROLE_ADMIN")>
-                    <li><a href="/admin">用户管理</a></li>
-                </#if>
-            </#if>
             <#if auth??>
                 <#if auth.authenticated>
                     <li class="dropdown">
