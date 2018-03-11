@@ -180,4 +180,6 @@ public abstract interface StandardRepository
     int countDeptByDeptName(String deptName);
 
     void deleteDeptByDeptId(String deptId);
+
+    PagingResult<Vulnerability> queryVulnerabilities(VulnerabilitySearchRequest search);
 }

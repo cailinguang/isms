@@ -1899,4 +1899,28 @@ public class JdbcStandardRepository
     public void deleteDeptByDeptId(String deptId){
         this.jdbcTemplate.update("delete from APP.ISMS_DEPT where DEPT_ID=?",deptId);
     }
+
+    @Override
+    public PagingResult<Vulnerability> queryVulnerabilities(VulnerabilitySearchRequest search) {
+        StringBuilder builder = new StringBuilder("select * from APP.ISMS_VULNERABILITY");
+        Map<String, Object> values = new HashMap();
+
+        if(search.getSystem()!=null&&!search.getSystem().equals("")){
+            builder.append(" where SYSTEM like :system");
+            values.put("system","%"+search.getSystem()+"%");
+        }
+
+        return this.namedTemplate.query(builder.toString(), values, new PagingResultSetExtractor<Vulnerability>(search.getPageNumber(), search.getItemPerPage()) {
+            @Override
+            public Vulnerability mapRow(ResultSet rs) throws SQLException {
+                Vulnerability item = new Vulnerability();
+                item.setId(rs.getLong("ID"));
+                item.setDescripiton(rs.getString("DESCRIPTION"));
+                item.setSystem(rs.getString("SYSTEM"));
+                item.setReleaseDate(rs.getDate("RELEASE_DATE"));
+                item.setSuggestion(rs.getString("SUGGESTION"));
+                return item;
+            }
+        });
+    }
 }

@@ -656,4 +656,9 @@ public class StandardController {
         this.repository.deleteDeptByDeptId(deptId);
         return GenericResponse.success();
     }
+
+    @RequestMapping(value="/api/vulnerabilities",method = RequestMethod.GET)
+    public Object getVulnerabilities(String system){
+
+    }
 }

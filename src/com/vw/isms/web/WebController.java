@@ -319,5 +319,17 @@ public class WebController {
         return "dept";
     }
 
+    /**
+     * 漏洞模块数据
+     * @param map
+     * @param authentication
+     * @return
+     */
+    @RequestMapping("vulnerability")
+    public String getVulnerability(ModelMap map, Authentication authentication){
+        setupAuth(map, authentication);
+        setReadonlyStatus(map, authentication, false);
+        return "vulnerability";
+    }
 
 }
