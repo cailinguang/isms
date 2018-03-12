@@ -1170,6 +1170,11 @@ public class JdbcStandardRepository
                         throw new SQLException(e);
                     }
                 }
+
+                @Override
+                public int count() {
+                    return namedTemplate.queryForObject(builder.toString().replace("*","count(*)"),values,Integer.class);
+                }
             };
             return (PagingResult)this.namedTemplate.query(builder.toString(), values, handler);
         }
@@ -1204,6 +1209,11 @@ public class JdbcStandardRepository
                     ev.setPath(rs.getString("PATH"));
                     ev.setContentType(rs.getString("CONTENT_TYPE"));
                     return ev;
+                }
+
+                @Override
+                public int count() {
+                    return namedTemplate.queryForObject(builder.toString().replace("*","count(*)"),values,Integer.class);
                 }
             });
         }
@@ -1244,6 +1254,11 @@ public class JdbcStandardRepository
                     ev.setContentType(rs.getString("CONTENT_TYPE"));
                     return ev;
                 }
+
+                @Override
+                public int count() {
+                    return namedTemplate.queryForObject(builder.toString().replace("*","count(*)"),values,Integer.class);
+                }
             });
         }
         catch (Throwable t)
@@ -1278,6 +1293,11 @@ public class JdbcStandardRepository
                     ev.setPath(rs.getString("PATH"));
                     ev.setContentType(rs.getString("CONTENT_TYPE"));
                     return ev;
+                }
+
+                @Override
+                public int count() {
+                    return namedTemplate.queryForObject(builder.toString().replace("*","count(*)"),values,Integer.class);
                 }
             });
         }
@@ -1530,6 +1550,11 @@ public class JdbcStandardRepository
                     ev.setUserName(rs.getString("USERNAME"));
                     return ev;
                 }
+
+                @Override
+                public int count() {
+                    return namedTemplate.queryForObject(builder.toString().replace("*","count(*)"),values,Integer.class);
+                }
             });
         }
         catch (Throwable t)
@@ -1668,6 +1693,11 @@ public class JdbcStandardRepository
                     ev.setContentType(rs.getString("CONTENT_TYPE"));
                     ev.setUserName(rs.getString("USERNAME"));
                     return ev;
+                }
+
+                @Override
+                public int count() {
+                    return namedTemplate.queryForObject(builder.toString().replace("*","count(*)"),values,Integer.class);
                 }
             });
         }
@@ -1858,6 +1888,11 @@ public class JdbcStandardRepository
                 dept.setDeptName(rs.getString("DEPT_NAME"));
                 return dept;
             }
+
+            @Override
+            public int count() {
+                return namedTemplate.queryForObject(sql.toString().replace("*","count(*)"),values,Integer.class);
+            }
         });
     }
 
@@ -1920,6 +1955,11 @@ public class JdbcStandardRepository
                 item.setReleaseDate(rs.getDate("RELEASE_DATE"));
                 item.setSuggestion(rs.getString("SUGGESTION"));
                 return item;
+            }
+
+            @Override
+            public int count() {
+                return namedTemplate.queryForObject(builder.toString().replace("*","count(*)"),values,Integer.class);
             }
         });
     }

@@ -58,7 +58,7 @@ IsmsDataTree.prototype.render = function () {
                     "drag_selection": false,
                 }
             });
-
+            //me.view.jstree(true).refresh(true);
             //open and select  root node  on jstree ready.
             me.view.on('ready.jstree',function (e,data) {
                 var _tree = me.view.jstree(true);

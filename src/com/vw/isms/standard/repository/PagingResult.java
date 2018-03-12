@@ -8,6 +8,7 @@ public class PagingResult<T>
 {
   private final int pageNumber;
   private final int itemPerPage;
+  private int count;
   
   public PagingResult(int pageNumber, int itemPerPage)
   {
@@ -47,4 +48,12 @@ public class PagingResult<T>
   {
     return this.pageNumber;
   }
+
+    public int getCount() {
+        return count;
+    }
+
+    public void setCount(int count) {
+        this.count = count;
+    }
 }

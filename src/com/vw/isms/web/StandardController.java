@@ -659,6 +659,6 @@ public class StandardController {
 
     @RequestMapping(value="/api/vulnerabilities",method = RequestMethod.GET)
     public Object getVulnerabilities(String system){
-
+        return null;
     }
 }

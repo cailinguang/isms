@@ -81,9 +81,12 @@
         </tbody>
         <tfoot>
             <tr>
-                <td colspan="5" align="right">
-                    {{#if hasPrevPage}}<a id="prevPage" href="javascript:void(0)" style="margin-right:20px;">前一页</a>{{/if}}
-                    {{#if hasNextPage}}<a id="nextPage" href="javascript:void(0)" style="margin-left:30px;">后一页</a>{{/if}}
+                <td colspan="5">
+                    <div style="float:left;" id="pageInfo">{{page-info this}}</div>
+                    <div style="float:right;">
+                        {{#if hasPrevPage}}<a id="prevPage" href="javascript:void(0)" style="margin-right:20px;">前一页</a>{{/if}}
+                        {{#if hasNextPage}}<a id="nextPage" href="javascript:void(0)" style="margin-left:30px;">后一页</a>{{/if}}
+                    </div>
                 </td>
             </tr>
         </tfoot>
@@ -94,13 +97,7 @@
 <#include "common_js.ftl">
 <script type="text/javascript">
     $("#nav_evidence_library_tree").addClass("active");
-    Handlebars.registerHelper({'calculateIndex':function(index,options){
-        var index = index+1;
-        if(options.data.root.pageNumber!=undefined){
-            return options.data.root.pageNumber*options.data.root.itemPerPage+index;
-        }
 
-    }});
     var search_results_template = Handlebars.compile($("#evidences").html());
 
     //init tree
@@ -138,6 +135,9 @@
                     {classId:result.classId},
                     function(response) {
                         ui.find("[item_id='" + result.id + "']").remove();
+
+                        window._response.count--;
+                        $("#pageInfo").html(Handlebars.compile('{{page-info this}}')(window._response));
                     }
             );
         });
@@ -200,7 +200,7 @@
                                                 },
                                                 function (response) {
                                                     //e.data.descSpan.html(desc);
-                                                    updateSearchResults($("#search_string").prop("value"),window.pageNumber);
+                                                    updateSearchResults($("#search_string").prop("value"),window._pageNumber);
                                                     $("#evidence_update_dialog").dialog("close");
                                                 });
                                     }
@@ -211,10 +211,11 @@
             }
         }
     }
-    window.pageNumber = 0;
+    window._pageNumber = 0;
+    window._response = null;
     function updateSearchResults(namePattern, pageNumber) {
         var node = tree.getSelectNode();
-        window.pageNumber = pageNumber;
+        window._pageNumber = pageNumber;
         IsmsRequester.requestJson(
                 "/api/properties/evidences",
                 "POST",
@@ -229,6 +230,7 @@
                         response.hasPrevPage = true;
                     }
                     for(var i=0;i<response.results.length;i++) {response.results[i].classType=node.text;}
+                    window._response = response;
                     $("#standard_search_results").html(search_results_template(response));
                     setupUI($("#standard_search_results"), response.results);
                     var prevPage = $("#prevPage");
@@ -265,6 +267,8 @@
                 $("#standard_search_results tbody").prepend($(search_results_template({results: [evidence]})).find('tr:eq(-2)'))
                 setupUI($("#standard_search_results"), [evidence]);
                 setupDeleteAction($("#standard_search_results"), evidence);
+                window._response.count++;
+                $("#pageInfo").html(Handlebars.compile('{{page-info this}}')(window._response));
             }
         },tree.getSelectNode());
     });

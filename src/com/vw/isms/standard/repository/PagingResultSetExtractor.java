@@ -16,7 +16,9 @@ public abstract class PagingResultSetExtractor<T>
   
   public abstract T mapRow(ResultSet paramResultSet)
     throws SQLException;
-  
+
+  public abstract int count();
+
   public PagingResult<T> extractData(ResultSet rs)
     throws SQLException
   {
@@ -32,6 +34,7 @@ public abstract class PagingResultSetExtractor<T>
       index++;
     }
     this.result.setHasNextPage(rs.next());
+    this.result.setCount(count());
     return this.result;
   }
 }

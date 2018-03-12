@@ -79,6 +79,11 @@ public class UserRepository
           user.setDepartment(rs.getString("DEPARTMENT"));
           return user;
         }
+
+          @Override
+          public int count() {
+              return namedTemplate.queryForObject(builder.toString().replace("*","count(*)"),values,Integer.class);
+          }
       };
       return (PagingResult)this.namedTemplate.query(builder.toString(), values, handler);
     }

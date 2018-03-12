@@ -81,9 +81,12 @@
         </tbody>
         <tfoot>
             <tr>
-                <td colspan="5" align="right">
-                    {{#if hasPrevPage}}<a id="prevPage" href="javascript:void(0)" style="margin-right:20px;">前一页</a>{{/if}}
-                    {{#if hasNextPage}}<a id="nextPage" href="javascript:void(0)" style="margin-left:30px;">后一页</a>{{/if}}
+                <td colspan="5">
+                    <div style="float:left;" id="pageInfo">{{page-info this}}</div>
+                    <div style="float:right;">
+                        {{#if hasPrevPage}}<a id="prevPage" href="javascript:void(0)" style="margin-right:20px;">前一页</a>{{/if}}
+                        {{#if hasNextPage}}<a id="nextPage" href="javascript:void(0)" style="margin-left:30px;">后一页</a>{{/if}}
+                    </div>
                 </td>
             </tr>
         </tfoot>
@@ -132,6 +135,8 @@
                     {classId:result.classId},
                     function(response) {
                         ui.find("[item_id='" + result.id + "']").remove();
+                        window._response.count--;
+                        $("#pageInfo").html(Handlebars.compile('{{page-info this}}')(window._response));
                     }
             );
         });
@@ -205,8 +210,11 @@
         }
     }
 
+    window._pageNumber = 0;
+    window._response = null;
     function updateSearchResults(namePattern, pageNumber) {
         var node = tree.getSelectNode();
+        window._pageNumber = pageNumber;
         IsmsRequester.requestJson(
                 "/api/properties/datas",
                 "POST",
@@ -220,6 +228,7 @@
                     if (response.pageNumber > 0) {
                         response.hasPrevPage = true;
                     }
+                    window._response = response;
                     $("#standard_search_results").html(search_results_template(response));
                     setupUI($("#standard_search_results"), response.results);
                     var prevPage = $("#prevPage");
@@ -252,10 +261,12 @@
         var uploader = new EvidenceUploader(DATA_TYPE);
         uploader.openDialog(true, function (evidence) {
             if (typeof evidence != 'undefined') {
-
                 $("#standard_search_results tbody").prepend($(search_results_template({results: [evidence]})).find('tr:eq(-2)'))
                 setupUI($("#standard_search_results"), [evidence]);
                 setupDeleteAction($("#standard_search_results"), evidence);
+
+                window._response.count++;
+                $("#pageInfo").html(Handlebars.compile('{{page-info this}}')(window._response));
             }
         },tree.getSelectNode());
     });
