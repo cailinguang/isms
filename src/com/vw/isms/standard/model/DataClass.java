@@ -67,16 +67,3 @@ public class DataClass {
     }
 }
 
-class CustomJsonSerial extends JsonSerializer<DataClass> {
-
-    @Override
-    public void serialize(DataClass value, JsonGenerator jgen, SerializerProvider serializerProvider) throws IOException, JsonProcessingException {
-        jgen.writeStartObject();
-        jgen.writeStringField("classId", String.valueOf(value.getClassId()));
-        jgen.writeStringField("classType", value.getClassType());
-        jgen.writeStringField("parentId", String.valueOf(value.getParentId()));
-        jgen.writeStringField("className",value.getClassName());
-        jgen.writeNumberField("position",value.getPosition());
-        jgen.writeEndObject();
-    }
-}

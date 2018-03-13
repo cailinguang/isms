@@ -62,7 +62,7 @@
             {{#each results}}
             <tr item_id="{{id}}">
                 <td>{{calculateIndex @index}}</td>
-                <td>{{classType}}</td>
+                <td>{{className}}</td>
                 <td><a href="/download_evidence/{{id}}" download="{{name}}">{{name}}</a></td>
                 <td><span property="description">{{description}}</span>
                     <#if !readonly>
@@ -154,18 +154,17 @@
                 edit.click(
                         {
                             descSpan: descSpan,
-                            item: item,
-                            node:tree.getSelectNode()
+                            item: item
                         },
                         function (e) {
-                            $("#update-classId").val(e.data.node.id);
-                            $("#update-choice-lassType").val(e.data.node.text).on('click',function () {
+                            $("#update-classId").val(e.data.item.classId);
+                            $("#update-choice-lassType").val(e.data.item.className).on('click',function () {
                                 new IsmsDataTree({
                                     view: $("#update-upload-tree"),
                                     type: "EVIDENCE",
                                     readonly:true,
                                     selectRoot:false,
-                                    initSelectNode:e.data.node.id,
+                                    initSelectNode:e.data.item.classId,
                                     selectionCallback:function (node) {
                                         $("#update-upload-tree").dialog('close');
                                         $("#update-classId").val(node.id);
@@ -229,7 +228,6 @@
                     if (response.pageNumber > 0) {
                         response.hasPrevPage = true;
                     }
-                    for(var i=0;i<response.results.length;i++) {response.results[i].classType=node.text;}
                     window._response = response;
                     $("#standard_search_results").html(search_results_template(response));
                     setupUI($("#standard_search_results"), response.results);
@@ -246,7 +244,6 @@
                         });
                     }
                     for (var i = 0; i < response.results.length; ++i) {
-                        response.results[i].classId = node.id;
                         setupDeleteAction($("#standard_search_results"), response.results[i]);
                     }
                 }
@@ -263,7 +260,7 @@
         var uploader = new EvidenceUploader('EVIDENCE');
         uploader.openDialog(true, function (evidence) {
             if (typeof evidence != 'undefined') {
-                evidence.classType=$("#choice-lassType").val();
+                evidence.className=$("#choice-lassType").val();
                 $("#standard_search_results tbody").prepend($(search_results_template({results: [evidence]})).find('tr:eq(-2)'))
                 setupUI($("#standard_search_results"), [evidence]);
                 setupDeleteAction($("#standard_search_results"), evidence);

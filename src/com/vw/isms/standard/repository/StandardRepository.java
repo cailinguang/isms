@@ -6,7 +6,7 @@ import com.vw.isms.property.EnumProperty;
 import com.vw.isms.property.EvidenceSetProperty;
 import com.vw.isms.property.FloatProperty;
 import com.vw.isms.property.StringProperty;
-import com.vw.isms.standard.Data;
+import com.vw.isms.standard.model.Data;
 import com.vw.isms.standard.model.*;
 import com.vw.isms.web.DeptRequest;
 

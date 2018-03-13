@@ -8,10 +8,10 @@ import com.vw.isms.property.EvidenceSetProperty;
 import com.vw.isms.property.FloatProperty;
 import com.vw.isms.property.Property;
 import com.vw.isms.property.StringProperty;
-import com.vw.isms.standard.Data;
+import com.vw.isms.standard.model.Data;
 import com.vw.isms.standard.model.*;
 import com.vw.isms.util.IdUtil;
-import java.io.PrintStream;
+
 import java.sql.PreparedStatement;
 import java.sql.ResultSet;
 import java.sql.SQLException;
@@ -21,7 +21,6 @@ import java.util.Collections;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
-import java.util.Map.Entry;
 
 import com.vw.isms.web.DeptRequest;
 import org.springframework.jdbc.core.BatchPreparedStatementSetter;
@@ -1232,15 +1231,21 @@ public class JdbcStandardRepository
         {
             Map<String, Object> values = new HashMap();
             StringBuilder builder = new StringBuilder();
-            builder.append("SELECT * FROM APP.ISMS_EVIDENCE where 1=1 ");
+            builder.append("SELECT e.*,c.CLASS_NAME,c.CLASS_ID FROM APP.ISMS_EVIDENCE e " +
+                    "left join APP.ISMS_DATA_CLASS_FILE cf on e.evidence_id=cf.file_id " +
+                    "left join APP.ISMS_DATA_CLASS c on cf.class_id=c.class_id where 1=1 ");
             if (!StringUtils.isEmpty(search.getNamePattern()))
             {
                 values.put("namePattern", "%" + search.getNamePattern().toLowerCase() + "%");
-                builder.append(" and (LOWER(NAME) like :namePattern OR LOWER(DESCRIPTION) like :namePattern)");
+                builder.append(" and (LOWER(e.NAME) like :namePattern OR LOWER(e.DESCRIPTION) like :namePattern)");
             }
             if(search.getClassId()!=null){
-                values.put("classId", search.getClassId());
-                builder.append(" and exists(select 1 from APP.ISMS_DATA_CLASS_FILE where file_id = evidence_id and class_id=:classId)");
+                DataClass dataClass = this.queryDataClass(search.getClassId());
+                //根目录查询所有
+                if(dataClass.getParentId()!=0) {
+                    values.put("classId", search.getClassId());
+                    builder.append(" and cf.class_id=:classId");
+                }
             }
 
             return this.namedTemplate.query(builder.toString(), values, new PagingResultSetExtractor<Evidence>(search.getPageNumber(), search.getItemPerPage()) {
@@ -1252,12 +1257,14 @@ public class JdbcStandardRepository
                     ev.setDescription(rs.getString("DESCRIPTION"));
                     ev.setPath(rs.getString("PATH"));
                     ev.setContentType(rs.getString("CONTENT_TYPE"));
+                    ev.setClassName(rs.getString("CLASS_NAME"));
+                    ev.setClassId(rs.getLong("CLASS_ID"));
                     return ev;
                 }
 
                 @Override
                 public int count() {
-                    return namedTemplate.queryForObject(builder.toString().replace("*","count(*)"),values,Integer.class);
+                    return namedTemplate.queryForObject(builder.toString().replace("e.*,c.CLASS_NAME,c.CLASS_ID","count(*)"),values,Integer.class);
                 }
             });
         }
@@ -1527,15 +1534,21 @@ public class JdbcStandardRepository
         {
             Map<String, Object> values = new HashMap();
             StringBuilder builder = new StringBuilder();
-            builder.append("SELECT * FROM APP.ISMS_DATA where 1=1 ");
+            builder.append("SELECT e.*,c.CLASS_NAME,c.CLASS_ID FROM APP.ISMS_DATA e " +
+                    "left join APP.ISMS_DATA_CLASS_FILE cf on e.evidence_id=cf.file_id " +
+                    "left join APP.ISMS_DATA_CLASS c on cf.class_id=c.class_id where 1=1 ");
             if (!StringUtils.isEmpty(search.getNamePattern()))
             {
                 values.put("namePattern", "%" + search.getNamePattern().toLowerCase() + "%");
                 builder.append(" and (LOWER(NAME) like :namePattern OR LOWER(DESCRIPTION) like :namePattern)");
             }
             if(search.getClassId()!=null){
-                values.put("classId", search.getClassId());
-                builder.append(" and exists(select 1 from APP.ISMS_DATA_CLASS_FILE where file_id = evidence_id and class_id=:classId)");
+                DataClass dataClass = this.queryDataClass(search.getClassId());
+                //根目录查询所有
+                if(dataClass.getParentId()!=0) {
+                    values.put("classId", search.getClassId());
+                    builder.append(" and cf.class_id=:classId");
+                }
             }
 
             return this.namedTemplate.query(builder.toString(), values, new PagingResultSetExtractor<Data>(search.getPageNumber(), search.getItemPerPage()) {
@@ -1548,12 +1561,14 @@ public class JdbcStandardRepository
                     ev.setPath(rs.getString("PATH"));
                     ev.setContentType(rs.getString("CONTENT_TYPE"));
                     ev.setUserName(rs.getString("USERNAME"));
+                    ev.setClassId(rs.getLong("CLASS_ID"));
+                    ev.setClassName(rs.getString("CLASS_NAME"));
                     return ev;
                 }
 
                 @Override
                 public int count() {
-                    return namedTemplate.queryForObject(builder.toString().replace("*","count(*)"),values,Integer.class);
+                    return namedTemplate.queryForObject(builder.toString().replace("e.*,c.CLASS_NAME,c.CLASS_ID","count(*)"),values,Integer.class);
                 }
             });
         }
@@ -1671,15 +1686,21 @@ public class JdbcStandardRepository
         {
             Map<String, Object> values = new HashMap();
             StringBuilder builder = new StringBuilder();
-            builder.append("SELECT * FROM APP.ISMS_SECURITY where 1=1 ");
+            builder.append("SELECT e.*,c.CLASS_NAME,c.CLASS_ID FROM APP.ISMS_SECURITY e " +
+                    "left join APP.ISMS_DATA_CLASS_FILE cf on e.evidence_id=cf.file_id " +
+                    "left join APP.ISMS_DATA_CLASS c on cf.class_id=c.class_id where 1=1 ");
             if (!StringUtils.isEmpty(search.getNamePattern()))
             {
                 values.put("namePattern", "%" + search.getNamePattern().toLowerCase() + "%");
-                builder.append(" and (LOWER(NAME) like :namePattern OR LOWER(DESCRIPTION) like :namePattern)");
+                builder.append(" and (LOWER(NAME) like :namePattern OR LOWER(DESCRIPTION) like :namePattern) ");
             }
             if(search.getClassId()!=null){
-                values.put("classId", search.getClassId());
-                builder.append(" and exists(select 1 from APP.ISMS_DATA_CLASS_FILE where file_id = evidence_id and class_id=:classId)");
+                DataClass dataClass = this.queryDataClass(search.getClassId());
+                //根目录查询所有
+                if(dataClass.getParentId()!=0) {
+                    values.put("classId", search.getClassId());
+                    builder.append("and cf.class_id=:classId");
+                }
             }
 
             return this.namedTemplate.query(builder.toString(), values, new PagingResultSetExtractor<Data>(search.getPageNumber(), search.getItemPerPage()) {
@@ -1692,12 +1713,14 @@ public class JdbcStandardRepository
                     ev.setPath(rs.getString("PATH"));
                     ev.setContentType(rs.getString("CONTENT_TYPE"));
                     ev.setUserName(rs.getString("USERNAME"));
+                    ev.setClassId(rs.getLong("CLASS_ID"));
+                    ev.setClassName(rs.getString("CLASS_NAME"));
                     return ev;
                 }
 
                 @Override
                 public int count() {
-                    return namedTemplate.queryForObject(builder.toString().replace("*","count(*)"),values,Integer.class);
+                    return namedTemplate.queryForObject(builder.toString().replace("e.*,c.CLASS_NAME,c.CLASS_ID","count(*)"),values,Integer.class);
                 }
             });
         }

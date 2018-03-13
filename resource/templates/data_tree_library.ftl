@@ -153,18 +153,17 @@
                 edit.click(
                         {
                             descSpan: descSpan,
-                            item: item,
-                            node:tree.getSelectNode()
+                            item: item
                         },
                         function (e) {
-                            $("#update-classId").val(e.data.node.id);
-                            $("#update-choice-lassType").val(e.data.node.text).on('click',function () {
+                            $("#update-classId").val(e.data.item.classId);
+                            $("#update-choice-lassType").val(e.data.item.className).on('click',function () {
                                 new IsmsDataTree({
                                     view: $("#update-upload-tree"),
                                     type: DATA_TYPE,
                                     readonly:true,
                                     selectRoot:false,
-                                    initSelectNode:e.data.node.id,
+                                    initSelectNode:e.data.item.classId,
                                     selectionCallback:function (node) {
                                         $("#update-upload-tree").dialog('close');
                                         $("#update-classId").val(node.id);
@@ -244,7 +243,6 @@
                         });
                     }
                     for (var i = 0; i < response.results.length; ++i) {
-                        response.results[i].classId = node.id;
                         setupDeleteAction($("#standard_search_results"), response.results[i]);
                     }
                 }
@@ -261,6 +259,7 @@
         var uploader = new EvidenceUploader(DATA_TYPE);
         uploader.openDialog(true, function (evidence) {
             if (typeof evidence != 'undefined') {
+
                 $("#standard_search_results tbody").prepend($(search_results_template({results: [evidence]})).find('tr:eq(-2)'))
                 setupUI($("#standard_search_results"), [evidence]);
                 setupDeleteAction($("#standard_search_results"), evidence);

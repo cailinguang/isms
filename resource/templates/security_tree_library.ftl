@@ -81,9 +81,12 @@
         </tbody>
         <tfoot>
             <tr>
-                <td colspan="5" align="right">
-                    {{#if hasPrevPage}}<a id="prevPage" href="javascript:void(0)" style="margin-right:20px;">前一页</a>{{/if}}
-                    {{#if hasNextPage}}<a id="nextPage" href="javascript:void(0)" style="margin-left:30px;">后一页</a>{{/if}}
+                <td colspan="5">
+                    <div style="float:left;" id="pageInfo">{{page-info this}}</div>
+                    <div style="float:right;">
+                        {{#if hasPrevPage}}<a id="prevPage" href="javascript:void(0)" style="margin-right:20px;">前一页</a>{{/if}}
+                        {{#if hasNextPage}}<a id="nextPage" href="javascript:void(0)" style="margin-left:30px;">后一页</a>{{/if}}
+                    </div>
                 </td>
             </tr>
         </tfoot>
@@ -132,6 +135,8 @@
                     {classId:result.classId},
                     function(response) {
                         ui.find("[item_id='" + result.id + "']").remove();
+                        window._response.count--;
+                        $("#pageInfo").html(Handlebars.compile('{{page-info this}}')(window._response));
                     }
             );
         });
@@ -152,14 +157,14 @@
                             node:tree.getSelectNode()
                         },
                         function (e) {
-                            $("#update-classId").val(e.data.node.id);
-                            $("#update-choice-lassType").val(e.data.node.text).on('click',function () {
+                            $("#update-classId").val(e.data.item.classId);
+                            $("#update-choice-lassType").val(e.data.item.className).on('click',function () {
                                 new IsmsDataTree({
                                     view: $("#update-upload-tree"),
                                     type: DATA_TYPE,
                                     readonly:true,
                                     selectRoot:false,
-                                    initSelectNode:e.data.node.id,
+                                    initSelectNode:e.data.item.classId,
                                     selectionCallback:function (node) {
                                         $("#update-upload-tree").dialog('close');
                                         $("#update-classId").val(node.id);
@@ -205,8 +210,11 @@
         }
     }
 
+    window._pageNumber = 0;
+    window._response = null;
     function updateSearchResults(namePattern, pageNumber) {
         var node = tree.getSelectNode();
+        window._pageNumber = pageNumber;
         IsmsRequester.requestJson(
                 "/api/properties/securities",
                 "POST",
@@ -220,6 +228,7 @@
                     if (response.pageNumber > 0) {
                         response.hasPrevPage = true;
                     }
+                    window._response = response;
                     $("#standard_search_results").html(search_results_template(response));
                     setupUI($("#standard_search_results"), response.results);
                     var prevPage = $("#prevPage");
@@ -235,7 +244,6 @@
                         });
                     }
                     for (var i = 0; i < response.results.length; ++i) {
-                        response.results[i].classId = node.id;
                         setupDeleteAction($("#standard_search_results"), response.results[i]);
                     }
                 }
@@ -256,6 +264,9 @@
                 $("#standard_search_results tbody").prepend($(search_results_template({results: [evidence]})).find('tr:eq(-2)'))
                 setupUI($("#standard_search_results"), [evidence]);
                 setupDeleteAction($("#standard_search_results"), evidence);
+
+                window._response.count++;
+                $("#pageInfo").html(Handlebars.compile('{{page-info this}}')(window._response));
             }
         },tree.getSelectNode());
     });

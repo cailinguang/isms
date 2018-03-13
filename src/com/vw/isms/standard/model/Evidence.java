@@ -3,6 +3,7 @@ package com.vw.isms.standard.model;
 import com.fasterxml.jackson.databind.annotation.JsonSerialize;
 import com.fasterxml.jackson.databind.ser.std.ToStringSerializer;
 
+@JsonSerialize(using = CustomJsonSerial.class)
 public class Evidence
 {
   private long id;
@@ -12,6 +13,8 @@ public class Evidence
   private String contentType;
 
   private long classId;
+
+  private String className;
   
   public String getContentType()
   {
@@ -71,4 +74,12 @@ public class Evidence
   public void setClassId(long classId) {
     this.classId = classId;
   }
+
+    public String getClassName() {
+        return className;
+    }
+
+    public void setClassName(String className) {
+        this.className = className;
+    }
 }

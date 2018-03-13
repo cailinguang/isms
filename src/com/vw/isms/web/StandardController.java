@@ -4,7 +4,7 @@ import com.vw.isms.EventProcessingException;
 import com.vw.isms.ModelException;
 import com.vw.isms.RepositoryException;
 import com.vw.isms.property.Properties;
-import com.vw.isms.standard.Data;
+import com.vw.isms.standard.model.Data;
 import com.vw.isms.standard.event.StandardEventProcessor;
 import com.vw.isms.standard.event.StandardNodeCreationEvent;
 import com.vw.isms.standard.event.StandardNodeDeleteEvent;

@@ -1,8 +1,10 @@
-package com.vw.isms.standard;
+package com.vw.isms.standard.model;
 
 import com.fasterxml.jackson.databind.annotation.JsonSerialize;
 import com.fasterxml.jackson.databind.ser.std.ToStringSerializer;
+import com.vw.isms.standard.model.CustomJsonSerial;
 
+@JsonSerialize(using = CustomJsonSerial.class)
 public class Data
 {
   private long id;
@@ -13,6 +15,7 @@ public class Data
   private String userName;
 
   private long classId;
+  private String className;
 
   public String getContentType()
   {
@@ -80,4 +83,12 @@ public class Data
   public void setUserName(String userName) {
     this.userName = userName;
   }
+
+    public String getClassName() {
+        return className;
+    }
+
+    public void setClassName(String className) {
+        this.className = className;
+    }
 }

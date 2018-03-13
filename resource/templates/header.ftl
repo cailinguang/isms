@@ -10,10 +10,10 @@
                 <li id="nav_standard_library"><a href="/standards">标准库</a></li>
                 <li id="nav_evaluation_library"><a href="/evaluations">安全评审</a></li>
                 <li id="nav_evidence_library_tree"><a href="/evidences_tree">证据库</a></li>
-                <li id="nav_data_library_tree"><a href="/data_tree">数据分类分级管理模块</a></li>
-                <li id="nav_security_library_tree"><a href="/security_tree">信息安全对标模块</a></li>
+                <li id="nav_data_library_tree"><a href="/data_tree">信息分级</a></li>
+                <li id="nav_security_library_tree"><a href="/security_tree">安全对标</a></li>
                 <#--<li id="nav_evidence_library_tree"><a href="/evidences_tree">风险管理库</a></li>-->
-                <li id="nav_network_security_tree"><a href="/network_security">网络安全法</a></li>
+                <li id="nav_network_security_tree"><a href="/network_security">等保标准</a></li>
                 <li id="nav_evidence_library_tree"><a href="/evidences_tree">漏洞模块数据</a></li>
             <#--<li id="nav_evidence_library_tree"><a href="/evidences_tree">审计日志</a></li>-->
                 <li id="nav_dept"><a href="/dept">部门管理</a></li>
