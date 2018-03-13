@@ -14,7 +14,7 @@
                 <li id="nav_security_library_tree"><a href="/security_tree">安全对标</a></li>
                 <#--<li id="nav_evidence_library_tree"><a href="/evidences_tree">风险管理库</a></li>-->
                 <li id="nav_network_security_tree"><a href="/network_security">等保标准</a></li>
-                <li id="nav_evidence_library_tree"><a href="/evidences_tree">漏洞模块数据</a></li>
+                <li id="nav_vulnerability"><a href="/vulnerability">漏洞模块数据</a></li>
             <#--<li id="nav_evidence_library_tree"><a href="/evidences_tree">审计日志</a></li>-->
                 <li id="nav_dept"><a href="/dept">部门管理</a></li>
                 <#if auth??>
