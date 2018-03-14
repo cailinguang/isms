@@ -4,6 +4,8 @@
 <script src="/dist/handlebars/handlebars-v4.0.5.js"></script>
 <script src="/dist/jquery-ui-1.12.0/jquery-ui.min.js"></script>
 <script src="/dist/bootstrap-3.3.5/js/bootstrapSwitch.js"></script>
+<script src="/dist/bootstrap-3.3.5/js/bootstrap-datetimepicker.min.js"></script>
+<script src="/dist/bootstrap-3.3.5/js/bootstrap-select.min.js"></script>
 <script src="/dist/jstree/jstree.min.js"></script>
 <script src="/dist/chart/Chart.bundle.js"></script>
 <script src="/js/common.js"></script>

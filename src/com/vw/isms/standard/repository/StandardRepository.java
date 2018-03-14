@@ -182,4 +182,12 @@ public abstract interface StandardRepository
     void deleteDeptByDeptId(String deptId);
 
     PagingResult<Vulnerability> queryVulnerabilities(VulnerabilitySearchRequest search);
+
+    Vulnerability queryVulnerability(String id);
+
+    void createVulnerability(Vulnerability vulnerability);
+
+    void deleteVulnerability(String id);
+
+    void updateVulnerability(Vulnerability vulnerability);
 }

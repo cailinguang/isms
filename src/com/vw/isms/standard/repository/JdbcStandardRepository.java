@@ -23,8 +23,10 @@ import java.util.List;
 import java.util.Map;
 
 import com.vw.isms.web.DeptRequest;
+import org.springframework.dao.DataAccessException;
 import org.springframework.jdbc.core.BatchPreparedStatementSetter;
 import org.springframework.jdbc.core.JdbcTemplate;
+import org.springframework.jdbc.core.ResultSetExtractor;
 import org.springframework.jdbc.core.RowMapper;
 import org.springframework.jdbc.core.namedparam.NamedParameterJdbcTemplate;
 import org.springframework.transaction.annotation.Transactional;
@@ -1985,5 +1987,49 @@ public class JdbcStandardRepository
                 return namedTemplate.queryForObject(builder.toString().replace("*","count(*)"),values,Integer.class);
             }
         });
+    }
+
+    @Override
+    public Vulnerability queryVulnerability(String id){
+        return this.jdbcTemplate.query("select * from APP.ISMS_VULNERABILITY", new Object[]{id}, new ResultSetExtractor<Vulnerability>() {
+            @Override
+            public Vulnerability extractData(ResultSet rs) throws SQLException, DataAccessException {
+                Vulnerability item = new Vulnerability();
+                item.setId(rs.getLong("ID"));
+                item.setDescripiton(rs.getString("DESCRIPTION"));
+                item.setSystem(rs.getString("SYSTEM"));
+                item.setReleaseDate(rs.getDate("RELEASE_DATE"));
+                item.setSuggestion(rs.getString("SUGGESTION"));
+                return item;
+            }
+        });
+    }
+
+    @Override
+    public void createVulnerability(Vulnerability vulnerability){
+        SimpleJdbcInsertion insertion = new SimpleJdbcInsertion();
+        insertion.withSchema("APP").withTable("ISMS_VULNERABILITY")
+                .withColumnValue("ID", Long.valueOf(vulnerability.getId()))
+                .withColumnValue("DESCRIPTION", vulnerability.getDescripiton())
+                .withColumnValue("SYSTEM", vulnerability.getSystem())
+                .withColumnValue("RELEASE_DATE", vulnerability.getReleaseDate())
+                .withColumnValue("SUGGESTION", vulnerability.getSuggestion());
+        insertion.insert(this.jdbcTemplate);
+    }
+
+    @Override
+    public void deleteVulnerability(String id){
+        this.jdbcTemplate.update("delete from APP.ISMS_VULNERABILITY where id=?",id);
+    }
+
+    @Override
+    public void updateVulnerability(Vulnerability vulnerability){
+        SimpleJdbcUpdate update = new SimpleJdbcUpdate();
+        update.withSchema("APP").withTable("ISMS_VULNERABILITY").withKey("ID", Long.valueOf(vulnerability.getId()))
+                .withColumnValue("DESCRIPTION", vulnerability.getDescripiton())
+                .withColumnValue("SYSTEM", vulnerability.getSystem())
+                .withColumnValue("RELEASE_DATE", vulnerability.getReleaseDate())
+                .withColumnValue("SUGGESTION", vulnerability.getSuggestion());
+        update.update(this.namedTemplate);
     }
 }

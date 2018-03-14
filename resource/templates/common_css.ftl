@@ -4,6 +4,8 @@
 <link rel="stylesheet"
       href="/dist/bootstrap-3.3.5/css/bootstrap-theme.min.css"/>
 <link rel="stylesheet" href="/dist/bootstrap-3.3.5/css/bootstrapSwitch.css"/>
+<link rel="stylesheet" href="/dist/bootstrap-3.3.5/css/bootstrap-datetimepicker.min.css"/>
+<link rel="stylesheet" href="/dist/bootstrap-3.3.5/css/bootstrap-select.min.css"/>
 <link rel="stylesheet" href="/dist/jquery-ui-1.12.0/jquery-ui.min.css"/>
 <link rel="stylesheet" href="/dist/jstree/themes/default/style.min.css">
 <style type="text/css">

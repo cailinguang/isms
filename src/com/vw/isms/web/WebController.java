@@ -331,4 +331,17 @@ public class WebController {
         return "vulnerability";
     }
 
+    /**
+     * 风险模块数据
+     * @param map
+     * @param authentication
+     * @return
+     */
+    @RequestMapping({"risk_library"})
+    public String getRisk(ModelMap map, Authentication authentication) {
+        setupAuth(map, authentication);
+        setReadonlyStatus(map, authentication, false);
+        return "risk_library";
+    }
+
 }

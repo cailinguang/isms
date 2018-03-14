@@ -12,10 +12,7 @@ import com.vw.isms.standard.event.StandardNodeMoveEvent;
 import com.vw.isms.standard.event.StandardNodePropertiesUpdateEvent;
 import com.vw.isms.standard.event.StandardNodeRenameEvent;
 import com.vw.isms.standard.model.*;
-import com.vw.isms.standard.repository.EvidenceSearchRequest;
-import com.vw.isms.standard.repository.PagingResult;
-import com.vw.isms.standard.repository.StandardRepository;
-import com.vw.isms.standard.repository.StandardSearchRequest;
+import com.vw.isms.standard.repository.*;
 import com.vw.isms.util.IdUtil;
 
 import java.io.File;
@@ -657,8 +654,33 @@ public class StandardController {
         return GenericResponse.success();
     }
 
-    @RequestMapping(value="/api/vulnerabilities",method = RequestMethod.GET)
-    public Object getVulnerabilities(String system){
-        return null;
+    @RequestMapping(value="/api/vulnerabilities",method = RequestMethod.POST)
+    @ResponseBody
+    public Object getVulnerabilities(@RequestBody VulnerabilitySearchRequest search){
+        return this.repository.queryVulnerabilities(search);
+    }
+
+    @RequestMapping(value = {"/api/vulnerability"}, method = {org.springframework.web.bind.annotation.RequestMethod.POST}, produces = {"application/json"})
+    public Object saveVulnerability(@RequestBody Vulnerability vulnerability){
+        vulnerability.setId(IdUtil.next());
+        this.repository.createVulnerability(vulnerability);
+        return GenericResponse.success();
+    }
+
+    @RequestMapping(value = {"/api/vulnerability/{id}"}, method = {RequestMethod.DELETE}, produces = {"application/json"})
+    public Object deleteVulnerability(@PathVariable String id){
+        this.repository.deleteVulnerability(id);
+        return GenericResponse.success();
+    }
+
+    @RequestMapping(value = {"/api/vulnerability/{id}"}, method = {RequestMethod.PATCH}, produces = {"application/json"})
+    public Object updateVulnerability(@PathVariable String id,@RequestBody Vulnerability vulnerability){
+        this.repository.updateVulnerability(vulnerability);
+        return GenericResponse.success();
+    }
+
+    @RequestMapping(value="/api/risk_library",method = RequestMethod.POST)
+    public Object queryRisks() throws Exception{
+        return ResolveExcel.resolveRisks();
     }
 }
