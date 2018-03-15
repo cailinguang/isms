@@ -9,6 +9,7 @@ import com.vw.isms.property.StringProperty;
 import com.vw.isms.standard.model.Data;
 import com.vw.isms.standard.model.*;
 import com.vw.isms.web.DeptRequest;
+import com.vw.isms.web.RoleRequest;
 
 import java.util.List;
 
@@ -173,11 +174,21 @@ public abstract interface StandardRepository
 
     void createDept(Dept dept);
 
+    PagingResult<Role> queryRoles(RoleRequest search);
+
+    void createRole(Role role);
+
     void updateDept(Dept dept);
+
+    void updateRole(Role role);
 
     Dept queryDeptByDeptId(String deptId);
 
+    Role queryRoleByRoleId(String roleId);
+
     int countDeptByDeptName(String deptName);
+
+    int countRoleByRoleName(String roleName);
 
     void deleteDeptByDeptId(String deptId);
 
@@ -190,4 +201,16 @@ public abstract interface StandardRepository
     void deleteVulnerability(String id);
 
     void updateVulnerability(Vulnerability vulnerability);
+
+    void deleteRoleByRoleId(String roleId);
+
+    List<Menu> queryAllMenu();
+
+    List<Menu> queryRoleMenuByRoleId(String roleId);
+
+    void grantRoleMenu(String roleId, Long... menuIds);
+
+    void createAuditLog(AuditLog auditLog);
+
+    PagingResult<AuditLog> queryAuditLog(AuditSearchRequest search) throws Exception;
 }

@@ -344,4 +344,30 @@ public class WebController {
         return "risk_library";
     }
 
+
+    /**
+     * 角色管理
+     * @param map
+     * @param authentication
+     * @return
+     */
+    @RequestMapping("role")
+    public String getRole(ModelMap map, Authentication authentication){
+        setupAuth(map, authentication);
+        setReadonlyStatus(map, authentication, false);
+        return "role";
+    }
+
+    /**
+     * 审计日志
+     * @param map
+     * @param authentication
+     * @return
+     */
+    @RequestMapping("audit_log")
+    public String getAuditLog(ModelMap map, Authentication authentication){
+        setupAuth(map, authentication);
+        setReadonlyStatus(map, authentication, false);
+        return "audit_log";
+    }
 }

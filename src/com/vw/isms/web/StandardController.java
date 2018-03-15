@@ -617,15 +617,13 @@ public class StandardController {
     @RequestMapping(value = {"/api/dept"}, method = {org.springframework.web.bind.annotation.RequestMethod.POST}, produces = {"application/json"})
     @ResponseBody
     public Object createDept(@RequestBody Dept dept) throws Exception{
-        if(this.repository.queryDeptByDeptId(dept.getDeptId())!=null){
-            throw new EventProcessingException("DepartmentID already exist.");
-        }
+        dept.setDeptId(String.valueOf(IdUtil.next()));
         if(this.repository.countDeptByDeptName(dept.getDeptName())!=0){
             throw new EventProcessingException("DepartmentName already exist.");
         }
 
         this.repository.createDept(dept);
-        return GenericResponse.success();
+        return this.repository.queryDeptByDeptId(dept.getDeptId());
     }
 
     @RequestMapping(value = {"/api/dept/{deptId}"}, method = {org.springframework.web.bind.annotation.RequestMethod.GET}, produces = {"application/json"})
@@ -682,5 +680,78 @@ public class StandardController {
     @RequestMapping(value="/api/risk_library",method = RequestMethod.POST)
     public Object queryRisks() throws Exception{
         return ResolveExcel.resolveRisks();
+    }
+
+
+    @RequestMapping(value = {"/api/roles"}, method = {org.springframework.web.bind.annotation.RequestMethod.POST}, produces = {"application/json"})
+    @ResponseBody
+    public Object getRoles(@RequestBody RoleRequest req){
+        return this.repository.queryRoles(req);
+    }
+
+    @RequestMapping(value = {"/api/role"}, method = {org.springframework.web.bind.annotation.RequestMethod.POST}, produces = {"application/json"})
+    @ResponseBody
+    public Object createRole(@RequestBody Role role) throws Exception{
+        if(this.repository.queryRoleByRoleId(role.getRoleId())!=null){
+            throw new EventProcessingException("RoleID already exist.");
+        }
+        if(this.repository.countRoleByRoleName(role.getRoleName())!=0){
+            throw new EventProcessingException("RoleName already exist.");
+        }
+
+        this.repository.createRole(role);
+        return GenericResponse.success();
+    }
+
+    @RequestMapping(value = {"/api/role/{roleId}"}, method = {org.springframework.web.bind.annotation.RequestMethod.GET}, produces = {"application/json"})
+    @ResponseBody
+    public Object getRole(@PathVariable String roleId){
+        return this.repository.queryRoleByRoleId(roleId);
+    }
+
+    @RequestMapping(value = {"/api/role/{roleId}"}, method = {org.springframework.web.bind.annotation.RequestMethod.PATCH}, produces = {"application/json"})
+    @ResponseBody
+    public Object updateRole(@PathVariable String roleId,@RequestBody Role role) throws Exception{
+        Role oldRole = this.repository.queryRoleByRoleId(roleId);
+
+        if(!oldRole.getRoleName().equals(role.getRoleName()) && this.repository.countRoleByRoleName(role.getRoleName())!=0){
+            throw new EventProcessingException("RoleName already exist.");
+        }
+        role.setRoleId(roleId);
+        this.repository.updateRole(role);
+        return GenericResponse.success();
+    }
+
+    @RequestMapping(value = {"/api/role/{roleId}"}, method = {org.springframework.web.bind.annotation.RequestMethod.DELETE}, produces = {"application/json"})
+    @ResponseBody
+    public Object deleteRole(@PathVariable String roleId){
+        this.repository.deleteRoleByRoleId(roleId);
+        return GenericResponse.success();
+    }
+
+
+    @RequestMapping(value = {"/api/role/{roleId}/menus"}, method = {org.springframework.web.bind.annotation.RequestMethod.GET}, produces = {"application/json"})
+    @ResponseBody
+    public Object getRoleMenu(@PathVariable String roleId){
+        return this.repository.queryRoleMenuByRoleId(roleId);
+    }
+
+    @RequestMapping(value = {"/api/role/{roleId}/menus"}, method = {org.springframework.web.bind.annotation.RequestMethod.POST})
+    @ResponseBody
+    public Object getRoleMenu(@PathVariable String roleId,HttpServletRequest request,@RequestBody RoleRequest req){
+        this.repository.grantRoleMenu(roleId,req.getMenus());
+        return GenericResponse.success();
+    }
+
+    @RequestMapping(value = {"/api/menus"}, method = {org.springframework.web.bind.annotation.RequestMethod.GET})
+    @ResponseBody
+    public Object getMenus(){
+        return this.repository.queryAllMenu();
+    }
+
+    @RequestMapping(value = {"/api/auditLogs"}, method = {org.springframework.web.bind.annotation.RequestMethod.POST})
+    @ResponseBody
+    public Object getAuditLogs(@RequestBody AuditSearchRequest search) throws Exception {
+        return this.repository.queryAuditLog(search);
     }
 }

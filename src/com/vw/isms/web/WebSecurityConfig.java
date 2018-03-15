@@ -2,6 +2,8 @@ package com.vw.isms.web;
 
 import javax.sql.DataSource;
 
+import com.vw.isms.web.listener.SuccessLoginHandler;
+import com.vw.isms.web.listener.SuccessLogoutHandler;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.security.config.annotation.authentication.builders.AuthenticationManagerBuilder;
@@ -9,12 +11,6 @@ import org.springframework.security.config.annotation.authentication.configurers
 import org.springframework.security.config.annotation.web.builders.HttpSecurity;
 import org.springframework.security.config.annotation.web.configuration.EnableWebSecurity;
 import org.springframework.security.config.annotation.web.configuration.WebSecurityConfigurerAdapter;
-import org.springframework.security.config.annotation.web.configurers.CsrfConfigurer;
-import org.springframework.security.config.annotation.web.configurers.ExpressionUrlAuthorizationConfigurer;
-import org.springframework.security.config.annotation.web.configurers.ExpressionUrlAuthorizationConfigurer.AuthorizedUrl;
-import org.springframework.security.config.annotation.web.configurers.ExpressionUrlAuthorizationConfigurer.ExpressionInterceptUrlRegistry;
-import org.springframework.security.config.annotation.web.configurers.FormLoginConfigurer;
-import org.springframework.security.config.annotation.web.configurers.LogoutConfigurer;
 import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
 
 @Configuration
@@ -23,14 +19,18 @@ public class WebSecurityConfig
         extends WebSecurityConfigurerAdapter {
     @Autowired
     private DataSource dataSource;
+    @Autowired
+    private SuccessLogoutHandler logoutHandler;
+    @Autowired
+    private SuccessLoginHandler loginHandler;
 
     protected void configure(HttpSecurity http)
             throws Exception {
         http.csrf().disable();
 
-        http.formLogin().defaultSuccessUrl("/standards", false)
+        http.formLogin().defaultSuccessUrl("/standards", false).successHandler(loginHandler)
         .loginPage("/login").usernameParameter("username").passwordParameter("password").failureUrl("/login?error").permitAll()
-        .and().logout().logoutUrl("/logout").logoutSuccessUrl("/login?logout").permitAll()
+        .and().logout().addLogoutHandler(logoutHandler).logoutUrl("/logout").logoutSuccessUrl("/login?logout").permitAll()
 
         .and().authorizeRequests().antMatchers("/", "/dist/**", "/js/**", "/images/**").permitAll()
 

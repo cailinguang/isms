@@ -6,6 +6,7 @@ package com.vw.isms.standard.model;
 public class Dept {
     private String deptId;
     private String deptName;
+    private String deptDesc;
 
     public String getDeptId() {
         return deptId;
@@ -21,5 +22,13 @@ public class Dept {
 
     public void setDeptName(String deptName) {
         this.deptName = deptName;
+    }
+
+    public String getDeptDesc() {
+        return deptDesc;
+    }
+
+    public void setDeptDesc(String deptDesc) {
+        this.deptDesc = deptDesc;
     }
 }

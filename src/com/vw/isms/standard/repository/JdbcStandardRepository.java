@@ -15,14 +15,11 @@ import com.vw.isms.util.IdUtil;
 import java.sql.PreparedStatement;
 import java.sql.ResultSet;
 import java.sql.SQLException;
-import java.util.ArrayList;
-import java.util.Collection;
-import java.util.Collections;
-import java.util.HashMap;
-import java.util.List;
-import java.util.Map;
+import java.text.SimpleDateFormat;
+import java.util.*;
 
 import com.vw.isms.web.DeptRequest;
+import com.vw.isms.web.RoleRequest;
 import org.springframework.dao.DataAccessException;
 import org.springframework.jdbc.core.BatchPreparedStatementSetter;
 import org.springframework.jdbc.core.JdbcTemplate;
@@ -1911,6 +1908,7 @@ public class JdbcStandardRepository
                 Dept dept = new Dept();
                 dept.setDeptId(rs.getString("DEPT_ID"));
                 dept.setDeptName(rs.getString("DEPT_NAME"));
+                dept.setDeptDesc(rs.getString("DEPT_DESC"));
                 return dept;
             }
 
@@ -1926,14 +1924,15 @@ public class JdbcStandardRepository
         SimpleJdbcInsertion insertion = new SimpleJdbcInsertion();
         insertion.withSchema("APP").withTable("ISMS_DEPT")
                 .withColumnValue("DEPT_ID",dept.getDeptId())
-                .withColumnValue("DEPT_NAME",dept.getDeptName());
+                .withColumnValue("DEPT_NAME",dept.getDeptName())
+                .withColumnValue("DEPT_DESC",dept.getDeptDesc());
         insertion.insert(this.jdbcTemplate);
     }
 
     @Override
     public void updateDept(Dept dept){
-        String sql = "update APP.ISMS_DEPT set DEPT_NAME=? where DEPT_ID=?";
-        this.jdbcTemplate.update(sql,dept.getDeptName(), dept.getDeptId());
+        String sql = "update APP.ISMS_DEPT set DEPT_NAME=?,DEPT_DESC=? where DEPT_ID=?";
+        this.jdbcTemplate.update(sql,dept.getDeptName(),dept.getDeptDesc(), dept.getDeptId());
     }
 
     @Override
@@ -1944,6 +1943,7 @@ public class JdbcStandardRepository
                 Dept dept = new Dept();
                 dept.setDeptId(rs.getString("DEPT_ID"));
                 dept.setDeptName(rs.getString("DEPT_NAME"));
+                dept.setDeptDesc(rs.getString("DEPT_DESC"));
                 return dept;
             }
         },new Object[]{deptId});
@@ -2031,5 +2031,169 @@ public class JdbcStandardRepository
                 .withColumnValue("RELEASE_DATE", vulnerability.getReleaseDate())
                 .withColumnValue("SUGGESTION", vulnerability.getSuggestion());
         update.update(this.namedTemplate);
+    }
+
+
+    @Override
+    public PagingResult<Role> queryRoles(RoleRequest search) {
+        StringBuffer sql = new StringBuffer("select * from APP.ISMS_ROLE");
+        Map<String, Object> values = new HashMap();
+
+        if(!StringUtils.isEmpty(search.getRoleName())){
+            sql.append(" where ROLE_NAME like :roleName");
+            values.put("roleName","%"+search.getRoleName()+"%");
+        }
+
+        return this.namedTemplate.query(sql.toString(), values, new PagingResultSetExtractor<Role>(search.getPageNumber(), search.getItemPerPage()) {
+            @Override
+            public Role mapRow(ResultSet rs) throws SQLException {
+                Role role = new Role();
+                role.setRoleId(rs.getString("ROLE_ID"));
+                role.setRoleName(rs.getString("ROLE_NAME"));
+                return role;
+            }
+
+            @Override
+            public int count() {
+                return namedTemplate.queryForObject(sql.toString().replace("*","count(*)"),values,Integer.class);
+            }
+        });
+    }
+
+    @Override
+    public void createRole(Role role){
+        SimpleJdbcInsertion insertion = new SimpleJdbcInsertion();
+        insertion.withSchema("APP").withTable("ISMS_ROLE")
+                .withColumnValue("ROLE_ID",role.getRoleId())
+                .withColumnValue("ROLE_NAME",role.getRoleName());
+        insertion.insert(this.jdbcTemplate);
+    }
+
+    @Override
+    public void updateRole(Role role){
+        String sql = "update APP.ISMS_ROLE set ROLE_NAME=? where ROLE_ID=?";
+        this.jdbcTemplate.update(sql,role.getRoleName(), role.getRoleId());
+    }
+
+    @Override
+    public Role queryRoleByRoleId(String roleId){
+        List<Role> lists = this.jdbcTemplate.query("select * from APP.ISMS_ROLE where ROLE_ID=?", new RowMapper<Role>() {
+            @Override
+            public Role mapRow(ResultSet rs, int i) throws SQLException {
+                Role role = new Role();
+                role.setRoleId(rs.getString("ROLE_ID"));
+                role.setRoleName(rs.getString("ROLE_NAME"));
+                return role;
+            }
+        },new Object[]{roleId});
+        return lists.isEmpty()?null:lists.get(0);
+    }
+
+    @Override
+    public int countRoleByRoleName(String roleName){
+        return this.jdbcTemplate.queryForObject("select count(*) from APP.ISMS_ROLE where ROLE_NAME=?",new Object[]{roleName},Integer.class);
+    }
+
+    @Override
+    public void deleteRoleByRoleId(String roleId){
+        this.jdbcTemplate.update("delete from APP.ISMS_ROLE where ROLE_ID=?",roleId);
+    }
+
+    private RowMapper<Menu> getMenuMapper(){
+        return new RowMapper<Menu>() {
+            @Override
+            public Menu mapRow(ResultSet rs, int i) throws SQLException {
+                Menu menu = new Menu();
+                menu.setMenuId(rs.getLong("MENU_ID"));
+                menu.setMenuName(rs.getString("MENU_NAME"));
+                menu.setMenuUrl(rs.getString("MENU_URL"));
+                menu.setPosition(rs.getInt("POSITION"));
+                return menu;
+            }
+        };
+    }
+
+    @Override
+    public List<Menu> queryAllMenu() {
+        return this.jdbcTemplate.query("select * from app.ISMS_MENU order by POSITION",getMenuMapper());
+    }
+
+    @Override
+    public List<Menu> queryRoleMenuByRoleId(String roleId){
+        return this.jdbcTemplate.query("select * from app.ISMS_MENU m where " +
+                "exists(select 1 from app.ISMS_ROLE_MENU rm where rm.MENU_ID=m.MENU_ID and rm.ROLE_ID=?) order by POSITION",new Object[]{roleId},getMenuMapper());
+    }
+
+    @Override
+    public void grantRoleMenu(String roleId, Long... menuIds){
+        this.jdbcTemplate.update("delete from app.ISMS_ROLE_MENU where ROLE_ID=?",roleId);
+        if(menuIds!=null&&menuIds.length>0)
+        this.jdbcTemplate.batchUpdate("insert into app.ISMS_ROLE_MENU(ROLE_ID, MENU_ID) VALUES (?,?)", new BatchPreparedStatementSetter() {
+            @Override
+            public void setValues(PreparedStatement ps, int i) throws SQLException {
+                ps.setString(1,roleId);
+                ps.setLong(2,menuIds[i]);
+            }
+
+            @Override
+            public int getBatchSize() {
+                return menuIds.length;
+            }
+        });
+    }
+
+    @Override
+    public void createAuditLog(AuditLog auditLog){
+        SimpleJdbcInsertion insertion = new SimpleJdbcInsertion();
+        insertion.withSchema("APP").withTable("ISMS_AUDIT_LOG")
+                .withColumnValue("ID",auditLog.getId())
+                .withColumnValue("USERNAME",auditLog.getUserName())
+                .withColumnValue("OPERATION",auditLog.getOperation())
+                .withColumnValue("OPERATION_TIME",auditLog.getOperationDate());
+        insertion.insert(this.jdbcTemplate);
+    }
+
+    @Override
+    public PagingResult<AuditLog> queryAuditLog(AuditSearchRequest search) throws Exception{
+        StringBuffer sql = new StringBuffer("select * from APP.ISMS_AUDIT_LOG where 1=1 ");
+        String orderBy = " order by OPERATION_TIME desc";
+        Map<String, Object> values = new HashMap();
+
+        if(!StringUtils.isEmpty(search.getUserName())){
+            sql.append("and USERNAME=:userName");
+            values.put("userName","%"+search.getUserName()+"%");
+        }
+        if(!StringUtils.isEmpty(search.getStartDate())){
+            sql.append("and OPERATION_TIME >= :startDate");
+            Date startDate = new SimpleDateFormat("yyyy-mm-dd").parse(search.getStartDate());
+            values.put("startDate",startDate);
+        }
+        if(!StringUtils.isEmpty(search.getEndDate())){
+            sql.append("and OPERATION_TIME < :endDate");
+            Date endDate = new SimpleDateFormat("yyyy-mm-dd").parse(search.getEndDate());
+            Calendar endCalendar = Calendar.getInstance();
+            endCalendar.setTime(endDate);
+            endCalendar.add(Calendar.DAY_OF_YEAR,1);
+            values.put("endDate",endCalendar.getTime());
+        }
+
+        sql.append(orderBy);
+
+        return this.namedTemplate.query(sql.toString(), values, new PagingResultSetExtractor<AuditLog>(search.getPageNumber(), search.getItemPerPage()) {
+            @Override
+            public AuditLog mapRow(ResultSet rs) throws SQLException {
+                AuditLog auditLog = new AuditLog();
+                auditLog.setId(rs.getLong("ID"));
+                auditLog.setUserName(rs.getString("USERNAME"));
+                auditLog.setOperation(rs.getString("OPERATION"));
+                auditLog.setOperationDate(rs.getTimestamp("OPERATION_TIME"));
+                return auditLog;
+            }
+
+            @Override
+            public int count() {
+                return namedTemplate.queryForObject(sql.toString().replace("*","count(*)").replace(orderBy,""),values,Integer.class);
+            }
+        });
     }
 }

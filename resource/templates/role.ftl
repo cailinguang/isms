@@ -1,7 +1,7 @@
 <html>
 <head>
     <meta charset="utf-8">
-    <title>Department</title>
+    <title>Role</title>
 <#include "common_css.ftl">
 </head>
 <body>
@@ -20,24 +20,25 @@
     <div id="standard_search_results"></div>
 </div>
 
-<script id="depts" type="text/x-handlebars-template">
+<script id="roles" type="text/x-handlebars-template">
     <table class="table table-hover">
         <thead>
             <tr>
-                <th style="width:40%;min-width:150px;">DepartmentName</th>
-                <th style="width:40%;min-width:150px;">DepartmentDesc</th>
-                <th style="width:20%;min-width:200px;"></th>
+                <th style="width:40%;min-width:150px;">RoleID</th>
+                <th style="width:40%;min-width:150px;">RoleName</th>
+                <th style="width:20%;min-width:300px;"></th>
             </tr>
         </thead>
         <tbody>
             {{#each results}}
-            <tr deptId="{{deptId}}">
-                <td>{{deptName}}</td>
-                <td>{{deptDesc}}</td>
+            <tr roleId="{{roleId}}">
+                <td>{{roleId}}</td>
+                <td>{{roleName}}</td>
                 <#if !readonly>
                     <td style="padding-right:0px;width:200px;">
                         <button class="btn btn-default" evidence="{{this.id}}" action="update">Update</button>
                         <button class="btn btn-default" evidence="{{this.id}}" action="delete">Delete</button>
+                        <button class="btn btn-default" evidence="{{this.id}}" action="permissions">Permissions</button>
                     </td>
                 </#if>
             </tr>
@@ -58,31 +59,52 @@
 </script>
 <div style="display:none" id="update_dialog">
     <form>
-        <label for="update-deptId">DepartmentName:</label>
-        <input class="form-control" name="classTypeTxt" id="update-deptName">
+        <label for="update-roleId">RoleID:</label>
+        <input class="form-control" name="classTypeTxt" id="update-roleId">
 
-        <label for="update-deptName">DepartmentDesc</label>
-        <textarea id="update-deptDesc" class="form-control"></textarea>
+        <label for="update-roleName">RoleName</label>
+        <textarea id="update-roleName" class="form-control"></textarea>
     </form>
     <div align="right">
         <button class="btn btn-primary" id="update-btn">Update</button>
     </div>
 </div>
+
+<div title="Grant Role Menus" style="display:none" id="grant_dialog">
+    <div style="margin:10px;" id="menu-content"></div>
+    <div align="right">
+        <button class="btn btn-primary" id="grant-menu-btn">Save</button>
+    </div>
+</div>
+
 <#include "common_js.ftl">
+<script id="menu-template" type="text/x-handlebars-template">
+    <ul class="list-unstyled">
+        {{#each this}}
+        <li>
+            <input type="checkbox" id="menu-{{menuId}}" menuId="{{menuId}}"/>
+            <label for="menu-{{menuId}}">{{menuName}}</label>
+        </li>
+        {{/each}}
+    </ul>
+</script>
 <script type="text/javascript">
-    $("#nav_dept").addClass("active");
-    var search_results_template = Handlebars.compile($("#depts").html());
+    $("#nav_role").addClass("active");
+    var search_results_template = Handlebars.compile($("#roles").html());
+    var menu_template = Handlebars.compile($("#menu-template").html());
 
     var pageResult = $("#standard_search_results");
     var dialog = $("#update_dialog");
-    var updateDeptName = $("#update-deptName");
-    var updateDeptDesc = $("#update-deptDesc");
+    var updateRoleName = $("#update-roleName");
+    var updateRoleId = $("#update-roleId");
     var updateBtn = $("#update-btn");
+    var grantDialog = $("#grant_dialog");
+    var grantMenuBtn = $("#grant-menu-btn");
 
-    function setupUI(ui, depts) {
-        for (var i = 0; i < depts.length; ++i) {
-            var item = depts[i];
-            var row = ui.find("[deptId='" + item.deptId + "']");
+    function setupUI(ui, roles) {
+        for (var i = 0; i < roles.length; ++i) {
+            var item = roles[i];
+            var row = ui.find("[roleId='" + item.roleId + "']");
             var action = row.find("[action]");
             if (action.length) {
                 action.unbind();
@@ -92,36 +114,60 @@
                             var action = $(this).attr('action');
                             if(action=='delete'){
                                 IsmsRequester.requestJson(
-                                    "/api/dept/" + e.data.item.deptId,
+                                    "/api/role/" + e.data.item.roleId,
                                     "DELETE",
                                     { },
                                     function (response) {
-                                        ui.find("[deptId='" + e.data.item.deptId + "']").remove();
+                                        ui.find("[roleId='" + e.data.item.roleId + "']").remove();
                                         window._response.count--;
                                         $("#pageInfo").html(Handlebars.compile('{{page-info this}}')(window._response));
                                     });
                             }
 
                             if(action=='update'){
-                                updateDeptName.val(e.data.item.deptName).attr('readonly',true);
-                                updateDeptDesc.val(e.data.item.deptDesc);
-
+                                updateRoleName.val(e.data.item.roleName);
+                                updateRoleId.val(e.data.item.roleId).attr('readonly',true);
                                 updateBtn.html('Update').unbind();
                                 updateBtn.click(e.data,function(){
-                                    var deptName = updateDeptName.val();
-                                    var deptDesc = updateDeptDesc.val();
+                                    var roleName = updateRoleName.val();
                                     IsmsRequester.requestJson(
-                                            "/api/dept/" + e.data.item.deptId,
+                                            "/api/role/" + e.data.item.roleId,
                                             "PATCH",
-                                            { deptName: deptName,deptDesc: deptDesc},
+                                            { roleName: roleName },
                                             function (response) {
-                                                ui.find("[deptId='" + e.data.item.deptId + "'] td:eq(0)").html(deptName);
-                                                ui.find("[deptId='" + e.data.item.deptId + "'] td:eq(1)").html(deptDesc);
+                                                ui.find("[roleId='" + e.data.item.roleId + "'] td:eq(1)").html(roleName);
                                                 dialog.dialog('close');
                                             });
                                 });
-                                dialog.attr('title','Update Department');
-                                dialog.dialog({modal: true,title:'Update Department'});
+                                dialog.dialog({modal: true,title:'Update Role'});
+                            }
+
+                            if(action=='permissions'){
+                                grantDialog.dialog({modal: true});
+                                //load role menu
+                                grantMenuBtn.unbind();
+
+                                IsmsRequester.requestJson("/api/role/"+e.data.item.roleId+"/menus","GET",{},function (response) {
+                                    $("#menu-content input").iCheck('uncheck');
+                                    for(var index in response){
+                                        $("#menu-content input[menuId='"+response[index].menuId+"']").iCheck('check');
+                                    }
+
+                                    grantMenuBtn.click(e.data,function () {
+                                        var menus = [];
+                                        $("#menu-content input:checked").each(function () {
+                                            menus.push($(this).attr('menuId'))
+                                        });
+                                        IsmsRequester.requestJson("/api/role/"+e.data.item.roleId+"/menus",
+                                                "POST",
+                                                { menus: menus },
+                                                function (response) {
+                                                    grantDialog.dialog('close');
+                                                });
+                                    });
+                                })
+
+
                             }
 
                         });
@@ -131,10 +177,10 @@
     window._response = null;
     function updateSearchResults(namePattern, pageNumber) {
         IsmsRequester.requestJson(
-                "/api/depts",
+                "/api/roles",
                 "POST",
                 {
-                    deptName: namePattern,
+                    roleName: namePattern,
                     itemPerPage: 10,
                     pageNumber: pageNumber
                 },
@@ -167,24 +213,29 @@
     });
 
     $("#create_button").click(function () {
-        updateDeptName.val('').attr('readonly',false);
-        updateDeptDesc.val('');
+        updateRoleName.val('');
+        updateRoleId.val('').attr('readonly',false);
         updateBtn.html('Create').unbind();
         updateBtn.click(function(){
-            updateDeptName.find('+span').remove();
+            updateRoleName.find('+span').remove();
+            updateRoleId.find('+span').remove();
 
-            var deptName = updateDeptName.val();
-            var deptDesc = updateDeptDesc.val();
-            if(deptName.trim()==''){
-                updateDeptName.after('<span class="help-block">DepartmentName cant empty.</span>');
+            var roleName = updateRoleName.val();
+            var roleId = updateRoleId.val();
+            if(roleId.trim()==''){
+                updateRoleId.after('<span class="help-block">RoleID cant empty.</span>');
+                return;
+            }
+            if(roleName.trim()==''){
+                updateRoleName.after('<span class="help-block">RoleName cant empty.</span>');
                 return;
             }
             IsmsRequester.requestJson(
-                    "/api/dept",
+                    "/api/role",
                     "POST",
-                    { deptName: deptName,deptDesc:deptDesc },
+                    { roleName: roleName,roleId:roleId },
                     function (response) {
-                        var datas = [response];
+                        var datas = [{ roleName: roleName,roleId:roleId }];
                         $("#standard_search_results tbody").prepend($(search_results_template({results:datas})).find("tbody tr:first"));
                         setupUI(pageResult, datas);
                         dialog.dialog('close');
@@ -192,10 +243,17 @@
                         $("#pageInfo").html(Handlebars.compile('{{page-info this}}')(window._response));
                     });
         });
-        dialog.dialog({modal: true,title:'Create Department'});
+        dialog.dialog({modal: true,title:'Create Role'});
     });
 
     updateSearchResults('',0);
+    
+    //load allMenu
+    IsmsRequester.requestJson('/api/menus','GET',{},function (response) {
+        $("#menu-content").html(menu_template(response)).find('input').iCheck({
+            checkboxClass: 'icheckbox_flat-blue'
+        });
+    });
 </script>
 </body>
 </html>
