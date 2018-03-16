@@ -30,11 +30,16 @@ public class AdminController {
             throws RepositoryException {
         User user = new User();
         user.setUserName(req.getUserName());
+        user.setDepartment(req.getDepartment());
         if (req.isReadonly()) {
-            user.setRole("ROLE_READONLY_USER");
+            user.setRole("ReadOnly");
         } else {
-            user.setRole("ROLE_USER");
+            user.setRole("User");
         }
+        if(this.repository.getUser(req.getUserName())!=null){
+            throw new RepositoryException("userName is exists.");
+        }
+
         String rawPassword = this.repository.createUser(user);
         user.setPassword(rawPassword);
         return user;
@@ -50,12 +55,25 @@ public class AdminController {
         return user;
     }
 
+    @RequestMapping(value = {"/api/admin/users/{userName}/roles"}, method = {org.springframework.web.bind.annotation.RequestMethod.GET}, produces = {"application/json"})
+    @ResponseBody
+    public Object getUserRoles(@PathVariable String userName){
+        return this.repository.getUserRoles(userName);
+    }
+
+    @RequestMapping(value = {"/api/admin/users/{userName}/role"}, method = {org.springframework.web.bind.annotation.RequestMethod.POST}, produces = {"application/json"})
+    @ResponseBody
+    public Object assignUserRole(@PathVariable String userName, @RequestBody AdminUserRequest req){
+         this.repository.assignUserRole(userName,req.getRoles());
+        return GenericResponse.success();
+    }
+
     @RequestMapping(value = {"/api/admin/users/{userName}"}, method = {org.springframework.web.bind.annotation.RequestMethod.DELETE}, produces = {"application/json"})
     @ResponseBody
     public User deleteUser(@PathVariable String userName)
             throws RepositoryException {
         User user = this.repository.getUser(userName);
-        if (user.getRole().equals("ROLE_ADMIN")) {
+        if (user.getRole().equals("Admin")) {
             throw new RepositoryException("Cannot delete admin.");
         }
         this.repository.deleteUser(user);
@@ -71,7 +89,12 @@ public class AdminController {
         user.setEmail(req.getEmail());
         user.setTel(req.getTel());
         user.setDepartment(req.getDepartment());
+        if (req.isReadonly()) {
+            user.setRole("ReadOnly");
+        } else {
+            user.setRole("User");
+        }
         this.repository.updateUser(user);
-        return user;
+        return this.repository.getUser(userName);
     }
 }

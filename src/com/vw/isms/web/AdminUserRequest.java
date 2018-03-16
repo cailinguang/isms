@@ -8,6 +8,8 @@ public class AdminUserRequest {
     private String department;
     private String tel;
 
+    private String[] roles;
+
     public String getEmail() {
         return this.email;
     }
@@ -54,5 +56,13 @@ public class AdminUserRequest {
 
     public void setUserName(String userName) {
         this.userName = userName;
+    }
+
+    public String[] getRoles() {
+        return roles;
+    }
+
+    public void setRoles(String[] roles) {
+        this.roles = roles;
     }
 }

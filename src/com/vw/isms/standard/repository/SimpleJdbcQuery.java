@@ -25,7 +25,8 @@ public abstract class SimpleJdbcQuery<T>
   
   public T queryForObject(NamedParameterJdbcTemplate jdbcTemplate)
   {
-    return jdbcTemplate.queryForObject(getSql(), this.keys, this);
+    List<T> list = jdbcTemplate.query(getSql(), this.keys, this);
+    return list.size()>0?list.get(0):null;
   }
   
   private String getSql()

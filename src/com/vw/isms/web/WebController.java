@@ -23,6 +23,7 @@ import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.core.Authentication;
 import org.springframework.security.core.GrantedAuthority;
+import org.springframework.security.core.authority.SimpleGrantedAuthority;
 import org.springframework.security.core.userdetails.UserDetails;
 import org.springframework.stereotype.Controller;
 import org.springframework.ui.ModelMap;
@@ -41,17 +42,11 @@ public class WebController {
     private UserRepository userRepo;
 
     private void setReadonlyStatus(ModelMap map, Authentication auth, boolean requestReadonly) {
-        boolean readonly = true;
+        boolean readonly = false;
         if (!requestReadonly) {
-            for (GrantedAuthority a : auth.getAuthorities()) {
-                if (a.getAuthority().equals("ROLE_ADMIN")) {
-                    readonly = false;
-                    break;
-                }
-                if (a.getAuthority().equals("ROLE_USER")) {
-                    readonly = false;
-                    break;
-                }
+            if(auth.getAuthorities().contains(new SimpleGrantedAuthority("ROLE_ReadOnly"))
+                    && !auth.getAuthorities().contains(new SimpleGrantedAuthority("PER_Admin"))){
+                readonly = true;
             }
         }
         map.put("readonly", Boolean.valueOf(readonly));
@@ -170,6 +165,8 @@ public class WebController {
     @RequestMapping({"admin"})
     public String admin(ModelMap map, Authentication authentication) {
         setupAuth(map, authentication);
+        map.put("depts",this.repository.queryAllDept());
+        map.put("roles",this.repository.queryAllRoles());
         return "admin";
     }
 
@@ -191,7 +188,7 @@ public class WebController {
         }
         if ((!StringUtils.isEmpty(oldPassword)) && (!StringUtils.isEmpty(newPassword))) {
             UserDetails user = (UserDetails) authentication.getPrincipal();
-            if (!PasswordUtil.isCompliantPassword(newPassword)) {
+            if (!PasswordUtil.isCompliantPassword("admin".equals(user.getUsername())?PasswordUtil.adminUserLength:PasswordUtil.normalUserLength,user.getUsername(),newPassword)) {
                 return "redirect:reset_password?noncompliant=true";
             }
             if (!this.userRepo.updatePassword(user.getUsername(), oldPassword, newPassword)) {
@@ -369,5 +366,18 @@ public class WebController {
         setupAuth(map, authentication);
         setReadonlyStatus(map, authentication, false);
         return "audit_log";
+    }
+
+    /**
+     * 权限管理
+     * @param map
+     * @param authentication
+     * @return
+     */
+    @RequestMapping("permission")
+    public String getPermission(ModelMap map, Authentication authentication){
+        setupAuth(map, authentication);
+        setReadonlyStatus(map, authentication, false);
+        return "permission";
     }
 }

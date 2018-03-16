@@ -172,9 +172,13 @@ public abstract interface StandardRepository
 
     PagingResult<Dept> queryDepts(DeptRequest req);
 
+    List<Dept> queryAllDept();
+
     void createDept(Dept dept);
 
     PagingResult<Role> queryRoles(RoleRequest search);
+
+    List<Role> queryAllRoles();
 
     void createRole(Role role);
 
@@ -191,6 +195,8 @@ public abstract interface StandardRepository
     int countRoleByRoleName(String roleName);
 
     void deleteDeptByDeptId(String deptId);
+
+    int countUserByDeptId(String deptId);
 
     PagingResult<Vulnerability> queryVulnerabilities(VulnerabilitySearchRequest search);
 

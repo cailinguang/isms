@@ -9,6 +9,8 @@ public class User
   private String tel;
   private String email;
   private String department;
+
+  private String departmentName;
   
   public String getRealName()
   {
@@ -79,4 +81,12 @@ public class User
   {
     this.role = role;
   }
+
+    public String getDepartmentName() {
+        return departmentName;
+    }
+
+    public void setDepartmentName(String departmentName) {
+        this.departmentName = departmentName;
+    }
 }

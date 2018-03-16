@@ -1920,6 +1920,20 @@ public class JdbcStandardRepository
     }
 
     @Override
+    public List<Dept> queryAllDept(){
+        return this.jdbcTemplate.query("select * from APP.ISMS_DEPT", new RowMapper<Dept>() {
+            @Override
+            public Dept mapRow(ResultSet rs, int i) throws SQLException {
+                Dept dept = new Dept();
+                dept.setDeptId(rs.getString("DEPT_ID"));
+                dept.setDeptName(rs.getString("DEPT_NAME"));
+                dept.setDeptDesc(rs.getString("DEPT_DESC"));
+                return dept;
+            }
+        });
+    }
+
+    @Override
     public void createDept(Dept dept){
         SimpleJdbcInsertion insertion = new SimpleJdbcInsertion();
         insertion.withSchema("APP").withTable("ISMS_DEPT")
@@ -1958,6 +1972,11 @@ public class JdbcStandardRepository
     @Override
     public void deleteDeptByDeptId(String deptId){
         this.jdbcTemplate.update("delete from APP.ISMS_DEPT where DEPT_ID=?",deptId);
+    }
+
+    @Override
+    public int countUserByDeptId(String deptId){
+        return this.jdbcTemplate.queryForObject("select count(*) from APP.ISMS_USERS where DEPARTMENT=?",new Object[]{deptId},Integer.class);
     }
 
     @Override
@@ -2056,6 +2075,19 @@ public class JdbcStandardRepository
             @Override
             public int count() {
                 return namedTemplate.queryForObject(sql.toString().replace("*","count(*)"),values,Integer.class);
+            }
+        });
+    }
+
+    @Override
+    public List<Role> queryAllRoles(){
+        return this.jdbcTemplate.query("select * from APP.ISMS_ROLE", new RowMapper<Role>() {
+            @Override
+            public Role mapRow(ResultSet rs, int i) throws SQLException {
+                Role role = new Role();
+                role.setRoleId(rs.getString("ROLE_ID"));
+                role.setRoleName(rs.getString("ROLE_NAME"));
+                return role;
             }
         });
     }
@@ -2160,17 +2192,17 @@ public class JdbcStandardRepository
         Map<String, Object> values = new HashMap();
 
         if(!StringUtils.isEmpty(search.getUserName())){
-            sql.append("and USERNAME=:userName");
+            sql.append("and USERNAME like :userName ");
             values.put("userName","%"+search.getUserName()+"%");
         }
         if(!StringUtils.isEmpty(search.getStartDate())){
-            sql.append("and OPERATION_TIME >= :startDate");
-            Date startDate = new SimpleDateFormat("yyyy-mm-dd").parse(search.getStartDate());
+            sql.append("and OPERATION_TIME >= :startDate ");
+            Date startDate = new SimpleDateFormat("yyyy-MM-dd").parse(search.getStartDate());
             values.put("startDate",startDate);
         }
         if(!StringUtils.isEmpty(search.getEndDate())){
-            sql.append("and OPERATION_TIME < :endDate");
-            Date endDate = new SimpleDateFormat("yyyy-mm-dd").parse(search.getEndDate());
+            sql.append("and OPERATION_TIME < :endDate ");
+            Date endDate = new SimpleDateFormat("yyyy-MM-dd").parse(search.getEndDate());
             Calendar endCalendar = Calendar.getInstance();
             endCalendar.setTime(endDate);
             endCalendar.add(Calendar.DAY_OF_YEAR,1);

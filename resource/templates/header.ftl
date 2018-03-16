@@ -18,8 +18,9 @@
                 <li id="nav_audit_log"><a href="/audit_log">审计日志</a></li>
                 <li id="nav_dept"><a href="/dept">部门管理</a></li>
                 <li id="nav_role"><a href="/role">角色管理</a></li>
+                <li id="nav_permission"><a href="/permission">权限管理</a></li>
                 <#if auth??>
-                <#if auth.principal.authorities?seq_contains("ROLE_ADMIN")>
+                <#if auth.principal.authorities?seq_contains("PER_Admin")>
                     <li id="nav_admin"><a href="/admin">用户管理</a></li>
                 </#if>
                 </#if>

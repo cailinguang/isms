@@ -647,7 +647,10 @@ public class StandardController {
 
     @RequestMapping(value = {"/api/dept/{deptId}"}, method = {org.springframework.web.bind.annotation.RequestMethod.DELETE}, produces = {"application/json"})
     @ResponseBody
-    public Object deleteDept(@PathVariable String deptId){
+    public Object deleteDept(@PathVariable String deptId) throws Exception{
+        if(this.repository.countUserByDeptId(deptId)>0){
+            throw new EventProcessingException("Have user belongs to the Department.");
+        }
         this.repository.deleteDeptByDeptId(deptId);
         return GenericResponse.success();
     }
@@ -749,7 +752,7 @@ public class StandardController {
         return this.repository.queryAllMenu();
     }
 
-    @RequestMapping(value = {"/api/auditLogs"}, method = {org.springframework.web.bind.annotation.RequestMethod.POST})
+    @RequestMapping(value = {"/api/auditLogs"}, method = {org.springframework.web.bind.annotation.RequestMethod.POST}, produces = {"application/json"})
     @ResponseBody
     public Object getAuditLogs(@RequestBody AuditSearchRequest search) throws Exception {
         return this.repository.queryAuditLog(search);

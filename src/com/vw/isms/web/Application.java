@@ -111,7 +111,7 @@ public class Application {
             } catch (RepositoryException e) {
                 User admin = new User();
                 admin.setUserName("admin");
-                admin.setRole("ROLE_ADMIN");
+                admin.setRole("Admin");
                 admin.setPassword("admin");
                 repo.createUser(admin);
                 repo.changePassword(admin, "admin");
