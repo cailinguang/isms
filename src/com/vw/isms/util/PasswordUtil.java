@@ -1,6 +1,7 @@
 package com.vw.isms.util;
 
 import org.apache.commons.lang3.RandomStringUtils;
+import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
 
 public class PasswordUtil {
 
@@ -94,5 +95,7 @@ public class PasswordUtil {
     public static void main(String[] args) {
         String name = "test";
         System.out.println(randomCompliantPassword(adminUserLength,name));
+
+        System.out.println(new BCryptPasswordEncoder().encode("admin"));
     }
 }

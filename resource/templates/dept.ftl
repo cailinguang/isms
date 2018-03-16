@@ -103,7 +103,7 @@
                             }
 
                             if(action=='update'){
-                                updateDeptName.val(e.data.item.deptName).attr('readonly',true);
+                                updateDeptName.val(e.data.item.deptName);
                                 updateDeptDesc.val(e.data.item.deptDesc);
 
                                 updateBtn.html('Update').unbind();
