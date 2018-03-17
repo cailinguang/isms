@@ -63,7 +63,6 @@
 
 <#include "common_js.ftl">
 <script type="text/javascript">
-    $("#nav_audit_log").addClass("active");
     var search_results_template = Handlebars.compile($("#depts").html());
 
     $("#startDate,#endDate").datetimepicker({
@@ -113,6 +112,9 @@
         updateSearchResults(search, 0);
     });
 
+    $("#export_button").click(function () {
+        location.href= '/api/export_auditLogs?startDate='+$("#startDate").val()+'&endDate='+$("#endDate").val()+'&userName='+$("#userName").val();
+    });
 
     updateSearchResults({},0);
 </script>

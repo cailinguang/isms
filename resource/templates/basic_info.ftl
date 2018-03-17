@@ -16,8 +16,5 @@
 	</div>
 </div>
 <#include "common_js.ftl">
-<script type="text/javascript">
-    $("#nav_basic_info").addClass("active");
-</script>
 </body>
 </html>

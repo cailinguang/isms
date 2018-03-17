@@ -17,14 +17,17 @@ import com.vw.isms.util.IdUtil;
 
 import java.io.File;
 import java.io.IOException;
+import java.text.SimpleDateFormat;
 import java.util.Iterator;
 import java.util.List;
 import java.util.UUID;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 
+import com.vw.isms.util.MSExcelUtil;
 import org.apache.commons.io.FileUtils;
 import org.apache.commons.io.FilenameUtils;
+import org.apache.poi.hssf.usermodel.*;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.security.core.Authentication;
 import org.springframework.util.FileCopyUtils;
@@ -415,7 +418,7 @@ public class StandardController {
         ev.setUserName(authentication.getName());
         this.repository.createData(ev);
         this.repository.createDataMappingRelation(Long.parseLong(classId),ev.getId());
-        return ev;
+        return this.repository.getData(ev.getId());
     }
 
     /**
@@ -522,7 +525,7 @@ public class StandardController {
         ev.setUserName(authentication.getName());
         this.repository.createSecurity(ev);
         this.repository.createDataMappingRelation(Long.parseLong(classId),ev.getId());
-        return ev;
+        return this.repository.getSecurity(ev.getId());
     }
 
     /**
@@ -568,22 +571,51 @@ public class StandardController {
         return GenericResponse.success();
     }
 
+    @RequestMapping(value = {"/api/sites"}, method = {org.springframework.web.bind.annotation.RequestMethod.POST}, produces = {"application/json"})
+    @ResponseBody
+    public Object querySites(@RequestBody SiteSearchRequest search) throws RepositoryException, IOException {
+        return this.repository.querySites(search);
+    }
+
+    @RequestMapping(value = {"/api/site"}, method = {org.springframework.web.bind.annotation.RequestMethod.POST}, produces = {"application/json"})
+    @ResponseBody
+    public Object createSite(@RequestBody Site site) throws RepositoryException, IOException {
+        site.setSiteId(IdUtil.next());
+        this.repository.createSite(site);
+        return site;
+    }
+
+    @RequestMapping(value = {"/api/site"}, method = {RequestMethod.PATCH}, produces = {"application/json"})
+    @ResponseBody
+    public Object updateSite(@RequestBody Site site){
+        this.repository.updateSite(site);
+        return this.repository.querySiteById(site.getSiteId());
+    }
+
+    @RequestMapping(value = {"/api/site"}, method = {RequestMethod.DELETE}, produces = {"application/json"})
+    @ResponseBody
+    public Object deleteSite(@RequestBody Site site){
+        this.repository.deleteSite(site.getSiteId());
+        return GenericResponse.success();
+    }
+
+
     @RequestMapping(value = {"/api/properties/network-security/"}, method = {org.springframework.web.bind.annotation.RequestMethod.GET}, produces = {"application/json"})
     @ResponseBody
     public Object queryNetworkSecurityTarget() throws RepositoryException, IOException {
         return this.repository.queryNetworkSecurityTargets();
     }
 
-    @RequestMapping(value = {"/api/properties/network-security/{target}"}, method = {org.springframework.web.bind.annotation.RequestMethod.GET}, produces = {"application/json"})
+    @RequestMapping(value = {"/api/properties/network-security/{siteId}/{target}"}, method = {org.springframework.web.bind.annotation.RequestMethod.GET}, produces = {"application/json"})
     @ResponseBody
-    public Object queryTargetInfos(@PathVariable String target) throws RepositoryException, IOException {
-        return this.repository.queryNetworkSecurityByTarget(target);
+    public Object queryTargetInfos(@PathVariable Long siteId,@PathVariable String target) throws RepositoryException, IOException {
+        return this.repository.queryNetworkSecurityByTarget(siteId,target);
     }
 
-    @RequestMapping(value = {"/api/properties/network-security/{target}"}, method = {org.springframework.web.bind.annotation.RequestMethod.POST}, produces = {"application/json"})
+    @RequestMapping(value = {"/api/properties/network-security/{siteId}/{target}"}, method = {org.springframework.web.bind.annotation.RequestMethod.POST}, produces = {"application/json"})
     @ResponseBody
-    public GenericResponse updateTargetInfos(@PathVariable String target,@RequestBody NetworkSecurityRequest req) throws RepositoryException, IOException {
-        this.repository.updateNetworkSecuritys(req.getNetworkEvaluations());
+    public GenericResponse updateTargetInfos(@PathVariable Long siteId,@PathVariable String target,@RequestBody NetworkSecurityRequest req) throws RepositoryException, IOException {
+        this.repository.updateNetworkSecuritys(siteId,req.getNetworkEvaluations());
         return GenericResponse.success();
     }
 
@@ -756,5 +788,55 @@ public class StandardController {
     @ResponseBody
     public Object getAuditLogs(@RequestBody AuditSearchRequest search) throws Exception {
         return this.repository.queryAuditLog(search);
+    }
+
+    @RequestMapping(value = {"/api/export_auditLogs"})
+    public void exportAuditLogs(AuditSearchRequest search,HttpServletResponse response) throws Exception {
+        response.setHeader( "Content-Disposition", "attachment;filename=\""+ new String( "审计日志".getBytes( "gb2312" ), "ISO8859-1" )+ ".xls" + "\"" );
+
+        search.setPageNumber(0);
+        search.setItemPerPage(Integer.MAX_VALUE);
+        List<AuditLog> auditLogs = this.repository.queryAuditLog(search).getResults();
+
+        HSSFWorkbook wb = new HSSFWorkbook();
+        HSSFSheet sheet = wb.createSheet("table");  //创建table工作薄
+        HSSFRow row;
+        HSSFCell cell;
+
+        //style
+        HSSFCellStyle cellStyle = wb.createCellStyle();
+        HSSFFont font = wb.createFont();
+        font.setBold(true);
+        font.setFontHeightInPoints((short)14);
+        cellStyle.setFont(font);
+
+        sheet.setColumnWidth(0, MSExcelUtil.pixel2WidthUnits(160));
+
+        //title
+        row = sheet.createRow(0);
+        cell = row.createCell(0);
+        cell.setCellValue("时间");
+        cell.setCellStyle(cellStyle);
+        cell = row.createCell(1);
+        cell.setCellValue("用户");
+        cell.setCellStyle(cellStyle);
+        cell = row.createCell(2);
+        cell.setCellValue("状态");
+        cell.setCellStyle(cellStyle);
+
+        SimpleDateFormat simpleDateFormat = new SimpleDateFormat("yyyy-MM-dd HH:mm:ss");
+        for(int i = 0; i < auditLogs.size(); i++) {
+            row = sheet.createRow(i+1);//创建表格行
+
+            cell = row.createCell(0);
+            cell.setCellValue(simpleDateFormat.format(auditLogs.get(i).getOperationDate()));
+            cell = row.createCell(1);
+            cell.setCellValue(auditLogs.get(i).getUserName());
+            cell = row.createCell(2);
+            cell.setCellValue(auditLogs.get(i).getOperation());
+        }
+
+        wb.write(response.getOutputStream());
+        wb.close();
     }
 }

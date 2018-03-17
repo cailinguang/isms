@@ -53,6 +53,7 @@ public class UserDetailService implements UserDetailsService {
         }
 
         //GrantedAuthority是security提供的权限类，
+        //通过ROLE设置用户的类别
         List<GrantedAuthority> list = new ArrayList<GrantedAuthority>();
         if(user.getRole()!=null) {
             for (String role : user.getRole().split(",")) {
@@ -62,6 +63,16 @@ public class UserDetailService implements UserDetailsService {
         }
         if(username.equals("admin")){
             list.add(new SimpleGrantedAuthority("PER_Admin"));
+        }
+
+        //查询用户的menu_url
+        List<String> menuUrls = jdbcTemplate.queryForList("select m.MENU_URL from APP.ISMS_MENU m where exists" +
+                "(select 1 from APP.ISMS_USER_ROLE ur INNER JOIN APP.ISMS_ROLE_MENU rm on ur.ROLE_ID=rm.ROLE_ID " +
+                "where rm.MENU_ID=m.MENU_ID and ur.USERNAME=?)",new Object[]{username},String.class);
+        if(menuUrls!=null){
+            for(String menuUrl:menuUrls){
+                list.add(new SimpleGrantedAuthority("MENU_"+menuUrl));
+            }
         }
 
         User auth_user = new User(user.getUserName(),user.getPassword(),list);//返回包括权限角色的User给security

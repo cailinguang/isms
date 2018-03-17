@@ -72,7 +72,6 @@
 <#include "upload_evidence.ftl">
 <#include "common_js.ftl">
 <script type="text/javascript">
-    $("#nav_evidence_library").addClass("active");
     var search_results_template = Handlebars.compile($("#evidences").html());
 
     function setupDeleteAction(ui, result) {

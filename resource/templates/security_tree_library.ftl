@@ -22,7 +22,9 @@
                     <input id="search_string" type="text" class="form-control" placeholder="Search for...">
                     <span class="input-group-btn">
                         <button id="search_button" class="btn btn-default" type="button">查找</button>
+                        <#if !readonly>
                         <button id="upload_button" class="btn btn-default" type="button">上传</button>
+                        </#if>
                     </span>
                 </div>
             </div>
@@ -55,7 +57,9 @@
                 <th style="width:30%;">描述</th>
                 <th style="width:10%;">上传人</th>
                 <th style="width:10%;">部门</th>
+                <#if !readonly>
                 <th style="width:10%;"></th>
+                </#if>
             </tr>
         </thead>
         <tbody>
@@ -70,7 +74,7 @@
                     </#if>
                 </td>
                 <td>{{userName}}</td>
-                <td></td>
+                <td>{{deptName}}</td>
                 <#if !readonly>
                     <td style="padding-right:0px;">
                         <button class="btn btn-default" evidence="{{this.id}}" action="delete">删除</button>
@@ -96,14 +100,15 @@
 <#include "upload_security.ftl">
 <#include "common_js.ftl">
 <script type="text/javascript">
-    $("#nav_security_library_tree").addClass("active");
     var search_results_template = Handlebars.compile($("#evidences").html());
+    var readonly = ${readonly?string('true','false')};
 
     var DATA_TYPE = "SECURITY";
     //init tree
     var tree = new IsmsDataTree({
         viewId:'#evidence_tree',
         type:DATA_TYPE,
+        readonly:readonly,
         selectionCallback:function (node) {
             $("#search_string").val('');
             //set title

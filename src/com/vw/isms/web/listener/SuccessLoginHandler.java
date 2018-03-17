@@ -2,6 +2,7 @@ package com.vw.isms.web.listener;
 
 import com.vw.isms.standard.model.AuditLog;
 import com.vw.isms.standard.repository.StandardRepository;
+import com.vw.isms.standard.repository.UserRepository;
 import com.vw.isms.util.IdUtil;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.security.authentication.event.AuthenticationSuccessEvent;
@@ -24,6 +25,8 @@ import java.util.Date;
 public class SuccessLoginHandler extends SavedRequestAwareAuthenticationSuccessHandler {
     @Autowired
     private StandardRepository repository;
+    @Autowired
+    private UserRepository userRepository;
 
     @Override
     public void onAuthenticationSuccess(HttpServletRequest request, HttpServletResponse response, Authentication authentication) throws ServletException, IOException {
@@ -37,5 +40,8 @@ public class SuccessLoginHandler extends SavedRequestAwareAuthenticationSuccessH
         auditLog.setOperation("登录");
         auditLog.setOperationDate(new Date());
         repository.createAuditLog(auditLog);
+
+        //session put login
+        request.getSession().setAttribute("login",userRepository.queryUserLogin(user.getUsername()));
     }
 }

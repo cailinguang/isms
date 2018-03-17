@@ -1533,9 +1533,11 @@ public class JdbcStandardRepository
         {
             Map<String, Object> values = new HashMap();
             StringBuilder builder = new StringBuilder();
-            builder.append("SELECT e.*,c.CLASS_NAME,c.CLASS_ID FROM APP.ISMS_DATA e " +
+            builder.append("SELECT e.*,c.CLASS_NAME,c.CLASS_ID,d.DEPT_NAME FROM APP.ISMS_DATA e " +
                     "left join APP.ISMS_DATA_CLASS_FILE cf on e.evidence_id=cf.file_id " +
-                    "left join APP.ISMS_DATA_CLASS c on cf.class_id=c.class_id where 1=1 ");
+                    "left join APP.ISMS_DATA_CLASS c on cf.class_id=c.class_id " +
+                    "left join APP.ISMS_USERS u on e.USERNAME=u.USERNAME " +
+                    "left join APP.ISMS_DEPT d on u.DEPARTMENT=d.DEPT_ID where 1=1 ");
             if (!StringUtils.isEmpty(search.getNamePattern()))
             {
                 values.put("namePattern", "%" + search.getNamePattern().toLowerCase() + "%");
@@ -1562,12 +1564,13 @@ public class JdbcStandardRepository
                     ev.setUserName(rs.getString("USERNAME"));
                     ev.setClassId(rs.getLong("CLASS_ID"));
                     ev.setClassName(rs.getString("CLASS_NAME"));
+                    ev.setDeptName(rs.getString("DEPT_NAME"));
                     return ev;
                 }
 
                 @Override
                 public int count() {
-                    return namedTemplate.queryForObject(builder.toString().replace("e.*,c.CLASS_NAME,c.CLASS_ID","count(*)"),values,Integer.class);
+                    return namedTemplate.queryForObject(builder.toString().replace("e.*,c.CLASS_NAME,c.CLASS_ID,d.DEPT_NAME","count(*)"),values,Integer.class);
                 }
             });
         }
@@ -1605,31 +1608,28 @@ public class JdbcStandardRepository
     public Data getData(long evidenceId)
             throws RepositoryException
     {
-        SimpleJdbcQuery<Data> query = new SimpleJdbcQuery()
-        {
-            public Data mapRow(ResultSet rs, int rowNum)
-                    throws SQLException
-            {
+        List<Data> lists = this.jdbcTemplate.query("SELECT e.*,c.CLASS_NAME,c.CLASS_ID,d.DEPT_NAME FROM APP.ISMS_DATA e " +
+                "left join APP.ISMS_DATA_CLASS_FILE cf on e.evidence_id=cf.file_id " +
+                "left join APP.ISMS_DATA_CLASS c on cf.class_id=c.class_id " +
+                "left join APP.ISMS_USERS u on e.USERNAME=u.USERNAME " +
+                "left join APP.ISMS_DEPT d on u.DEPARTMENT=d.DEPT_ID where EVIDENCE_ID=? ", new Object[]{evidenceId}, new RowMapper<Data>() {
+            @Override
+            public Data mapRow(ResultSet rs, int i) throws SQLException {
                 Data ev = new Data();
                 ev.setId(rs.getLong("EVIDENCE_ID"));
-                ev.setContentType(rs.getString("CONTENT_TYPE"));
-                ev.setDescription(rs.getString("DESCRIPTION"));
                 ev.setName(rs.getString("NAME"));
+                ev.setDescription(rs.getString("DESCRIPTION"));
                 ev.setPath(rs.getString("PATH"));
+                ev.setContentType(rs.getString("CONTENT_TYPE"));
                 ev.setUserName(rs.getString("USERNAME"));
+                ev.setClassId(rs.getLong("CLASS_ID"));
+                ev.setClassName(rs.getString("CLASS_NAME"));
+                ev.setDeptName(rs.getString("DEPT_NAME"));
                 return ev;
             }
-        };
-        try
-        {
-            query.withSchema("APP").withTable("ISMS_DATA").withKey("EVIDENCE_ID", Long.valueOf(evidenceId)).withColumn("*");
-            return (Data)query.queryForObject(this.namedTemplate);
-        }
-        catch (Throwable t)
-        {
-            t.printStackTrace();
-            throw new RepositoryException(t.getMessage());
-        }
+        });
+
+        return lists.size()>0?lists.get(0):null;
     }
 
     @Override
@@ -1685,9 +1685,11 @@ public class JdbcStandardRepository
         {
             Map<String, Object> values = new HashMap();
             StringBuilder builder = new StringBuilder();
-            builder.append("SELECT e.*,c.CLASS_NAME,c.CLASS_ID FROM APP.ISMS_SECURITY e " +
+            builder.append("SELECT e.*,c.CLASS_NAME,c.CLASS_ID,d.DEPT_NAME FROM APP.ISMS_SECURITY e " +
                     "left join APP.ISMS_DATA_CLASS_FILE cf on e.evidence_id=cf.file_id " +
-                    "left join APP.ISMS_DATA_CLASS c on cf.class_id=c.class_id where 1=1 ");
+                    "left join APP.ISMS_DATA_CLASS c on cf.class_id=c.class_id " +
+                    "left join APP.ISMS_USERS u on e.USERNAME=u.USERNAME " +
+                    "left join APP.ISMS_DEPT d on u.DEPARTMENT=d.DEPT_ID where 1=1 ");
             if (!StringUtils.isEmpty(search.getNamePattern()))
             {
                 values.put("namePattern", "%" + search.getNamePattern().toLowerCase() + "%");
@@ -1714,12 +1716,13 @@ public class JdbcStandardRepository
                     ev.setUserName(rs.getString("USERNAME"));
                     ev.setClassId(rs.getLong("CLASS_ID"));
                     ev.setClassName(rs.getString("CLASS_NAME"));
+                    ev.setDeptName(rs.getString("DEPT_NAME"));
                     return ev;
                 }
 
                 @Override
                 public int count() {
-                    return namedTemplate.queryForObject(builder.toString().replace("e.*,c.CLASS_NAME,c.CLASS_ID","count(*)"),values,Integer.class);
+                    return namedTemplate.queryForObject(builder.toString().replace("e.*,c.CLASS_NAME,c.CLASS_ID,d.DEPT_NAME","count(*)"),values,Integer.class);
                 }
             });
         }
@@ -1757,31 +1760,28 @@ public class JdbcStandardRepository
     public Data getSecurity(long evidenceId)
             throws RepositoryException
     {
-        SimpleJdbcQuery<Data> query = new SimpleJdbcQuery()
-        {
-            public Data mapRow(ResultSet rs, int rowNum)
-                    throws SQLException
-            {
+        List<Data> lists = this.jdbcTemplate.query("SELECT e.*,c.CLASS_NAME,c.CLASS_ID,d.DEPT_NAME FROM APP.ISMS_SECURITY e " +
+                "left join APP.ISMS_DATA_CLASS_FILE cf on e.evidence_id=cf.file_id " +
+                "left join APP.ISMS_DATA_CLASS c on cf.class_id=c.class_id " +
+                "left join APP.ISMS_USERS u on e.USERNAME=u.USERNAME " +
+                "left join APP.ISMS_DEPT d on u.DEPARTMENT=d.DEPT_ID where EVIDENCE_ID=? ", new Object[]{evidenceId}, new RowMapper<Data>() {
+            @Override
+            public Data mapRow(ResultSet rs, int i) throws SQLException {
                 Data ev = new Data();
                 ev.setId(rs.getLong("EVIDENCE_ID"));
-                ev.setContentType(rs.getString("CONTENT_TYPE"));
-                ev.setDescription(rs.getString("DESCRIPTION"));
                 ev.setName(rs.getString("NAME"));
+                ev.setDescription(rs.getString("DESCRIPTION"));
                 ev.setPath(rs.getString("PATH"));
+                ev.setContentType(rs.getString("CONTENT_TYPE"));
                 ev.setUserName(rs.getString("USERNAME"));
+                ev.setClassId(rs.getLong("CLASS_ID"));
+                ev.setClassName(rs.getString("CLASS_NAME"));
+                ev.setDeptName(rs.getString("DEPT_NAME"));
                 return ev;
             }
-        };
-        try
-        {
-            query.withSchema("APP").withTable("ISMS_SECURITY").withKey("EVIDENCE_ID", Long.valueOf(evidenceId)).withColumn("*");
-            return (Data)query.queryForObject(this.namedTemplate);
-        }
-        catch (Throwable t)
-        {
-            t.printStackTrace();
-            throw new RepositoryException(t.getMessage());
-        }
+        });
+
+        return lists.size()>0?lists.get(0):null;
     }
 
     @Override
@@ -1833,8 +1833,103 @@ public class JdbcStandardRepository
     }
 
     @Override
-    public List<NetworkEvaluation> queryNetworkSecurityByTarget(String target){
-        SimpleJdbcQuery<NetworkEvaluation> query = new SimpleJdbcQuery<NetworkEvaluation>() {
+    public PagingResult<Site> querySites(SiteSearchRequest search){
+        StringBuffer sql = new StringBuffer("select s.*,d.DEPT_NAME from APP.ISMS_SITE s left join APP.ISMS_DEPT d on s.SITE_DEPT=DEPT_ID ");
+        Map<String, Object> values = new HashMap();
+
+        if(!StringUtils.isEmpty(search.getSiteName())){
+            sql.append(" where SITE_NAME like :siteName");
+            values.put("siteName","%"+search.getSiteName()+"%");
+        }
+
+        return this.namedTemplate.query(sql.toString(), values, new PagingResultSetExtractor<Site>(search.getPageNumber(), search.getItemPerPage()) {
+            @Override
+            public Site mapRow(ResultSet rs) throws SQLException {
+                Site site = new Site();
+                site.setSiteId(rs.getLong("SITE_ID"));
+                site.setSiteName(rs.getString("SITE_NAME"));
+                site.setSitePath(rs.getString("SITE_PATH"));
+                site.setSiteUrl(rs.getString("SITE_URL"));
+                site.setSiteGrade(rs.getString("SITE_GRADE"));
+                site.setSiteDept(rs.getString("SITE_DEPT"));
+                site.setSiteDeptName(rs.getString("DEPT_NAME"));
+                site.setSiteContacts(rs.getString("SITE_CONTACTS"));
+                return site;
+            }
+
+            @Override
+            public int count() {
+                return namedTemplate.queryForObject(sql.toString().replace("s.*,d.DEPT_NAME","count(*)"),values,Integer.class);
+            }
+        });
+    }
+
+    @Override
+    public Site querySiteById(Long siteId){
+        List<Site> sites = this.jdbcTemplate.query("select s.*,d.DEPT_NAME from APP.ISMS_SITE s left join APP.ISMS_DEPT d on s.SITE_DEPT=DEPT_ID where SITE_ID=?", new Object[]{siteId}, new RowMapper<Site>() {
+            @Override
+            public Site mapRow(ResultSet rs, int i) throws SQLException {
+                Site site = new Site();
+                site.setSiteId(rs.getLong("SITE_ID"));
+                site.setSiteName(rs.getString("SITE_NAME"));
+                site.setSitePath(rs.getString("SITE_PATH"));
+                site.setSiteUrl(rs.getString("SITE_URL"));
+                site.setSiteGrade(rs.getString("SITE_GRADE"));
+                site.setSiteDept(rs.getString("SITE_DEPT"));
+                site.setSiteDeptName(rs.getString("DEPT_NAME"));
+                site.setSiteContacts(rs.getString("SITE_CONTACTS"));
+                return site;
+            }
+        });
+        return sites.size()>0?sites.get(0):null;
+    }
+
+    @Override
+    public void createSite(Site site){
+        SimpleJdbcInsertion insertion = new SimpleJdbcInsertion();
+        insertion.withSchema("APP").withTable("ISMS_SITE")
+                .withColumnValue("SITE_ID",site.getSiteId())
+                .withColumnValue("SITE_NAME",site.getSiteName())
+                .withColumnValue("SITE_PATH",site.getSitePath())
+                .withColumnValue("SITE_URL",site.getSiteUrl())
+                .withColumnValue("SITE_GRADE",site.getSiteGrade())
+                .withColumnValue("SITE_DEPT",site.getSiteDept())
+                .withColumnValue("SITE_CONTACTS",site.getSiteContacts());
+        insertion.insert(this.jdbcTemplate);
+
+        //insert ISMS_SITE_NV
+        this.jdbcTemplate.update("insert into APP.ISMS_SITE_NV(EVALUATION_ID, SITE_ID, RESULT, CONFORMITY, REMARK) SELECT EVALUATION_ID,?,RESULT,CONFORMITY,REMARK from APP.ISMS_NETWORK_EVALUATION",site.getSiteId());
+    }
+
+    @Override
+    public void updateSite(Site site){
+        SimpleJdbcUpdate update = new SimpleJdbcUpdate();
+        update.withSchema("APP").withTable("ISMS_SITE").withKey("SITE_ID",site.getSiteId())
+                .withColumnValue("SITE_NAME",site.getSiteName())
+                .withColumnValue("SITE_PATH",site.getSitePath())
+                .withColumnValue("SITE_URL",site.getSiteUrl())
+                .withColumnValue("SITE_GRADE",site.getSiteGrade())
+                .withColumnValue("SITE_DEPT",site.getSiteDept())
+                .withColumnValue("SITE_CONTACTS",site.getSiteContacts());
+        update.update(this.namedTemplate);
+    }
+
+    @Override
+    public void deleteSite(Long siteId){
+        this.jdbcTemplate.update("delete from APP.ISMS_SITE WHERE SITE_ID=?",siteId);
+        this.jdbcTemplate.update("delete from APP.ISMS_SITE_NV where SITE_ID=?",siteId);
+    }
+
+
+
+    @Override
+    public List<NetworkEvaluation> queryNetworkSecurityByTarget(Long siteId,String target){
+
+        return this.jdbcTemplate.query("select e.EVALUATION_ID,e.EVALUATION_TARGET,e.EVALUATION_INDEX,e.CONTROL_ITEM," +
+                "nv.REMARK,nv.CONFORMITY,nv.RESULT FROM APP.ISMS_SITE_NV nv " +
+                "LEFT JOIN APP.ISMS_NETWORK_EVALUATION e on nv.EVALUATION_ID=e.EVALUATION_ID " +
+                "where nv.SITE_ID=? AND e.EVALUATION_TARGET=?",
+                new Object[]{siteId, target}, new RowMapper<NetworkEvaluation>() {
             @Override
             public NetworkEvaluation mapRow(ResultSet resultSet, int i) throws SQLException {
                 NetworkEvaluation networkEvaluation = new NetworkEvaluation();
@@ -1845,22 +1940,19 @@ public class JdbcStandardRepository
                 networkEvaluation.setResult(resultSet.getString("RESULT"));
                 networkEvaluation.setConformity(resultSet.getString("CONFORMITY"));
                 networkEvaluation.setRemark(resultSet.getString("REMARK"));
-                networkEvaluation.setOrder(resultSet.getInt("ORDER"));
+                //networkEvaluation.setOrder(resultSet.getInt("ORDER"));
                 return networkEvaluation;
             }
-        };
-        query.withSchema("APP").withTable("ISMS_NETWORK_EVALUATION").withKey("EVALUATION_TARGET",target);
-
-        return query.query(this.namedTemplate);
+        });
     }
 
     @Override
-    public void updateNetworkSecuritys(List<NetworkEvaluation> networkEvaluations){
-        String sql = "update APP.ISMS_NETWORK_EVALUATION set RESULT=?,CONFORMITY=?,REMARK=? where EVALUATION_ID=?";
+    public void updateNetworkSecuritys(Long siteId,List<NetworkEvaluation> networkEvaluations){
+
+        String sql = "update APP.ISMS_SITE_NV set RESULT=?,CONFORMITY=?,REMARK=? where EVALUATION_ID=? AND SITE_ID=?";
         this.jdbcTemplate.batchUpdate(sql, new BatchPreparedStatementSetter() {
             public int getBatchSize() {
                 return networkEvaluations.size();
-                //这个方法设定更新记录数，通常List里面存放的都是我们要更新的，所以返回list.size();
             }
             public void setValues(PreparedStatement ps, int i)throws SQLException {
                 NetworkEvaluation net = networkEvaluations.get(i);
@@ -1868,8 +1960,10 @@ public class JdbcStandardRepository
                 ps.setString(2, net.getConformity());
                 ps.setString(3, net.getRemark());
                 ps.setLong(4, net.getEvaluationId());
+                ps.setLong(5,siteId);
             }
         });
+
     }
 
     @Override
@@ -2225,6 +2319,22 @@ public class JdbcStandardRepository
             @Override
             public int count() {
                 return namedTemplate.queryForObject(sql.toString().replace("*","count(*)").replace(orderBy,""),values,Integer.class);
+            }
+        });
+    }
+
+    @Override
+    public List<Menu> queryUserMenu(String username){
+        return this.jdbcTemplate.query("select * from APP.ISMS_MENU m where EXISTS " +
+                "(select 1 from APP.ISMS_USER_ROLE uo INNER JOIN APP.ISMS_ROLE_MENU rm on uo.ROLE_ID=rm.ROLE_ID where rm.MENU_ID=m.MENU_ID AND uo.USERNAME=?)", new Object[]{username}, new RowMapper<Menu>() {
+            @Override
+            public Menu mapRow(ResultSet rs, int i) throws SQLException {
+                Menu menu = new Menu();
+                menu.setMenuId(rs.getLong("MENU_ID"));
+                menu.setMenuName(rs.getString("MENU_NAME"));
+                menu.setMenuUrl(rs.getString("MENU_URL"));
+                menu.setPosition(rs.getInt("POSITION"));
+                return menu;
             }
         });
     }

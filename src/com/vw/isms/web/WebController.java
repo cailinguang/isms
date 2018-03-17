@@ -2,29 +2,31 @@ package com.vw.isms.web;
 
 import com.vw.isms.ModelException;
 import com.vw.isms.RepositoryException;
-import com.vw.isms.standard.model.Data;
-import com.vw.isms.standard.model.Evaluation;
-import com.vw.isms.standard.model.Evidence;
-import com.vw.isms.standard.model.Standard;
-import com.vw.isms.standard.model.StandardType;
+import com.vw.isms.standard.model.*;
 import com.vw.isms.standard.repository.StandardRepository;
 import com.vw.isms.standard.repository.UserRepository;
 import com.vw.isms.util.PasswordUtil;
 
 import java.io.File;
 import java.io.IOException;
+import java.util.Date;
 import javax.servlet.http.HttpServletRequest;
 
 import org.apache.commons.io.FileUtils;
+import org.apache.commons.lang3.ArrayUtils;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.core.io.FileSystemResource;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
+import org.springframework.security.authentication.BadCredentialsException;
+import org.springframework.security.authentication.LockedException;
 import org.springframework.security.core.Authentication;
 import org.springframework.security.core.GrantedAuthority;
 import org.springframework.security.core.authority.SimpleGrantedAuthority;
 import org.springframework.security.core.userdetails.UserDetails;
+import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
+import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Controller;
 import org.springframework.ui.ModelMap;
 import org.springframework.util.StringUtils;
@@ -40,6 +42,7 @@ public class WebController {
     private String basicInfoPath;
     @Autowired
     private UserRepository userRepo;
+    private PasswordEncoder passwordEncoder = new BCryptPasswordEncoder();
 
     private void setReadonlyStatus(ModelMap map, Authentication auth, boolean requestReadonly) {
         boolean readonly = false;
@@ -54,6 +57,8 @@ public class WebController {
 
     private void setupAuth(ModelMap map, Authentication authentication) {
         map.put("auth", authentication);
+        if(authentication!=null)
+        map.put("menus",this.repository.queryUserMenu(authentication.getName()));
     }
 
     @RequestMapping({"basic_info"})
@@ -156,15 +161,31 @@ public class WebController {
         setupAuth(map, authentication);
         if (request.getParameter("error") != null) {
             map.put("loginMessage", "Invalid user name or password.");
+            map.put("error", getErrorMessage(request, "SPRING_SECURITY_LAST_EXCEPTION"));
         } else {
             map.put("loginMessage", "");
         }
         return "login";
     }
 
+    private String getErrorMessage(HttpServletRequest request, String key) {
+        Exception exception = (Exception) request.getSession().getAttribute(key);
+
+        String error = "";
+        if (exception instanceof BadCredentialsException) {
+            error = "Invalid username and password!";
+        } else if (exception instanceof LockedException) {
+            error = exception.getMessage();
+        } else {
+            error = "Invalid username and password!";
+        }
+        return error;
+    }
+
     @RequestMapping({"admin"})
     public String admin(ModelMap map, Authentication authentication) {
         setupAuth(map, authentication);
+        setReadonlyStatus(map, authentication, false);
         map.put("depts",this.repository.queryAllDept());
         map.put("roles",this.repository.queryAllRoles());
         return "admin";
@@ -179,20 +200,49 @@ public class WebController {
             return "reset_password";
         }
         if (!StringUtils.isEmpty(noncompliant)) {
-            map.put("error", "New password is not compliant to the security standard.");
+            map.put("error", "New password is not compliant to the security standard.<br/>" +
+                    "1.密码至少同时包含下列四种字符：<br/>" +
+                    "&nbsp;&nbsp;a）大写字母<br/>" +
+                    "&nbsp;&nbsp;b）小写字母<br/>" +
+                    "&nbsp;&nbsp;c）数字<br/>" +
+                    "&nbsp;&nbsp;d）非字母数字字符（如！、@、#等）<br/>" +
+                    "2.密码中不得包含登录用户名<br/>" +
+                    "3.普通用户密码长度至少10位,管理员至少16位 ");
             return "reset_password";
         }
         if (!StringUtils.isEmpty(success)) {
-            map.put("error", "New password has been set.");
+            map.put("error", "New password has been set. Please login again.");
             return "reset_password";
         }
+
         if ((!StringUtils.isEmpty(oldPassword)) && (!StringUtils.isEmpty(newPassword))) {
             UserDetails user = (UserDetails) authentication.getPrincipal();
             if (!PasswordUtil.isCompliantPassword("admin".equals(user.getUsername())?PasswordUtil.adminUserLength:PasswordUtil.normalUserLength,user.getUsername(),newPassword)) {
                 return "redirect:reset_password?noncompliant=true";
             }
+
             if (!this.userRepo.updatePassword(user.getUsername(), oldPassword, newPassword)) {
                 return "redirect:reset_password?mismatch=true";
+            }
+
+            Login login = this.userRepo.queryUserLogin(user.getUsername());
+            if(login!=null){
+                String lastSixPass = login.getLastSixPassword();
+                String[] sixPass = lastSixPass!=null?lastSixPass.split(","):new String[0];
+
+                if(ArrayUtils.contains(sixPass,passwordEncoder.encode(newPassword))){
+                    map.put("error", "New password must be different from the previous 6 passwords ");
+                    return "reset_password";
+                }
+
+                sixPass = ArrayUtils.add(sixPass,passwordEncoder.encode(newPassword));
+                if(sixPass.length>6){
+                    sixPass = ArrayUtils.subarray(sixPass,sixPass.length-6,sixPass.length);
+                }
+                login.setLastSixPassword(org.apache.commons.lang3.StringUtils.join(sixPass,','));
+                login.setLastChangePassTime(new Date());
+                this.userRepo.updateUserLogin(login);
+
             }
             return "redirect:reset_password?success=true";
         }
@@ -274,7 +324,6 @@ public class WebController {
         return ResponseEntity.status(HttpStatus.OK).contentType(mediaType).body(res);
     }
 
-
     /**
      * 网络安全法
      * @param map
@@ -289,18 +338,19 @@ public class WebController {
     }
 
     /**
-     * view网络安全法
+     * 网站管理
      * @param map
      * @param authentication
      * @return
      */
-    @RequestMapping({"view_security"})
-    public String getViewSecurity(ModelMap map, Authentication authentication,@RequestParam String target) {
+    @RequestMapping({"site"})
+    public String getSite(ModelMap map, Authentication authentication) {
         setupAuth(map, authentication);
         setReadonlyStatus(map, authentication, false);
-        map.put("target",target);
-        return "view_security";
+        map.put("depts",this.repository.queryAllDept());
+        return "site";
     }
+
 
     /**
      * 部门管理
@@ -380,4 +430,6 @@ public class WebController {
         setReadonlyStatus(map, authentication, false);
         return "permission";
     }
+
+
 }

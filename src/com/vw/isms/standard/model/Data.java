@@ -17,6 +17,8 @@ public class Data
   private long classId;
   private String className;
 
+  private String deptName;
+
   public String getContentType()
   {
     return this.contentType;
@@ -91,4 +93,12 @@ public class Data
     public void setClassName(String className) {
         this.className = className;
     }
+
+  public String getDeptName() {
+    return deptName;
+  }
+
+  public void setDeptName(String deptName) {
+    this.deptName = deptName;
+  }
 }

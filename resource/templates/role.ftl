@@ -12,7 +12,9 @@
             <input id="search_string" type="text" class="form-control" placeholder="Search for Name">
             <span class="input-group-btn">
                 <button id="search_button" class="btn btn-default" type="button">Search</button>
+                <#if !readonly>
                 <button id="create_button" class="btn btn-default" type="button">Create</button>
+                </#if>
             </span>
         </div>
     </div>
@@ -26,7 +28,9 @@
             <tr>
                 <th style="width:40%;min-width:150px;">RoleID</th>
                 <th style="width:40%;min-width:150px;">RoleName</th>
+                <#if !readonly>
                 <th style="width:20%;min-width:300px;"></th>
+                </#if>
             </tr>
         </thead>
         <tbody>
@@ -89,7 +93,6 @@
     </ul>
 </script>
 <script type="text/javascript">
-    $("#nav_role").addClass("active");
     var search_results_template = Handlebars.compile($("#roles").html());
     var menu_template = Handlebars.compile($("#menu-template").html());
 

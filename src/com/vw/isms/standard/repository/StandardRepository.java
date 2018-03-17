@@ -164,9 +164,19 @@ public abstract interface StandardRepository
 
     List<String> queryNetworkSecurityTargets();
 
-    List<NetworkEvaluation> queryNetworkSecurityByTarget(String target);
+    PagingResult<Site> querySites(SiteSearchRequest search);
 
-    void updateNetworkSecuritys(List<NetworkEvaluation> networkEvaluations);
+  Site querySiteById(Long siteId);
+
+  void createSite(Site site);
+
+  void updateSite(Site site);
+
+  void deleteSite(Long siteId);
+
+  List<NetworkEvaluation> queryNetworkSecurityByTarget(Long siteId,String target);
+
+    void updateNetworkSecuritys(Long siteId,List<NetworkEvaluation> networkEvaluations);
 
     void importNetworkSecuritys(List<NetworkEvaluation> networkEvaluations);
 
@@ -219,4 +229,6 @@ public abstract interface StandardRepository
     void createAuditLog(AuditLog auditLog);
 
     PagingResult<AuditLog> queryAuditLog(AuditSearchRequest search) throws Exception;
+
+  List<Menu> queryUserMenu(String username);
 }

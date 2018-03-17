@@ -40,7 +40,6 @@
 </script>
 <#include "common_js.ftl">
 <script type="text/javascript">
-    $("#nav_evaluation_library").addClass("active");
     var search_results_template = Handlebars.compile($("#evaluations").html());
 
     function updateSearchResults(namePattern, standardType, pageNumber) {

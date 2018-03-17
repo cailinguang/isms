@@ -88,11 +88,6 @@
 </script>
 <#include "common_js.ftl">
 <script type="text/javascript">
-    <#if isEvaluation == 0>
-    $("#nav_standard_library").addClass("active");
-    <#else>
-    $("#nav_evaluation_library").addClass("active");
-    </#if>
     var search_results_template = Handlebars.compile($("#standards").html());
 
     function setupArchiveAction(result) {

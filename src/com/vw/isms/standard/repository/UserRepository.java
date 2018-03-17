@@ -1,6 +1,7 @@
 package com.vw.isms.standard.repository;
 
 import com.vw.isms.RepositoryException;
+import com.vw.isms.standard.model.Login;
 import com.vw.isms.standard.model.Role;
 import com.vw.isms.standard.model.User;
 import com.vw.isms.util.PasswordUtil;
@@ -255,5 +256,45 @@ public class UserRepository
               return roles.length;
           }
       });
+  }
+
+  public Login queryUserLogin(String username){
+      List<Login> logins = this.jdbcTemplate.query("select * from APP.ISMS_LOGIN where USERNAME=?", new Object[]{username}, new RowMapper<Login>() {
+          @Override
+          public Login mapRow(ResultSet rs, int i) throws SQLException {
+              Login login = new Login();
+              login.setUserName(rs.getString("USERNAME"));
+              login.setLastLoginTime(rs.getTimestamp("LAST_LOGTIN_TIME"));
+              login.setLoginCount(rs.getInt("LOGIN_COUNT"));
+              login.setLastSixPassword(rs.getString("LAST_SIX_PASSWORD"));
+              login.setLastChangePassTime(rs.getTimestamp("LAST_CHANGE_PASS_TIME"));
+              return login;
+          }
+      });
+      return logins.size()>0?logins.get(0):null;
+  }
+
+  public void updateUserLogin(Login login){
+      SimpleJdbcUpdate update = new SimpleJdbcUpdate();
+      update.withSchema("APP").withTable("ISMS_LOGIN").withKey("USERNAME",login.getUserName())
+              .withColumnValue("LAST_LOGTIN_TIME",login.getLastLoginTime())
+              .withColumnValue("LOGIN_COUNT",login.getLoginCount())
+              .withColumnValue("LAST_CHANGE_PASS_TIME",login.getLastChangePassTime())
+              .withColumnValue("LAST_SIX_PASSWORD",login.getLastSixPassword());
+      update.update(this.namedTemplate);
+  }
+
+  public void createUserLogin(Login login){
+      if(this.jdbcTemplate.queryForObject("select count(*) from APP.ISMS_USERS where USERNAME=?",new Object[]{login.getUserName()},Integer.class)>0){
+          SimpleJdbcInsertion insertion = new SimpleJdbcInsertion();
+          insertion.withSchema("APP").withTable("ISMS_LOGIN")
+                  .withColumnValue("USERNAME",login.getUserName())
+                  .withColumnValue("LAST_LOGTIN_TIME",login.getLastLoginTime())
+                  .withColumnValue("LOGIN_COUNT",login.getLoginCount())
+                  .withColumnValue("LAST_CHANGE_PASS_TIME",login.getLastChangePassTime())
+                  .withColumnValue("LAST_SIX_PASSWORD",login.getLastSixPassword());
+          insertion.insert(this.jdbcTemplate);
+      }
+
   }
 }

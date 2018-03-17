@@ -63,10 +63,12 @@
                     <span class="glyphicon glyphicon-search"></span>
                     Search
                 </button>
+                <#if !readonly>
                 <button id="create_user_link" class="btn btn-default">
                     <span class="glyphicon glyphicon-user"></span>
                     Create User
                 </button>
+                </#if>
             </div>
         </div>
     </div>
@@ -83,7 +85,7 @@
             <th>Department</th>
             <th>Tel</th>
             <th>Email</th>
-            <th></th>
+            <#if !readonly><th></th></#if>
         </tr>
         {{#each results}}
         <tr user="{{this.userName}}" realname="{{this.realName}}" department="{{this.department}}" tel="{{this.tel}}" email="{{this.email}}" role="{{role}}">
@@ -93,18 +95,17 @@
             <td>{{this.departmentName}}</td>
             <td>{{this.tel}}</td>
             <td>{{this.email}}</td>
+            <#if !readonly>
             <td>
                 <a href="javascript:void(0)" action="reset">Reset Password</a>
                 <span>|</span>
                 <a href="javascript:void(0)" action="roles">Assign Role</a>
                 <span>|</span>
                 <a href="javascript:void(0)" action="update">Update Profile</a>
-                {{#ifCond this.role "ROLE_Admin"}}
-                {{else}}
                 <span>|</span>
                 <a href="javascript:void(0)" action="delete">Delete</a>
-                {{/ifCond}}
             </td>
+            </#if>
         </tr>
         {{/each}}
         <tr>
@@ -150,7 +151,6 @@
 </script>
 <#include "common_js.ftl">
 <script type="text/javascript">
-    $("#nav_admin").addClass("active");
     Handlebars.registerHelper('ifCond', function(v1, v2, options) {
         if(v1 === v2) {
             return options.fn(this);
@@ -239,7 +239,7 @@
         $("#create_user").dialog({
             modal: true,
             height: 350,
-            width: 400,
+            width: 450,
             buttons: {
                 Close: function () {
                     $(this).dialog("close");
@@ -376,7 +376,7 @@
                     username: $(rows[i]).attr("user")
                 },function (e) {
                     //load user role
-                    IsmsRequester.requestJson('/api/admin/users/'+e.data.userName+'/roles','GET',{},function (response) {
+                    IsmsRequester.requestJson('/api/admin/users/'+e.data.username+'/roles','GET',{},function (response) {
                         $("#role-dialog").dialog({
                             modal: true,
                             open:function(event,ui){
@@ -393,7 +393,7 @@
                                         roles.push($(this).attr('roleId'))
                                     });
                                     var me = this;
-                                    IsmsRequester.requestJson('/api/admin/users/'+e.data.userName+'/role','POST',{roles:roles},function (res) {
+                                    IsmsRequester.requestJson('/api/admin/users/'+e.data.username+'/role','POST',{roles:roles},function (res) {
                                         $(me).dialog("close");
                                     })
 

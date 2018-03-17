@@ -4,6 +4,7 @@ var IsmsErrorReporter = {
         $(template(msg)).dialog({
             resizable: false,
             modal: true,
+            position: { my: "top", at: "top+250"},
             buttons: {
                 "Ok": function () {
                     $(this).dialog("close");

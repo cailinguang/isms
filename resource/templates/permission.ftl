@@ -34,7 +34,6 @@
 
 <#include "common_js.ftl">
 <script type="text/javascript">
-    $("#nav_permission").addClass("active");
     var search_results_template = Handlebars.compile($("#table-template").html());
 
 

@@ -22,7 +22,9 @@
                     <input id="search_string" type="text" class="form-control" placeholder="Search for...">
                     <span class="input-group-btn">
                         <button id="search_button" class="btn btn-default" type="button">查找</button>
+                        <#if !readonly>
                         <button id="upload_button" class="btn btn-default" type="button">上传</button>
+                        </#if>
                     </span>
                 </div>
             </div>
@@ -55,7 +57,7 @@
                 <th style="width:100px !important;">证据分类</th>
                 <th>文件</th>
                 <th>描述</th>
-                <th style="width:50px !important;"></th>
+                <#if !readonly><th style="width:50px !important;"></th></#if>
             </tr>
         </thead>
         <tbody>
@@ -96,14 +98,14 @@
 <#include "upload_evidence.ftl">
 <#include "common_js.ftl">
 <script type="text/javascript">
-    $("#nav_evidence_library_tree").addClass("active");
-
     var search_results_template = Handlebars.compile($("#evidences").html());
+    var readonly = ${readonly?string('true','false')};
 
     //init tree
     var tree = new IsmsDataTree({
         viewId:'#evidence_tree',
         type:'EVIDENCE',
+        readonly:readonly,
         selectionCallback:function (node) {
             $("#search_string").val('');
             //set title

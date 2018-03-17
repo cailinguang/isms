@@ -56,7 +56,6 @@
 </script>
 <#include "common_js.ftl">
 <script type="text/javascript">
-    $("#nav_risk_library").addClass("active");
     var table_template = Handlebars.compile($("#table-template").html());
 
     var risk_map = null;
