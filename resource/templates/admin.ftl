@@ -47,7 +47,7 @@
         <#list roles as r>
             <li>
                 <input type="checkbox" id="role-${r.roleId}" roleId="${r.roleId}"/>
-                <label for="role-${r.roleId}">${r.roleName}</label>
+                <label for="role-${r.roleId}">[${r.roleId}]${r.roleName}</label>
             </li>
         </#list>
         </ul>
