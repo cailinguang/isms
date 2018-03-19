@@ -1,12 +1,10 @@
-package com.vw.isms.standard.repository;
+package com.vw.isms.web.request;
 
-public class StandardSearchRequest
+public class UserSearchRequest
 {
   private String namePattern;
-  private String standardType;
   private int pageNumber;
   private int itemPerPage;
-  private boolean archived;
   
   public String getNamePattern()
   {
@@ -16,21 +14,6 @@ public class StandardSearchRequest
   public void setNamePattern(String namePattern)
   {
     this.namePattern = namePattern;
-  }
-  
-  public String getStandardType()
-  {
-    return this.standardType;
-  }
-  
-  public void setStandardType(String standardType)
-  {
-    this.standardType = standardType;
-  }
-  
-  public boolean isSuccess()
-  {
-    return true;
   }
   
   public int getPageNumber()
@@ -51,15 +34,5 @@ public class StandardSearchRequest
   public void setItemPerPage(int itemPerPage)
   {
     this.itemPerPage = itemPerPage;
-  }
-  
-  public boolean isArchived()
-  {
-    return this.archived;
-  }
-  
-  public void setArchived(boolean archived)
-  {
-    this.archived = archived;
   }
 }

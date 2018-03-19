@@ -1,7 +1,7 @@
 package com.vw.isms.standard.event;
 
 import com.vw.isms.EventProcessingException;
-import com.vw.isms.web.StandardNodeRequest;
+import com.vw.isms.web.request.StandardNodeRequest;
 
 public class StandardNodeCreationEvent
   implements StandardEvent

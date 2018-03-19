@@ -11,6 +11,9 @@
                 <#list menus as m>
                     <li id="nav_${m.menuId}" <#if requestURI==m.menuUrl>class="active"</#if> ><a href="${m.menuUrl}">${m.menuName}</a></li>
                 </#list>
+                <#if auth.principal.authorities?seq_contains("PER_Admin")>
+                    <li <#if requestURI=="/backup">class="active"</#if> ><a href="/backup">数据备份</a></li>
+                </#if>
                 </#if>
             </ul>
             <ul class="nav navbar-nav navbar-right">

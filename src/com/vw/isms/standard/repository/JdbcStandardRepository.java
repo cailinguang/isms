@@ -12,19 +12,14 @@ import com.vw.isms.standard.model.Data;
 import com.vw.isms.standard.model.*;
 import com.vw.isms.util.IdUtil;
 
-import java.sql.PreparedStatement;
-import java.sql.ResultSet;
-import java.sql.SQLException;
+import java.sql.*;
 import java.text.SimpleDateFormat;
 import java.util.*;
+import java.util.Date;
 
-import com.vw.isms.web.DeptRequest;
-import com.vw.isms.web.RoleRequest;
+import com.vw.isms.web.request.*;
 import org.springframework.dao.DataAccessException;
-import org.springframework.jdbc.core.BatchPreparedStatementSetter;
-import org.springframework.jdbc.core.JdbcTemplate;
-import org.springframework.jdbc.core.ResultSetExtractor;
-import org.springframework.jdbc.core.RowMapper;
+import org.springframework.jdbc.core.*;
 import org.springframework.jdbc.core.namedparam.NamedParameterJdbcTemplate;
 import org.springframework.transaction.annotation.Transactional;
 import org.springframework.util.StringUtils;
@@ -2337,5 +2332,40 @@ public class JdbcStandardRepository
                 return menu;
             }
         });
+    }
+
+    @Override
+    public void exportDerby(String path){
+        this.jdbcTemplate.execute(new ConnectionCallback() {
+            @Override
+            public Object doInConnection(Connection connection) throws SQLException, DataAccessException {
+                CallableStatement cs = connection.prepareCall("CALL SYSCS_UTIL.SYSCS_BACKUP_DATABASE(?)");
+                cs.setString(1,path);
+                cs.execute();
+                cs.close();
+                return null;
+            }
+        });
+
+        /*List<String> tables = this.jdbcTemplate.execute(new ConnectionCallback<List<String>>() {
+            @Override
+            public List<String> doInConnection(Connection connection) throws SQLException, DataAccessException {
+                List<String> tables = new ArrayList();
+                DatabaseMetaData dbMetaData = connection.getMetaData();
+                ResultSet   tabs = dbMetaData.getTables(null,null,null,new String[]{"TABLE"});
+                while(tabs.next()){
+                    tables.add(tabs.getString("TABLE_NAME"));
+                }
+                return tables;
+            }
+        });
+
+        for(String table:tables){
+            this.jdbcTemplate.update("CALL SYSCS_UTIL.SYSCS_EXPORT_TABLE (?,?,?,?,?,?)",new Object[]{
+                    "APP",table,"c:/db/"+table+".dat","$",null,null
+            });
+        }*/
+
+
     }
 }

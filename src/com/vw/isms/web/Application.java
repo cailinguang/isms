@@ -6,13 +6,16 @@ import com.vw.isms.standard.repository.JdbcStandardRepository;
 import com.vw.isms.standard.repository.StandardRepository;
 import com.vw.isms.standard.repository.UserRepository;
 
+import java.io.File;
 import java.io.IOException;
-import java.io.PrintStream;
 import java.sql.SQLException;
 import javax.servlet.MultipartConfigElement;
 import javax.sql.DataSource;
 
+import com.vw.isms.util.BackupApplicationUtil;
+import com.vw.isms.util.ZipUtil;
 import org.apache.commons.dbcp.BasicDataSource;
+import org.apache.commons.io.FileUtils;
 import org.apache.commons.lang3.StringUtils;
 import org.apache.commons.lang3.SystemUtils;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -28,27 +31,68 @@ public class Application {
     private String basicInfoPath;
     private String uploadDir;
     private String databasePath;
+    private String backupPath;
+
+    private String restoreDbPath;
 
     public Application()
             throws IOException {
         if (!StringUtils.isEmpty(System.getProperty("root.dir"))) {
             this.uploadDir = (System.getProperty("root.dir") + "/upload");
             this.databasePath = (System.getProperty("root.dir") + "/db");
+            this.backupPath = (System.getProperty("root.dir") + "/backup");
             this.basicInfoPath = (System.getProperty("root.dir") + "/basic_info.html");
         } else if (SystemUtils.IS_OS_WINDOWS) {
             this.uploadDir = "c:/isms/upload";
             this.databasePath = "c:/isms/db";
+            this.backupPath = "c:/isms/backup";
             this.basicInfoPath = "c:/isms/basic_info.html";
         } else {
             this.uploadDir = "/var/tmp/isms/upload";
             this.databasePath = "/var/tmp/isms/db";
+            this.backupPath = "/var/tmp/isms/backup";
             this.basicInfoPath = "/var/tmp/isms/basic_info.html";
+        }
+
+        if(!StringUtils.isEmpty(System.getProperty(BackupApplicationUtil.SP_restore_key))){
+            String zipFile = System.getProperty(BackupApplicationUtil.SP_restore_key);
+            String tempUNZipPath = this.backupPath + File.separator + "temp";
+
+            File tempFile = new File(tempUNZipPath);
+            if(tempFile.exists()){
+                FileUtils.deleteDirectory(tempFile);
+            }
+            tempFile.mkdirs();
+
+            File uploadFile = new File(this.uploadDir);
+            if(uploadFile.exists()){
+                FileUtils.deleteDirectory(uploadFile);
+            }
+            uploadFile.mkdirs();
+
+            ZipUtil.upzipFile(new File(zipFile),tempUNZipPath);
+
+            FileUtils.copyDirectory(new File(tempUNZipPath+File.separator+"upload"),uploadFile);
+
+
+
+            this.restoreDbPath = tempUNZipPath + File.separator + "db";
         }
     }
 
     @Bean
     public String basicInfoPath() {
         return this.basicInfoPath;
+    }
+
+    @Bean
+    public String backupPath() {
+        return this.backupPath;
+    }
+
+    @Bean
+    public String uploadDir() {
+        return this.uploadDir;
     }
 
     @Bean
@@ -73,6 +117,9 @@ public class Application {
         BasicDataSource ds = new BasicDataSource();
         ds.setDriverClassName("org.apache.derby.jdbc.EmbeddedDriver");
         ds.setUrl("jdbc:derby:" + this.databasePath);
+        if(this.restoreDbPath!=null){
+            ds.setUrl(ds.getUrl()+";restoreFrom="+this.restoreDbPath);
+        }
         ds.setUsername("isms");
         ds.setPassword("isms");
         return ds;

@@ -431,5 +431,16 @@ public class WebController {
         return "permission";
     }
 
-
+    /**
+     * 权限管理
+     * @param map
+     * @param authentication
+     * @return
+     */
+    @RequestMapping("backup")
+    public String getBackup(ModelMap map, Authentication authentication){
+        setupAuth(map, authentication);
+        setReadonlyStatus(map, authentication, false);
+        return "backup";
+    }
 }

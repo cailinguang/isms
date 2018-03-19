@@ -8,8 +8,7 @@ import com.vw.isms.property.FloatProperty;
 import com.vw.isms.property.StringProperty;
 import com.vw.isms.standard.model.Data;
 import com.vw.isms.standard.model.*;
-import com.vw.isms.web.DeptRequest;
-import com.vw.isms.web.RoleRequest;
+import com.vw.isms.web.request.*;
 
 import java.util.List;
 
@@ -231,4 +230,6 @@ public abstract interface StandardRepository
     PagingResult<AuditLog> queryAuditLog(AuditSearchRequest search) throws Exception;
 
   List<Menu> queryUserMenu(String username);
+
+    void exportDerby(String path);
 }

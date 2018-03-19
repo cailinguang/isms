@@ -1,4 +1,4 @@
-package com.vw.isms.web;
+package com.vw.isms.web.response;
 
 public class GenericResponse {
     private final boolean success;

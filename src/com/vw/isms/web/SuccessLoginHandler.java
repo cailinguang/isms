@@ -1,4 +1,4 @@
-package com.vw.isms.web.listener;
+package com.vw.isms.web;
 
 import com.vw.isms.standard.model.AuditLog;
 import com.vw.isms.standard.repository.StandardRepository;

@@ -13,22 +13,24 @@ import com.vw.isms.standard.event.StandardNodePropertiesUpdateEvent;
 import com.vw.isms.standard.event.StandardNodeRenameEvent;
 import com.vw.isms.standard.model.*;
 import com.vw.isms.standard.repository.*;
-import com.vw.isms.util.IdUtil;
+import com.vw.isms.util.*;
 
-import java.io.File;
-import java.io.IOException;
+import java.io.*;
 import java.text.SimpleDateFormat;
-import java.util.Iterator;
-import java.util.List;
-import java.util.UUID;
+import java.util.*;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 
-import com.vw.isms.util.MSExcelUtil;
+import com.vw.isms.web.request.*;
+import com.vw.isms.web.response.*;
 import org.apache.commons.io.FileUtils;
 import org.apache.commons.io.FilenameUtils;
 import org.apache.poi.hssf.usermodel.*;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.core.io.FileSystemResource;
+import org.springframework.http.HttpStatus;
+import org.springframework.http.MediaType;
+import org.springframework.http.ResponseEntity;
 import org.springframework.security.core.Authentication;
 import org.springframework.util.FileCopyUtils;
 import org.springframework.util.StringUtils;
@@ -40,6 +42,10 @@ import org.springframework.web.multipart.MultipartHttpServletRequest;
 public class StandardController {
     @Autowired
     private StandardRepository repository;
+    @Autowired
+    private String backupPath;
+    @Autowired
+    private String uploadDir;
 
     private StandardEventProcessor getProcessor() {
         return new StandardEventProcessor(this.repository);
@@ -838,5 +844,83 @@ public class StandardController {
 
         wb.write(response.getOutputStream());
         wb.close();
+    }
+
+    @RequestMapping(value = {"/api/backups"}, method = {org.springframework.web.bind.annotation.RequestMethod.POST}, produces = {"application/json"})
+    @ResponseBody
+    public Object getBackups(){
+        List<Backup> backups = new ArrayList();
+        File backupFile = new File(this.backupPath);
+        if(backupFile.exists()&&backupFile.isDirectory()){
+            File[] files = backupFile.listFiles();
+            for(File file:files){
+                if(file.getName().matches("^[\\d-]+\\.zip$")&&file.isFile()){
+                    Backup backup = new Backup();
+                    backup.setDate(file.getName().replace(".zip",""));
+                    backup.setPath(file.getAbsolutePath());
+                    backups.add(backup);
+                }
+            }
+        }
+        return backups;
+    }
+
+    @RequestMapping(value = {"/api/backup"}, method = {org.springframework.web.bind.annotation.RequestMethod.POST}, produces = {"application/json"})
+    @ResponseBody
+    public Object startBackup() throws Exception{
+        String time = new SimpleDateFormat("yyyyMMdd-HHmmss").format(new Date());
+
+        File backupFile = new File(this.backupPath);
+        if(!backupFile.exists()){
+            backupFile.mkdirs();
+        }
+
+        File thisBackupDir = new File(backupFile,time);
+        if(!thisBackupDir.exists()){
+            thisBackupDir.mkdirs();
+        }
+        //copy upload
+        FileUtils.copyDirectoryToDirectory(new File(this.uploadDir),thisBackupDir);
+        //backup derby database
+        this.repository.exportDerby(thisBackupDir.getAbsolutePath());
+        //zip files
+        ZipUtil.zipFile(this.backupPath+File.separator+time+".zip", Arrays.asList(new File(thisBackupDir+File.separator+"upload"),new File(thisBackupDir+File.separator+"db")));
+        //delete dir
+        FileUtils.deleteDirectory(thisBackupDir);
+        return GenericResponse.success();
+    }
+
+    @RequestMapping(value = {"/api/restore/{backup}"}, method = {org.springframework.web.bind.annotation.RequestMethod.POST}, produces = {"application/json"})
+    @ResponseBody
+    public Object restore(@PathVariable String backup) throws Exception{
+        String filePath = this.backupPath + File.separator + backup +".zip";
+        File file = new File(filePath);
+        if(!file.exists() || !file.isFile()){
+            throw new EventProcessingException("backup not exist.");
+        }
+        new Thread(()->{
+            BackupApplicationUtil.rebootAndRestore(filePath);
+        }).start();
+        return GenericResponse.success();
+    }
+
+    @RequestMapping(value = {"/api/restore/{backup}"}, method = {RequestMethod.DELETE}, produces = {"application/json"})
+    @ResponseBody
+    public Object deleteRestore(@PathVariable String backup) throws Exception{
+        String filePath = this.backupPath + File.separator + backup +".zip";
+        File file = new File(filePath);
+        if(!file.exists() || !file.isFile()){
+            throw new EventProcessingException("backup not exist.");
+        }
+        file.delete();
+        return GenericResponse.success();
+    }
+
+    @RequestMapping(value = {"/api/down_load_restore/{backup}"})
+    public ResponseEntity<FileSystemResource> downLoadRestore(@PathVariable String backup,HttpServletResponse response) throws Exception{
+        String filePath = this.backupPath + File.separator + backup +".zip";
+
+        FileSystemResource res = new FileSystemResource(new File(filePath));
+        return ResponseEntity.status(HttpStatus.OK).contentType(MediaType.valueOf("application/x-zip-compressed")).body(res);
     }
 }

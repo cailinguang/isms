@@ -1,20 +1,20 @@
-package com.vw.isms.web;
+package com.vw.isms.web.request;
 
 /**
  * Created by clg on 2018/3/8.
  */
-public class RoleRequest {
-    private String roleName;
+public class DeptRequest {
+    private String deptName;
     private int pageNumber;
     private int itemPerPage;
-    private Long[] menus;
 
-    public String getRoleName() {
-        return roleName;
+
+    public String getDeptName() {
+        return deptName;
     }
 
-    public void setRoleName(String roleName) {
-        this.roleName = roleName;
+    public void setDeptName(String deptName) {
+        this.deptName = deptName;
     }
 
     public int getPageNumber() {
@@ -31,13 +31,5 @@ public class RoleRequest {
 
     public void setItemPerPage(int itemPerPage) {
         this.itemPerPage = itemPerPage;
-    }
-
-    public Long[] getMenus() {
-        return menus;
-    }
-
-    public void setMenus(Long[] menus) {
-        this.menus = menus;
     }
 }

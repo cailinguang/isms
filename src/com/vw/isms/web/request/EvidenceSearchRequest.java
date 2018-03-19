@@ -1,8 +1,8 @@
-package com.vw.isms.standard.repository;
+package com.vw.isms.web.request;
 
-public class VulnerabilitySearchRequest
+public class EvidenceSearchRequest
 {
-  public String system;
+  public String namePattern;
   private int pageNumber;
   private int itemPerPage;
   private Long classId;
@@ -26,16 +26,18 @@ public class VulnerabilitySearchRequest
   {
     this.itemPerPage = itemPerPage;
   }
-
-  public String getSystem() {
-    return system;
+  
+  public String getNamePattern()
+  {
+    return this.namePattern;
+  }
+  
+  public void setNamePattern(String namePattern)
+  {
+    this.namePattern = namePattern;
   }
 
-  public void setSystem(String system) {
-    this.system = system;
-  }
-
-  public Long getClassId() {
+    public Long getClassId() {
         return classId;
     }
 

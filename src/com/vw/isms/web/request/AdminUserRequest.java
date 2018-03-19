@@ -1,4 +1,4 @@
-package com.vw.isms.web;
+package com.vw.isms.web.request;
 
 public class AdminUserRequest {
     private String userName;

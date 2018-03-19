@@ -1,4 +1,4 @@
-package com.vw.isms.standard.repository;
+package com.vw.isms.web.request;
 
 /**
  * Created by clg on 2018/3/15.

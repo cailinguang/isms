@@ -1,4 +1,4 @@
-package com.vw.isms.web;
+package com.vw.isms.web.response;
 
 import com.vw.isms.property.Property;
 import com.vw.isms.standard.model.Standard;

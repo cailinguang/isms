@@ -4,19 +4,16 @@ import com.vw.isms.EventProcessingException;
 import com.vw.isms.ModelException;
 import com.vw.isms.RepositoryException;
 import com.vw.isms.property.FloatProperty;
-import com.vw.isms.property.Properties;
 import com.vw.isms.property.Property;
 import com.vw.isms.property.StringProperty;
 import com.vw.isms.standard.model.Standard;
 import com.vw.isms.standard.model.StandardNode;
 import com.vw.isms.standard.model.StandardNodeCustomizer;
 import com.vw.isms.standard.model.StandardNodeType;
-import com.vw.isms.standard.model.StandardType;
 import com.vw.isms.standard.repository.StandardRepository;
-import com.vw.isms.web.StandardNodeRequest;
-import java.util.List;
+
 import java.util.Map;
-import java.util.Map.Entry;
+
 import org.apache.commons.lang3.StringUtils;
 import org.springframework.transaction.annotation.Transactional;
 
