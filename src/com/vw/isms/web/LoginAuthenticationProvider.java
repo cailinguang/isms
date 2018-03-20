@@ -55,7 +55,7 @@ public class LoginAuthenticationProvider extends DaoAuthenticationProvider {
         Login login = userRepository.queryUserLogin(username);
         if(login!=null){
             if(login.getLoginCount()>=5 && currentDate.getTime()-login.getLastLoginTime().getTime() <= 30*60*1000){
-                throw new LockedException("fail login 5 times");
+                throw new LockedException("Continuous login more than 5 times, please try again in 30 minutes");
             }
         }
     }

@@ -7,7 +7,7 @@ public class PasswordUtil {
 
     public static final char[] chars = "01234567890abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ!@#$%^&*()_-+=".toCharArray();
     public static final int normalUserLength = 10;
-    public static final int adminUserLength = 18;
+    public static final int adminUserLength = 16;
 
     public static boolean hasUpper(String s) {
         for (int i = 0; i < s.length(); i++) {

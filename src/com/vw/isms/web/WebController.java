@@ -160,8 +160,8 @@ public class WebController {
     public String login(HttpServletRequest request, ModelMap map, Authentication authentication) {
         setupAuth(map, authentication);
         if (request.getParameter("error") != null) {
-            map.put("loginMessage", "Invalid user name or password.");
-            map.put("error", getErrorMessage(request, "SPRING_SECURITY_LAST_EXCEPTION"));
+            //map.put("loginMessage", "Invalid user name or password.");
+            map.put("loginMessage", getErrorMessage(request, "SPRING_SECURITY_LAST_EXCEPTION"));
         } else {
             map.put("loginMessage", "");
         }

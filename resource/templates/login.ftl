@@ -8,7 +8,7 @@
 <div class="container">
 <#include "header.ftl">
     <div class="row">
-        <div class="col-md-3" align="center" style="color: red">${loginMessage}</div>
+        <div class="col-md-6" align="center" style="color: red">${loginMessage}</div>
     </div>
     <div class="row" style="margin-top: 10px">
         <div class="col-md-3">
