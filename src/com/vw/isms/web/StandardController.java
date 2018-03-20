@@ -703,7 +703,7 @@ public class StandardController {
     public Object saveVulnerability(@RequestBody Vulnerability vulnerability){
         vulnerability.setId(IdUtil.next());
         this.repository.createVulnerability(vulnerability);
-        return GenericResponse.success();
+        return vulnerability;
     }
 
     @RequestMapping(value = {"/api/vulnerability/{id}"}, method = {RequestMethod.DELETE}, produces = {"application/json"})

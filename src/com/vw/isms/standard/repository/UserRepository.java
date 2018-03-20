@@ -41,13 +41,13 @@ public class UserRepository
     try
     {
       String rawPassword = PasswordUtil.randomCompliantPassword(user.getUserName());
-      String password = this.passwordEncoder.encode(rawPassword);
+      user.setPassword(this.passwordEncoder.encode(rawPassword));
       SimpleJdbcInsertion insertion = new SimpleJdbcInsertion();
       insertion
         .withSchema("APP")
         .withTable("ISMS_USERS")
         .withColumnValue("USERNAME", user.getUserName())
-        .withColumnValue("PASSWORD", password)
+        .withColumnValue("PASSWORD", user.getPassword())
         .withColumnValue("ROLE", user.getRole())
         .withColumnValue("TEL", user.getTel())
         .withColumnValue("REALNAME", user.getRealName())
@@ -147,22 +147,8 @@ public class UserRepository
     }
   }
   
-  public boolean updatePassword(String username, String oldPassword, String newPassword)
-    throws RepositoryException
-  {
-    User user = getUser(username);
-    if (!this.passwordEncoder.matches(oldPassword, user.getPassword())) {
-      return false;
-    }
-    if (PasswordUtil.isCompliantPassword("admin".equals(username)?PasswordUtil.adminUserLength:PasswordUtil.normalUserLength,user.getUserName(),newPassword))
-    {
-      changePassword(user, newPassword);
-      return true;
-    }
-    return false;
-  }
-  
-  public void changePassword(User user, String newPassword)
+
+  public void changePassword(String userName, String newPassword)
     throws RepositoryException
   {
     try
@@ -171,7 +157,7 @@ public class UserRepository
       update
         .withSchema("APP")
         .withTable("ISMS_USERS")
-        .withKey("USERNAME", user.getUserName())
+        .withKey("USERNAME", userName)
         .withColumnValue("PASSWORD", this.passwordEncoder.encode(newPassword));
       update.update(this.namedTemplate);
     }
@@ -244,7 +230,7 @@ public class UserRepository
 
   public void assignUserRole(String username,String... roles){
       this.jdbcTemplate.update("delete from APP.ISMS_USER_ROLE where USERNAME=?",username);
-      if(roles!=null)
+      if(roles!=null&&roles.length!=0)
       this.jdbcTemplate.batchUpdate("INSERT INTO APP.ISMS_USER_ROLE(USERNAME,ROLE_ID) VALUES (?,?)", new BatchPreparedStatementSetter() {
           @Override
           public void setValues(PreparedStatement preparedStatement, int i) throws SQLException {
@@ -296,6 +282,9 @@ public class UserRepository
                   .withColumnValue("LAST_SIX_PASSWORD",login.getLastSixPassword());
           insertion.insert(this.jdbcTemplate);
       }
+  }
 
+  public void deleteUserLogin(String userName){
+      this.jdbcTemplate.update("delete from APP.ISMS_LOGIN where USERNAME=?",userName);
   }
 }

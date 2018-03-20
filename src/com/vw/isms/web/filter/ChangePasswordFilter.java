@@ -37,27 +37,28 @@ public class ChangePasswordFilter implements Filter{
 
         String url = request.getRequestURI();
 
-        if(new AntPathRequestMatcher("/dist/**").matches(request)){
-            filterChain.doFilter(servletRequest,servletResponse);
-            return;
-        }
-        if(new AntPathRequestMatcher("/js/**").matches(request)){
-            filterChain.doFilter(servletRequest,servletResponse);
-            return;
-        }
-        if(new AntPathRequestMatcher("/images/**").matches(request)){
-            filterChain.doFilter(servletRequest,servletResponse);
-            return;
-        }
-        if(new AntPathRequestMatcher(reset_url).matches(request)){
-            filterChain.doFilter(servletRequest,servletResponse);
-            return;
-        }
-
         Login login = (Login) request.getSession().getAttribute("login");
         if(login!=null&&login.getLastChangePassTime()!=null){
             if(System.currentTimeMillis()-login.getLastChangePassTime().getTime()>=time){
-                response.sendRedirect(reset_url);
+
+                if(new AntPathRequestMatcher("/dist/**").matches(request)){
+                    filterChain.doFilter(servletRequest,servletResponse);
+                    return;
+                }
+                if(new AntPathRequestMatcher("/js/**").matches(request)){
+                    filterChain.doFilter(servletRequest,servletResponse);
+                    return;
+                }
+                if(new AntPathRequestMatcher("/images/**").matches(request)){
+                    filterChain.doFilter(servletRequest,servletResponse);
+                    return;
+                }
+                if(new AntPathRequestMatcher(reset_url).matches(request)){
+                    filterChain.doFilter(servletRequest,servletResponse);
+                    return;
+                }
+
+                response.sendRedirect(reset_url+"?foceChange=true");
                 return;
             }
         }

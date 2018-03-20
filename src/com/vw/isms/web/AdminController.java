@@ -1,6 +1,7 @@
 package com.vw.isms.web;
 
 import com.vw.isms.RepositoryException;
+import com.vw.isms.standard.model.Login;
 import com.vw.isms.standard.model.User;
 import com.vw.isms.standard.repository.PagingResult;
 import com.vw.isms.standard.repository.UserRepository;
@@ -13,6 +14,8 @@ import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.ResponseBody;
 import org.springframework.web.bind.annotation.RestController;
+
+import java.util.Date;
 
 @RestController
 public class AdminController {
@@ -43,6 +46,14 @@ public class AdminController {
         }
 
         String rawPassword = this.repository.createUser(user);
+
+        Login login = new Login();
+        login.setUserName(user.getUserName());
+        login.setLoginCount(0);
+        login.setLastChangePassTime(new Date());
+        login.setLastSixPassword(user.getPassword() );
+        this.repository.createUserLogin(login);
+
         user.setPassword(rawPassword);
         return user;
     }
@@ -79,6 +90,8 @@ public class AdminController {
             throw new RepositoryException("Cannot delete admin.");
         }
         this.repository.deleteUser(user);
+        this.repository.assignUserRole(userName,new String[0]);
+        this.repository.deleteUserLogin(userName);
         return user;
     }
 

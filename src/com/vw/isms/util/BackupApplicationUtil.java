@@ -4,6 +4,7 @@ package com.vw.isms.util;
 import org.springframework.util.StringUtils;
 
 import java.io.BufferedReader;
+import java.io.File;
 import java.io.InputStreamReader;
 import java.io.RandomAccessFile;
 
@@ -21,8 +22,9 @@ public class BackupApplicationUtil {
                     System.out.println("等待10s");
                     Thread.sleep(1000);
 
+                    String javaHome = System.getProperty("java.home");
                     String rootDir = System.getProperty("root.dir");
-                    StringBuffer commond = new StringBuffer("java ");
+                    StringBuffer commond = new StringBuffer(javaHome + File.separator +"bin" + File.separator + "java ");
                     if(!StringUtils.isEmpty(rootDir)){
                         commond.append("-Droot.dir=").append(rootDir);
                     }

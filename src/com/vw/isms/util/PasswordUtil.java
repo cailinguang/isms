@@ -57,11 +57,12 @@ public class PasswordUtil {
         return false;
     }
 
-    public static boolean isCompliantPassword(int length,String name,String password) {
+    public static boolean isCompliantPassword(String name,String password) {
+        int length = "admin".equals(name)?PasswordUtil.adminUserLength:PasswordUtil.normalUserLength;
         if (password.length() < length) {
             return false;
         }
-        if(name.equals(password)){
+        if(password.contains(name)){
             return false;
         }
         int complianceCount = 0;
@@ -80,22 +81,20 @@ public class PasswordUtil {
         return complianceCount >= 4;
     }
 
-    public static String randomCompliantPassword(String name) {
-        return randomCompliantPassword(normalUserLength,name);
-    }
 
-    public static String randomCompliantPassword(int length,String name){
+    public static String randomCompliantPassword(String name){
+        int length = "admin".equals(name)?PasswordUtil.adminUserLength:PasswordUtil.normalUserLength;
         String password;
         do {
             password = RandomStringUtils.random(length,chars);
-        } while (!isCompliantPassword(length,name,password));
+        } while (!isCompliantPassword(name,password));
         return password;
     }
 
     public static void main(String[] args) {
         String name = "test";
-        System.out.println(randomCompliantPassword(adminUserLength,name));
 
         System.out.println(new BCryptPasswordEncoder().encode("admin"));
+        System.out.println(new BCryptPasswordEncoder().encode("abcd"));
     }
 }

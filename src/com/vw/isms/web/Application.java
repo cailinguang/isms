@@ -21,9 +21,13 @@ import org.apache.commons.lang3.SystemUtils;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.SpringApplication;
 import org.springframework.boot.autoconfigure.SpringBootApplication;
+import org.springframework.boot.context.embedded.ConfigurableEmbeddedServletContainer;
+import org.springframework.boot.context.embedded.EmbeddedServletContainerCustomizer;
+import org.springframework.boot.context.embedded.ErrorPage;
 import org.springframework.boot.context.embedded.MultipartConfigFactory;
 import org.springframework.context.ConfigurableApplicationContext;
 import org.springframework.context.annotation.Bean;
+import org.springframework.http.HttpStatus;
 import org.springframework.jdbc.core.JdbcTemplate;
 
 @SpringBootApplication
@@ -133,6 +137,18 @@ public class Application {
         return repo;
     }
 
+    @Bean
+    public EmbeddedServletContainerCustomizer containerCustomizer(){
+        return new EmbeddedServletContainerCustomizer() {
+            @Override
+            public void customize(ConfigurableEmbeddedServletContainer container) {
+                container.addErrorPages(new ErrorPage(HttpStatus.BAD_REQUEST,"/400"));
+                container.addErrorPages(new ErrorPage(HttpStatus.FORBIDDEN,"/403"));
+                container.addErrorPages(new ErrorPage(HttpStatus.NOT_FOUND,"/404"));
+            }
+        };
+    }
+
     public static void updateDatabase(ConfigurableApplicationContext context) {
         System.out.println("Updating database.");
         JdbcTemplate template = (JdbcTemplate) context.getBean(JdbcTemplate.class);
@@ -152,8 +168,7 @@ public class Application {
         if (System.getProperty("resetAdmin") != null) {
             UserRepository repo = (UserRepository) context.getBean(UserRepository.class);
             try {
-                User admin = repo.getUser("admin");
-                repo.changePassword(admin, "admin");
+                repo.changePassword("admin", "admin");
                 System.out.println("admin password has been reset to admin");
             } catch (RepositoryException e) {
                 User admin = new User();
@@ -161,7 +176,7 @@ public class Application {
                 admin.setRole("Admin");
                 admin.setPassword("admin");
                 repo.createUser(admin);
-                repo.changePassword(admin, "admin");
+                repo.changePassword("admin", "admin");
                 System.out.println("Created admin with password admin");
             }
         }

@@ -109,9 +109,12 @@
         </tr>
         {{/each}}
         <tr>
-            <td colspan="7" align="right">
-                {{#if hasPrevPage}}<a id="prevPage" href="javascript:void(0)" style="margin-right:20px;">Prev</a>{{/if}}
-                {{#if hasNextPage}}<a id="nextPage" href="javascript:void(0)" style="margin-left:30px;">Next</a>{{/if}}
+            <td colspan="7">
+                <div style="float:left;" id="pageInfo">{{page-info this}}</div>
+                <div style="float:right;">
+                    {{#if hasPrevPage}}<a id="prevPage" href="javascript:void(0)" style="margin-right:20px;">Prev</a>{{/if}}
+                    {{#if hasNextPage}}<a id="nextPage" href="javascript:void(0)" style="margin-left:30px;">Next</a>{{/if}}
+                </div>
             </td>
         </tr>
     </table>

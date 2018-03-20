@@ -192,7 +192,13 @@ public class WebController {
     }
 
     @RequestMapping({"reset_password"})
-    public String resetPassword(@RequestParam(value = "oldPassword", required = false) String oldPassword, @RequestParam(value = "newPassword", required = false) String newPassword, @RequestParam(value = "mismatch", required = false) String mismatch, @RequestParam(value = "noncompliant", required = false) String noncompliant, @RequestParam(value = "success", required = false) String success, ModelMap map, Authentication authentication)
+    public String resetPassword(@RequestParam(value = "oldPassword", required = false) String oldPassword,
+                                @RequestParam(value = "newPassword", required = false) String newPassword,
+                                @RequestParam(value = "mismatch", required = false) String mismatch,
+                                @RequestParam(value = "noncompliant", required = false) String noncompliant,
+                                @RequestParam(value = "success", required = false) String success,
+                                @RequestParam(value = "foceChange", required = false) String foceChange,
+                                HttpServletRequest request,ModelMap map, Authentication authentication)
             throws RepositoryException {
         setupAuth(map, authentication);
         if (!StringUtils.isEmpty(mismatch)) {
@@ -215,13 +221,19 @@ public class WebController {
             return "reset_password";
         }
 
+        if(!StringUtils.isEmpty(foceChange)){
+            map.put("error", "You haven't changed the password for 90 days,please change the password.");
+            return "reset_password";
+        }
+
         if ((!StringUtils.isEmpty(oldPassword)) && (!StringUtils.isEmpty(newPassword))) {
             UserDetails user = (UserDetails) authentication.getPrincipal();
-            if (!PasswordUtil.isCompliantPassword("admin".equals(user.getUsername())?PasswordUtil.adminUserLength:PasswordUtil.normalUserLength,user.getUsername(),newPassword)) {
+            if (!PasswordUtil.isCompliantPassword(user.getUsername(),newPassword)) {
                 return "redirect:reset_password?noncompliant=true";
             }
 
-            if (!this.userRepo.updatePassword(user.getUsername(), oldPassword, newPassword)) {
+            User dbUser = this.userRepo.getUser(user.getUsername());
+            if(!this.passwordEncoder.matches(oldPassword, dbUser.getPassword())){
                 return "redirect:reset_password?mismatch=true";
             }
 
@@ -230,9 +242,11 @@ public class WebController {
                 String lastSixPass = login.getLastSixPassword();
                 String[] sixPass = lastSixPass!=null?lastSixPass.split(","):new String[0];
 
-                if(ArrayUtils.contains(sixPass,passwordEncoder.encode(newPassword))){
-                    map.put("error", "New password must be different from the previous 6 passwords ");
-                    return "reset_password";
+                for(String oldSixPass:sixPass){
+                    if(passwordEncoder.matches(newPassword,oldSixPass)){
+                        map.put("error", "New password must be different from the previous 6 passwords ");
+                        return "reset_password";
+                    }
                 }
 
                 sixPass = ArrayUtils.add(sixPass,passwordEncoder.encode(newPassword));
@@ -243,7 +257,13 @@ public class WebController {
                 login.setLastChangePassTime(new Date());
                 this.userRepo.updateUserLogin(login);
 
+                Login sessionLogin = (Login) request.getSession().getAttribute("login");
+                if(sessionLogin!=null){
+                    sessionLogin.setLastChangePassTime(new Date());
+                }
             }
+
+            this.userRepo.changePassword(user.getUsername(),newPassword);
             return "redirect:reset_password?success=true";
         }
         return "reset_password";
