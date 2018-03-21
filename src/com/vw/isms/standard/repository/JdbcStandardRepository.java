@@ -1242,7 +1242,7 @@ public class JdbcStandardRepository
                 }
             }
 
-            return this.namedTemplate.query(builder.toString(), values, new PagingResultSetExtractor<Evidence>(search.getPageNumber(), search.getItemPerPage()) {
+            return this.namedTemplate.query(builder.toString()+" order by e.NAME", values, new PagingResultSetExtractor<Evidence>(search.getPageNumber(), search.getItemPerPage()) {
                 @Override
                 public Evidence mapRow(ResultSet rs) throws SQLException {
                     Evidence ev = new Evidence();
@@ -2277,7 +2277,6 @@ public class JdbcStandardRepository
     @Override
     public PagingResult<AuditLog> queryAuditLog(AuditSearchRequest search) throws Exception{
         StringBuffer sql = new StringBuffer("select * from APP.ISMS_AUDIT_LOG where 1=1 ");
-        String orderBy = " order by OPERATION_TIME desc";
         Map<String, Object> values = new HashMap();
 
         if(!StringUtils.isEmpty(search.getUserName())){
@@ -2298,9 +2297,7 @@ public class JdbcStandardRepository
             values.put("endDate",endCalendar.getTime());
         }
 
-        sql.append(orderBy);
-
-        return this.namedTemplate.query(sql.toString(), values, new PagingResultSetExtractor<AuditLog>(search.getPageNumber(), search.getItemPerPage()) {
+        return this.namedTemplate.query(sql.toString()+" order by OPERATION_TIME desc", values, new PagingResultSetExtractor<AuditLog>(search.getPageNumber(), search.getItemPerPage()) {
             @Override
             public AuditLog mapRow(ResultSet rs) throws SQLException {
                 AuditLog auditLog = new AuditLog();
@@ -2313,7 +2310,7 @@ public class JdbcStandardRepository
 
             @Override
             public int count() {
-                return namedTemplate.queryForObject(sql.toString().replace("*","count(*)").replace(orderBy,""),values,Integer.class);
+                return namedTemplate.queryForObject(sql.toString().replace("*","count(*)"),values,Integer.class);
             }
         });
     }

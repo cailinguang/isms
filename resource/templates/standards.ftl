@@ -53,6 +53,7 @@
                 <th></th>
             </tr>
         </thead>
+        <tbody>
         {{#each results}}
         <tr>
             <td>{{this.name}}</td>
@@ -75,15 +76,18 @@
             </td>
         </tr>
         {{/each}}
+        </tbody>
+        <tfoot>
         <tr>
-            <td></td>
-            <td></td>
-            <td align="center">
-                {{#if hasPrevPage}}<a id="prevPage" href="javascript:void(0)">前一页</a>{{/if}}
-                <span style="margin-left: 60px";></span>
-                {{#if hasNextPage}}<a id="nextPage" href="javascript:void(0)">后一页</a>{{/if}}
+            <td colspan="3">
+                <div style="float:left;" id="pageInfo">{{page-info this}}</div>
+                <div style="float:right;">
+                    {{#if hasPrevPage}}<a id="prevPage" href="javascript:void(0)" style="margin-right:20px;">前一页</a>{{/if}}
+                    {{#if hasNextPage}}<a id="nextPage" href="javascript:void(0)" style="margin-left:30px;">后一页</a>{{/if}}
+                </div>
             </td>
         </tr>
+        </tfoot>
     </table>
 </script>
 <#include "common_js.ftl">

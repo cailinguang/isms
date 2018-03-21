@@ -2,11 +2,11 @@
     <div class="container-fluid">
         <div class="isms_header">
             <div><img src="images/SAIClogo.png" alt="SAIC" style="float:left"></div>
-            <div><h1 style="padding: 40px">ISMS信息安全管理平台<small>&nbsp;&nbsp;test version(内测版)</small></h1></div>
+            <div><h1 style="padding: 40px">ISMS信息安全管理平台<small></small></h1></div>
         </div>
         <div id="navbar" class="navbar-collapse collapse">
             <ul class="nav navbar-nav">
-                <li id="nav_basic" <#if requestURI=="/basic_info">class="active"</#if> ><a href="/basic_info">基础信息</a></li>
+                <#--<li id="nav_basic" <#if requestURI=="/basic_info">class="active"</#if> ><a href="/basic_info">基础信息</a></li>-->
                 <#if auth??>
                 <#list menus as m>
                     <li id="nav_${m.menuId}" <#if requestURI==m.menuUrl>class="active"</#if> ><a href="${m.menuUrl}">${m.menuName}</a></li>

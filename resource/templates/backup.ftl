@@ -28,7 +28,7 @@
                 <td align="center">{{path}}</td>
                 <td>
                     <button class="btn btn-default" type="button" onclick="restore('{{date}}')">还原</button>
-                    <button class="btn btn-default" type="button" onclick="download('{{date}}')">下载</button>
+                    <#--<button class="btn btn-default" type="button" onclick="download('{{date}}')">下载</button>-->
                     <button class="btn btn-default" type="button" onclick="deleteR('{{date}}')">删除</button>
                 </td>
             </tr>

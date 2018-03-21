@@ -18,7 +18,7 @@
     <#if !readonly>
     <p class="text-right">
         <button class="btn btn-default" type="button" id="update">Update</button>
-        <button class="btn btn-default" type="button" id="import">Import</button>
+        <#--<button class="btn btn-default" type="button" id="import">Import</button>-->
     </p>
     </#if>
 

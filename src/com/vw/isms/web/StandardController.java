@@ -43,6 +43,8 @@ public class StandardController {
     @Autowired
     private StandardRepository repository;
     @Autowired
+    private UserRepository userRepository;
+    @Autowired
     private String backupPath;
     @Autowired
     private String uploadDir;
@@ -75,6 +77,7 @@ public class StandardController {
             for (Standard standard : result.getResults()) {
                 resp.add(new StandardSearchResult(standard));
             }
+            resp.setCount(result.getCount());
             return resp;
         } catch (RepositoryException e) {
             throw new EventProcessingException(e);
@@ -460,10 +463,13 @@ public class StandardController {
      */
     @RequestMapping(value = {"/api/properties/data/{evidenceId}"}, method = {org.springframework.web.bind.annotation.RequestMethod.DELETE}, produces = {"application/json"})
     @ResponseBody
-    public GenericResponse deleteData(@PathVariable Long evidenceId,@RequestBody EvidenceSearchRequest req)
-            throws RepositoryException, IOException {
+    public GenericResponse deleteData(@PathVariable Long evidenceId,@RequestBody EvidenceSearchRequest req,Authentication authentication)
+            throws Exception {
         Data src = this.repository.getData(evidenceId.longValue());
         String absPath = this.repository.getEvidencePath(src.getPath());
+        if(!this.userRepository.isSameDept(src.getUserName(),authentication.getName())){
+            throw new EventProcessingException("Not allowed to delete different departmental files.");
+        }
         this.repository.deleteData(evidenceId.longValue());
         this.repository.deleteDataMappingRelation(req.getClassId(),evidenceId);
         FileUtils.forceDelete(new File(absPath));
@@ -567,10 +573,13 @@ public class StandardController {
      */
     @RequestMapping(value = {"/api/properties/security/{evidenceId}"}, method = {org.springframework.web.bind.annotation.RequestMethod.DELETE}, produces = {"application/json"})
     @ResponseBody
-    public GenericResponse deleteSecurity(@PathVariable Long evidenceId,@RequestBody EvidenceSearchRequest req)
-            throws RepositoryException, IOException {
+    public GenericResponse deleteSecurity(@PathVariable Long evidenceId,@RequestBody EvidenceSearchRequest req,Authentication authentication)
+            throws Exception {
         Data src = this.repository.getSecurity(evidenceId.longValue());
         String absPath = this.repository.getEvidencePath(src.getPath());
+        if(!this.userRepository.isSameDept(src.getUserName(),authentication.getName())){
+            throw new EventProcessingException("Not allowed to delete different departmental files.");
+        }
         this.repository.deleteSecurity(evidenceId.longValue());
         this.repository.deleteDataMappingRelation(req.getClassId(),evidenceId);
         FileUtils.forceDelete(new File(absPath));

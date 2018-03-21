@@ -127,6 +127,18 @@ public class UserRepository
       return users.size()>0?users.get(0):null;
 
   }
+
+  public boolean isSameDept(String userNameA,String userNameB) throws RepositoryException{
+      User userA = getUser(userNameA);
+      User userB = getUser(userNameB);
+
+      if(userA!=null && userB!=null){
+          if(userA.getDepartment()==null&&userB.getDepartment()==null) return true;
+          if(userA.getDepartment()!=null&&userB.getDepartment()!=null && userA.getDepartment().equals(userB.getDepartment())) return true;
+      }
+      return false;
+
+  }
   
   public void deleteUser(User user)
     throws RepositoryException
