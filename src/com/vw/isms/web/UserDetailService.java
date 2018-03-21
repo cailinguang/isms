@@ -61,7 +61,7 @@ public class UserDetailService implements UserDetailsService {
                 list.add(new SimpleGrantedAuthority("ROLE_" + role));
             }
         }
-        if(username.equals("admin")){
+        if(username.equals("useradmin")){
             list.add(new SimpleGrantedAuthority("PER_Admin"));
         }
 

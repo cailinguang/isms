@@ -86,7 +86,7 @@ public class AdminController {
     public User deleteUser(@PathVariable String userName)
             throws RepositoryException {
         User user = this.repository.getUser(userName);
-        if (user.getRole().equals("Admin")) {
+        if (user.getUserName().equals("useradmin")) {
             throw new RepositoryException("Cannot delete admin.");
         }
         this.repository.deleteUser(user);

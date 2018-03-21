@@ -12,7 +12,7 @@
     </div>
     <div class="row" style="margin-top: 10px">
         <div class="col-md-3">
-            <form action="/login" method="post">
+            <form action="/login" method="post" onsubmit="return uatVersion()">
                 <div class="input-group">
                     <span class="input-group-addon" style="width: 100px">User Name</span>
                     <input type="text" class="form-control" name="username"/>
@@ -27,5 +27,12 @@
         </div>
     </div>
 </div>
+<#--测试版本弹出框-->
+<script type="text/javascript">
+    function uatVersion() {
+       alert('current version:UAT');
+       return true;
+    }
+</script>
 </body>
 </html>

@@ -168,15 +168,15 @@ public class Application {
         if (System.getProperty("resetAdmin") != null) {
             UserRepository repo = (UserRepository) context.getBean(UserRepository.class);
             try {
-                repo.changePassword("admin", "admin");
+                repo.changePassword("useradmin", "useradmin");
                 System.out.println("admin password has been reset to admin");
             } catch (RepositoryException e) {
                 User admin = new User();
-                admin.setUserName("admin");
+                admin.setUserName("useradmin");
                 admin.setRole("Admin");
-                admin.setPassword("admin");
+                admin.setPassword("useradmin");
                 repo.createUser(admin);
-                repo.changePassword("admin", "admin");
+                repo.changePassword("useradmin", "useradmin");
                 System.out.println("Created admin with password admin");
             }
         }

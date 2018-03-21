@@ -58,7 +58,7 @@ public class PasswordUtil {
     }
 
     public static boolean isCompliantPassword(String name,String password) {
-        int length = "admin".equals(name)?PasswordUtil.adminUserLength:PasswordUtil.normalUserLength;
+        int length = "useradmin".equals(name)?PasswordUtil.adminUserLength:PasswordUtil.normalUserLength;
         if (password.length() < length) {
             return false;
         }
@@ -83,7 +83,7 @@ public class PasswordUtil {
 
 
     public static String randomCompliantPassword(String name){
-        int length = "admin".equals(name)?PasswordUtil.adminUserLength:PasswordUtil.normalUserLength;
+        int length = "useradmin".equals(name)?PasswordUtil.adminUserLength:PasswordUtil.normalUserLength;
         String password;
         do {
             password = RandomStringUtils.random(length,chars);
@@ -94,7 +94,6 @@ public class PasswordUtil {
     public static void main(String[] args) {
         String name = "test";
 
-        System.out.println(new BCryptPasswordEncoder().encode("admin"));
-        System.out.println(new BCryptPasswordEncoder().encode("abcd"));
+        System.out.println(new BCryptPasswordEncoder().encode("useradmin"));
     }
 }
