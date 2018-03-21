@@ -4,7 +4,7 @@
     <table class="table">
         <tr>
             <td>
-                <a href="javascript:void(0)" resource_id="{{../id}}" action="edit">{{name.value}}</a>
+                <a href="javascript:void(0)" resource_id="{{../id}}" action="edit" style="font-weight: bold;">{{name.value}}</a>
                 <br/>
                 <span class="maturity-level-inline" data-toggle="tooltip" title="{{description.value}}">
                     Maturity Level: {{formatScore ../score}}
