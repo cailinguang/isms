@@ -149,22 +149,20 @@ public class Application {
         };
     }
 
+    //update database
     public static void updateDatabase(ConfigurableApplicationContext context) {
         System.out.println("Updating database.");
         JdbcTemplate template = (JdbcTemplate) context.getBean(JdbcTemplate.class);
-        template.execute("ALTER TABLE APP.ISMS_USERS ADD COLUMN REALNAME VARCHAR(64)");
-        template.execute("ALTER TABLE APP.ISMS_USERS ADD COLUMN TEL VARCHAR(64)");
-        template.execute("ALTER TABLE APP.ISMS_USERS ADD COLUMN DEPARTMENT VARCHAR(64)");
-        template.execute("ALTER TABLE APP.ISMS_USERS ADD COLUMN EMAIL VARCHAR(64)");
+        template.execute("alter table APP.ISMS_LOGIN alter column LAST_SIX_PASSWORD set data type VARCHAR(400)");
     }
 
     public static void main(String[] args)
             throws RepositoryException {
         ConfigurableApplicationContext context = SpringApplication.run(Application.class, args);
-        /*try {
+        try {
             updateDatabase(context);
         } catch (Exception localException) {
-        }*/
+        }
         if (System.getProperty("resetAdmin") != null) {
             UserRepository repo = (UserRepository) context.getBean(UserRepository.class);
             try {

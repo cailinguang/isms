@@ -55,7 +55,7 @@
         </thead>
         <tbody>
         {{#each results}}
-        <tr>
+        <tr item_id="{{this.standardId}}">
             <td>{{this.name}}</td>
             <td>{{this.standardType}}</td>
             <td align="center">
@@ -71,6 +71,7 @@
                     <#if !readonly>
                     	<a class="btn btn-default" href="/edit_evaluation?id={{this.standardId}}">修改</a>
                     	<button class="btn btn-default" standard="{{this.standardId}}" action="archive"></button>
+                        <button class="btn btn-default" standard="{{this.standardId}}" action="delete">删除</button>
                     </#if>
                 </#if>
             </td>
@@ -114,9 +115,29 @@
                     }
             );
         });
+
+        var deleteAction = search_results.find("[standard='" + result.standardId + "'][action='delete']");
+        deleteAction.unbind();
+        deleteAction.click(function () {
+            if(!confirm('Are you sure delete?')) return false;
+            IsmsRequester.requestJson(
+                    "/api/standards/" + result.standardId,
+                    "DELETE",
+                    {},
+                    function(response) {
+                        search_results.find("tr[item_id='"+result.standardId+"']").remove();
+                        window._response.count--;
+                        $("#pageInfo").html(Handlebars.compile('{{page-info this}}')(window._response));
+                    }
+            );
+        });
     }
 
+
+    window._pageNumber = 0;
+    window._response = null;
     function updateSearchResults(namePattern, standardType, archived, pageNumber) {
+        window._pageNumber = pageNumber;
         IsmsRequester.requestJson(
                 "${libraryUri}",
                 "POST",
@@ -131,6 +152,7 @@
                     if (response.pageNumber > 0) {
                         response.hasPrevPage = true;
                     }
+                    window._response = response;
                     $("#standard_search_results").html(search_results_template(response));
                     var prevPage = $("#prevPage");
                     if (prevPage.length && response.pageNumber > 0) {

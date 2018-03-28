@@ -2280,8 +2280,8 @@ public class JdbcStandardRepository
         Map<String, Object> values = new HashMap();
 
         if(!StringUtils.isEmpty(search.getUserName())){
-            sql.append("and USERNAME like :userName ");
-            values.put("userName","%"+search.getUserName()+"%");
+            sql.append("and LOWER(USERNAME) like :userName ");
+            values.put("userName","%"+search.getUserName().toLowerCase()+"%");
         }
         if(!StringUtils.isEmpty(search.getStartDate())){
             sql.append("and OPERATION_TIME >= :startDate ");
@@ -2363,6 +2363,18 @@ public class JdbcStandardRepository
             });
         }*/
 
+
+    }
+
+    @Override
+    public void deleteStandard(Long standardId){
+        this.jdbcTemplate.update("DELETE FROM APP.ISMS_STANDARD WHERE STANDARD_ID=?",standardId);
+        this.jdbcTemplate.update("DELETE FROM APP.ISMS_STANDARD_NODE WHERE STANDARD_ID=?",standardId);
+        this.jdbcTemplate.update("DELETE FROM APP.ISMS_STRING_PROPERTY WHERE STANDARD_ID=?",standardId);
+        this.jdbcTemplate.update("DELETE FROM APP.ISMS_EVIDENCE_PROPERTY WHERE STANDARD_ID=?",standardId);
+        this.jdbcTemplate.update("DELETE FROM APP.ISMS_FLOAT_PROPERTY WHERE STANDARD_ID=?",standardId);
+        this.jdbcTemplate.update("DELETE FROM APP.ISMS_ENUM_PROPERTY WHERE STANDARD_ID=?",standardId);
+        this.jdbcTemplate.update("DELETE FROM APP.ISMS_BOOLEAN_PROPERTY WHERE STANDARD_ID=?",standardId);
 
     }
 }

@@ -232,4 +232,6 @@ public abstract interface StandardRepository
   List<Menu> queryUserMenu(String username);
 
     void exportDerby(String path);
+
+    void deleteStandard(Long standardId);
 }

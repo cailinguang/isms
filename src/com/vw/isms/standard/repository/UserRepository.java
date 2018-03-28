@@ -257,6 +257,10 @@ public class UserRepository
       });
   }
 
+  public int countUsersByRole(String roleId){
+      return this.jdbcTemplate.queryForObject("select count(*) from APP.ISMS_USER_ROLE ur where ur.ROLE_ID=?",new Object[]{roleId},Integer.class);
+  }
+
   public Login queryUserLogin(String username){
       List<Login> logins = this.jdbcTemplate.query("select * from APP.ISMS_LOGIN where USERNAME=?", new Object[]{username}, new RowMapper<Login>() {
           @Override

@@ -209,6 +209,14 @@ public class StandardController {
         return GenericResponse.success();
     }
 
+    @RequestMapping(value = {"/api/standards/{standardId}"}, method = {RequestMethod.DELETE}, produces = {"application/json"})
+    @ResponseBody
+    public GenericResponse deleteStandardArchive(@PathVariable Long standardId)
+            throws RepositoryException {
+        this.repository.deleteStandard(standardId);
+        return GenericResponse.success();
+    }
+
     @RequestMapping(value = {"/api/properties/evidences/{evidenceId}"}, method = {org.springframework.web.bind.annotation.RequestMethod.DELETE}, produces = {"application/json"})
     @ResponseBody
     public GenericResponse deleteEvidence(@PathVariable Long evidenceId,@RequestBody EvidenceSearchRequest req)
@@ -597,7 +605,7 @@ public class StandardController {
     public Object createSite(@RequestBody Site site) throws RepositoryException, IOException {
         site.setSiteId(IdUtil.next());
         this.repository.createSite(site);
-        return site;
+        return this.repository.querySiteById(site.getSiteId());
     }
 
     @RequestMapping(value = {"/api/site"}, method = {RequestMethod.PATCH}, produces = {"application/json"})
@@ -696,7 +704,7 @@ public class StandardController {
     @ResponseBody
     public Object deleteDept(@PathVariable String deptId) throws Exception{
         if(this.repository.countUserByDeptId(deptId)>0){
-            throw new EventProcessingException("Have user belongs to the Department.");
+            throw new EventProcessingException("there are users belong to the department,cannot be deleted.");
         }
         this.repository.deleteDeptByDeptId(deptId);
         return GenericResponse.success();
@@ -774,7 +782,10 @@ public class StandardController {
 
     @RequestMapping(value = {"/api/role/{roleId}"}, method = {org.springframework.web.bind.annotation.RequestMethod.DELETE}, produces = {"application/json"})
     @ResponseBody
-    public Object deleteRole(@PathVariable String roleId){
+    public Object deleteRole(@PathVariable String roleId) throws Exception{
+        if(this.userRepository.countUsersByRole(roleId)>0){
+            throw new EventProcessingException("there are users assigned this role,cannot be deleted.");
+        }
         this.repository.deleteRoleByRoleId(roleId);
         return GenericResponse.success();
     }

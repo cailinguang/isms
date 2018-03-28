@@ -15,7 +15,7 @@
         </div>
         <div class="form-group">
             <label for="endDate">End Date</label>
-            <input type="email" class="form-control" id="endDate" placeholder="End Date">
+            <input type="text" class="form-control" id="endDate" placeholder="End Date" title="Please enter a date greater than or equal to the start date">
         </div>
         <div class="form-group">
             <label for="userName">UserName</label>
@@ -65,12 +65,21 @@
 <script type="text/javascript">
     var search_results_template = Handlebars.compile($("#depts").html());
 
-    $("#startDate,#endDate").datetimepicker({
+    var pickerOptions = {
         format:'yyyy-mm-dd',
         autoclose:true,
         todayBtn:true,
         minView:3
+    }
+    $("#startDate").datetimepicker(pickerOptions).on('changeDate',function () {
+        var endDate = $("#endDate");
+        endDate.datetimepicker('setStartDate',$(this).val());
+        if(endDate.val()!='' && $(this).val()>endDate.val()){
+            endDate.val($(this).val());
+        }
     });
+
+    $("#endDate").datetimepicker(pickerOptions);
 
     function updateSearchResults(search, pageNumber) {
         IsmsRequester.requestJson(
@@ -104,6 +113,12 @@
     }
 
     $("#search_button").click(function () {
+        var startDate = $("#startDate").val();
+        var endDate = $("#endDate").val();
+        if(startDate!='' && endDate!='' && startDate>endDate){
+            IsmsErrorReporter.reportError('The end date must be greater than or equal to the start date ');
+            return false;
+        }
         var search = {
             startDate:$("#startDate").val(),
             endDate:$("#endDate").val(),
