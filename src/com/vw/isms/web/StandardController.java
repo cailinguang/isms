@@ -717,6 +717,7 @@ public class StandardController {
     }
 
     @RequestMapping(value = {"/api/vulnerability"}, method = {org.springframework.web.bind.annotation.RequestMethod.POST}, produces = {"application/json"})
+    @ResponseBody
     public Object saveVulnerability(@RequestBody Vulnerability vulnerability){
         vulnerability.setId(IdUtil.next());
         this.repository.createVulnerability(vulnerability);

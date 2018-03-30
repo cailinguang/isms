@@ -2073,9 +2073,9 @@ public class JdbcStandardRepository
         StringBuilder builder = new StringBuilder("select * from APP.ISMS_VULNERABILITY");
         Map<String, Object> values = new HashMap();
 
-        if(search.getSystem()!=null&&!search.getSystem().equals("")){
-            builder.append(" where SYSTEM like :system");
-            values.put("system","%"+search.getSystem()+"%");
+        if(search.getName()!=null&&!search.getName().equals("")){
+            builder.append(" where NAME like :name");
+            values.put("name","%"+search.getName()+"%");
         }
 
         return this.namedTemplate.query(builder.toString(), values, new PagingResultSetExtractor<Vulnerability>(search.getPageNumber(), search.getItemPerPage()) {
@@ -2083,10 +2083,14 @@ public class JdbcStandardRepository
             public Vulnerability mapRow(ResultSet rs) throws SQLException {
                 Vulnerability item = new Vulnerability();
                 item.setId(rs.getLong("ID"));
-                item.setDescripiton(rs.getString("DESCRIPTION"));
-                item.setSystem(rs.getString("SYSTEM"));
-                item.setReleaseDate(rs.getDate("RELEASE_DATE"));
-                item.setSuggestion(rs.getString("SUGGESTION"));
+                item.setName(rs.getString("NAME"));
+                item.setQuantity(rs.getInt("QUANTITY"));
+                item.setDiscoverer(rs.getString("DISCOVERER"));
+                item.setCreater(rs.getString("CREATER"));
+                item.setUrl(rs.getString("URL"));
+                item.setDirector(rs.getString("DIRECTOR"));
+                item.setDiscovererTime(rs.getDate("DISCOVERER_TIME"));
+                item.setSolvingTime(rs.getDate("SOLVING_TIME"));
                 return item;
             }
 
@@ -2104,10 +2108,14 @@ public class JdbcStandardRepository
             public Vulnerability extractData(ResultSet rs) throws SQLException, DataAccessException {
                 Vulnerability item = new Vulnerability();
                 item.setId(rs.getLong("ID"));
-                item.setDescripiton(rs.getString("DESCRIPTION"));
-                item.setSystem(rs.getString("SYSTEM"));
-                item.setReleaseDate(rs.getDate("RELEASE_DATE"));
-                item.setSuggestion(rs.getString("SUGGESTION"));
+                item.setName(rs.getString("NAME"));
+                item.setQuantity(rs.getInt("QUANTITY"));
+                item.setDiscoverer(rs.getString("DISCOVERER"));
+                item.setCreater(rs.getString("CREATER"));
+                item.setUrl(rs.getString("URL"));
+                item.setDirector(rs.getString("DIRECTOR"));
+                item.setDiscovererTime(rs.getDate("DISCOVERER_TIME"));
+                item.setSolvingTime(rs.getDate("SOLVING_TIME"));
                 return item;
             }
         });
@@ -2118,10 +2126,14 @@ public class JdbcStandardRepository
         SimpleJdbcInsertion insertion = new SimpleJdbcInsertion();
         insertion.withSchema("APP").withTable("ISMS_VULNERABILITY")
                 .withColumnValue("ID", Long.valueOf(vulnerability.getId()))
-                .withColumnValue("DESCRIPTION", vulnerability.getDescripiton())
-                .withColumnValue("SYSTEM", vulnerability.getSystem())
-                .withColumnValue("RELEASE_DATE", vulnerability.getReleaseDate())
-                .withColumnValue("SUGGESTION", vulnerability.getSuggestion());
+                .withColumnValue("NAME", vulnerability.getName())
+                .withColumnValue("QUANTITY", vulnerability.getQuantity())
+                .withColumnValue("DISCOVERER", vulnerability.getDiscoverer())
+                .withColumnValue("CREATER", vulnerability.getCreater())
+                .withColumnValue("URL", vulnerability.getUrl())
+                .withColumnValue("DIRECTOR", vulnerability.getDirector())
+                .withColumnValue("DISCOVERER_TIME", vulnerability.getDiscovererTime())
+                .withColumnValue("SOLVING_TIME", vulnerability.getSolvingTime());
         insertion.insert(this.jdbcTemplate);
     }
 
@@ -2134,10 +2146,14 @@ public class JdbcStandardRepository
     public void updateVulnerability(Vulnerability vulnerability){
         SimpleJdbcUpdate update = new SimpleJdbcUpdate();
         update.withSchema("APP").withTable("ISMS_VULNERABILITY").withKey("ID", Long.valueOf(vulnerability.getId()))
-                .withColumnValue("DESCRIPTION", vulnerability.getDescripiton())
-                .withColumnValue("SYSTEM", vulnerability.getSystem())
-                .withColumnValue("RELEASE_DATE", vulnerability.getReleaseDate())
-                .withColumnValue("SUGGESTION", vulnerability.getSuggestion());
+                .withColumnValue("NAME", vulnerability.getName())
+                .withColumnValue("QUANTITY", vulnerability.getQuantity())
+                .withColumnValue("DISCOVERER", vulnerability.getDiscoverer())
+                .withColumnValue("CREATER", vulnerability.getCreater())
+                .withColumnValue("URL", vulnerability.getUrl())
+                .withColumnValue("DIRECTOR", vulnerability.getDirector())
+                .withColumnValue("DISCOVERER_TIME", vulnerability.getDiscovererTime())
+                .withColumnValue("SOLVING_TIME", vulnerability.getSolvingTime());
         update.update(this.namedTemplate);
     }
 

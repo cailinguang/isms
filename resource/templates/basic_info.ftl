@@ -7,12 +7,13 @@
 <body>
 <div class="container">
 	<#include "header.ftl">
-    <div class="row">
-		<#escape x as x?html>  
+    <div>
+        <img src="/images/home.jpg" width="100%"/>
+		<#--<#escape x as x?html>
 			<#noescape>
 			  ${content}
 			</#noescape>
-		</#escape>
+		</#escape>-->
 	</div>
 </div>
 <#include "common_js.ftl">
