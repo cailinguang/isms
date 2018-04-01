@@ -20,6 +20,7 @@
         <button class="btn btn-default" type="button" onclick="location.href='/site'">Back</button>
         <button class="btn btn-default" type="button" id="update">Update</button>
         <#--<button class="btn btn-default" type="button" id="import">Import</button>-->
+        <button class="btn btn-default" type="button" id="export">Export</button>
     </p>
     </#if>
 
@@ -253,6 +254,10 @@
                     },
                 },
             });
+        });
+
+        $("#export").on('click',function () {
+           window.location.href='/api/properties/network-security/'+siteId+'/'+target+'/export';
         });
     }
 

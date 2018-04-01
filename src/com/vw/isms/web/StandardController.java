@@ -27,6 +27,10 @@ import org.apache.commons.io.FileUtils;
 import org.apache.commons.io.FilenameUtils;
 import org.apache.commons.lang3.ArrayUtils;
 import org.apache.poi.hssf.usermodel.*;
+import org.apache.poi.ss.usermodel.BorderStyle;
+import org.apache.poi.ss.usermodel.VerticalAlignment;
+import org.apache.poi.ss.util.CellRangeAddress;
+import org.apache.poi.ss.util.RegionUtil;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.core.io.FileSystemResource;
 import org.springframework.http.HttpStatus;
@@ -660,6 +664,138 @@ public class StandardController {
     public GenericResponse updateTargetInfos(@PathVariable Long siteId,@PathVariable String target,@RequestBody NetworkSecurityRequest req) throws RepositoryException, IOException {
         this.repository.updateNetworkSecuritys(siteId,req.getNetworkEvaluations());
         return GenericResponse.success();
+    }
+
+
+    @RequestMapping(value = {"/api/properties/network-security/{siteId}/{target}/export"}, method = {org.springframework.web.bind.annotation.RequestMethod.GET})
+    public void exportTargetInfos(@PathVariable Long siteId,@PathVariable String target,HttpServletResponse response) throws RepositoryException, IOException {
+        Site site = this.repository.querySiteById(siteId);
+        List<NetworkEvaluation> results = this.repository.queryNetworkSecurityByTarget(siteId, target);
+
+        response.setHeader( "Content-Disposition", "attachment;filename=\""+ new String( (site.getSiteName()+"-"+target+"-Evaluation").getBytes( "gb2312" ), "ISO8859-1" )+ ".xls" + "\"" );
+
+        HSSFWorkbook wb = new HSSFWorkbook();
+        HSSFSheet sheet = wb.createSheet("table");  //创建table工作薄
+        HSSFRow row;
+        HSSFCell cell;
+
+        //style
+        HSSFCellStyle headerStyle = wb.createCellStyle();
+        HSSFFont font = wb.createFont();
+        font.setBold(true);
+        font.setFontHeightInPoints((short)14);
+        headerStyle.setFont(font);
+        headerStyle.setBorderBottom(BorderStyle.THIN);
+        headerStyle.setBorderLeft(BorderStyle.THIN);
+        headerStyle.setBorderRight(BorderStyle.THIN);
+        headerStyle.setBorderTop(BorderStyle.THIN);
+
+        //borderStyle
+        HSSFCellStyle borderStyle = wb.createCellStyle();
+        borderStyle.setBorderBottom(BorderStyle.THIN);
+        borderStyle.setBorderLeft(BorderStyle.THIN);
+        borderStyle.setBorderRight(BorderStyle.THIN);
+        borderStyle.setBorderTop(BorderStyle.THIN);
+        borderStyle.setVerticalAlignment(VerticalAlignment.CENTER);
+        borderStyle.setWrapText(true);
+
+        //title
+        row = sheet.createRow(0);
+        cell = row.createCell(0);
+        cell.setCellValue("序号");
+        cell.setCellStyle(headerStyle);
+        cell = row.createCell(1);
+        cell.setCellValue("测评对象");
+        cell.setCellStyle(headerStyle);
+        cell = row.createCell(2);
+        cell.setCellValue("测评指标");
+        cell.setCellStyle(headerStyle);
+        cell = row.createCell(3);
+        cell.setCellValue("控制项");
+        cell.setCellStyle(headerStyle);
+        cell = row.createCell(4);
+        cell.setCellValue("结果记录");
+        cell.setCellStyle(headerStyle);
+        cell = row.createCell(5);
+        cell.setCellValue("符合情况");
+        cell.setCellStyle(headerStyle);
+        cell = row.createCell(6);
+        cell.setCellValue("备注");
+        cell.setCellStyle(headerStyle);
+
+        sheet.setColumnWidth(1,20*256);
+        sheet.setColumnWidth(2,20*256);
+        sheet.setColumnWidth(3,40*256);
+        sheet.setColumnWidth(4,20*256);
+        sheet.setColumnWidth(5,20*256);
+        sheet.setColumnWidth(6,20*256);
+
+        for(int i = 0; i < results.size(); i++) {
+            row = sheet.createRow(i+1);//创建表格行
+            cell = row.createCell(0);
+            cell.setCellValue(i+1);
+
+            NetworkEvaluation networkEvaluation = results.get(i);
+
+            cell = row.createCell(1);
+            cell.setCellValue(networkEvaluation.getEvaluationTarget());
+            cell.setCellStyle(borderStyle);
+            cell = row.createCell(2);
+            cell.setCellValue(networkEvaluation.getEvaluationIndex());
+            cell.setCellStyle(borderStyle);
+            cell = row.createCell(3);
+            cell.setCellValue(networkEvaluation.getControlItem());
+            cell.setCellStyle(borderStyle);
+            cell = row.createCell(4);
+            cell.setCellValue(networkEvaluation.getResult());
+            cell.setCellStyle(borderStyle);
+            cell = row.createCell(5);
+            cell.setCellValue(networkEvaluation.getConformity());
+            cell.setCellStyle(borderStyle);
+            cell = row.createCell(6);
+            cell.setCellValue(networkEvaluation.getRemark());
+            cell.setCellStyle(borderStyle);
+        }
+
+
+        for(int i=1;i<sheet.getLastRowNum();i++){
+            if(sheet.getRow(i).getCell(1).getStringCellValue().equals(sheet.getRow(i+1).getCell(1).getStringCellValue())){
+                int j=1;
+                while(i+1+j<=sheet.getLastRowNum() && sheet.getRow(i).getCell(1).getStringCellValue().equals(sheet.getRow(i+1+j).getCell(1).getStringCellValue())){
+                    j++;
+                }
+                sheet.getRow(i+1).removeCell(sheet.getRow(i+1).getCell(1));
+                CellRangeAddress cra =new CellRangeAddress(i, i+j, 1, 1);
+                RegionUtil.setBorderBottom(1, cra, sheet); // 下边框
+                RegionUtil.setBorderLeft(1, cra, sheet); // 左边框
+                RegionUtil.setBorderRight(1, cra, sheet); // 有边框
+                RegionUtil.setBorderTop(1, cra, sheet); // 上边框
+                sheet.addMergedRegion(cra);
+
+                i=i+j;
+            }
+        }
+
+        for(int i=1;i<sheet.getLastRowNum();i++){
+            if(sheet.getRow(i).getCell(2).getStringCellValue().equals(sheet.getRow(i+1).getCell(2).getStringCellValue())){
+                int j=1;
+                while(i+1+j<=sheet.getLastRowNum() && sheet.getRow(i).getCell(2).getStringCellValue().equals(sheet.getRow(i+1+j).getCell(2).getStringCellValue())){
+                    j++;
+                }
+                sheet.getRow(i+1).removeCell(sheet.getRow(i+1).getCell(2));
+                CellRangeAddress cra =new CellRangeAddress(i, i+j, 2, 2);
+                RegionUtil.setBorderBottom(1, cra, sheet); // 下边框
+                RegionUtil.setBorderLeft(1, cra, sheet); // 左边框
+                RegionUtil.setBorderRight(1, cra, sheet); // 有边框
+                RegionUtil.setBorderTop(1, cra, sheet); // 上边框
+                sheet.addMergedRegion(cra);
+
+                i=i+j;
+            }
+        }
+
+        wb.write(response.getOutputStream());
+        wb.close();
     }
 
     @RequestMapping(value = {"/api/properties/network-security/{target}/import"}, method = {org.springframework.web.bind.annotation.RequestMethod.POST})
