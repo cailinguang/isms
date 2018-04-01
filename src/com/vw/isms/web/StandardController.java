@@ -25,6 +25,7 @@ import com.vw.isms.web.request.*;
 import com.vw.isms.web.response.*;
 import org.apache.commons.io.FileUtils;
 import org.apache.commons.io.FilenameUtils;
+import org.apache.commons.lang3.ArrayUtils;
 import org.apache.poi.hssf.usermodel.*;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.core.io.FileSystemResource;
@@ -241,6 +242,7 @@ public class StandardController {
         if (StringUtils.isEmpty(mpf.getOriginalFilename())) {
             throw new EventProcessingException("No file uploaded.");
         }
+        verifyFileType(mpf.getOriginalFilename());
 
         String classId = request.getParameter("classId");
         if(classId==null||classId.equals("")){
@@ -391,6 +393,14 @@ public class StandardController {
         }
     }
 
+
+    private String[] types = "xls,xlsx,doc,docx,msg,ppt,jpg,png,pdf,vsd,vsdx".split(",");
+    private void verifyFileType(String fileName){
+        String suffix = FilenameUtils.getExtension(fileName);
+        if(!ArrayUtils.contains(types,suffix)){
+            throw new RuntimeException("It is not allowed to upload this type of attachment.(only alow:xls,xlsx,doc,docx,msg,ppt,jpg,png,pdf,vsd,vsdx)");
+        }
+    }
     /**
      * 上传数据分类分级
      * @param request
@@ -412,6 +422,7 @@ public class StandardController {
         if (StringUtils.isEmpty(mpf.getOriginalFilename())) {
             throw new EventProcessingException("No file uploaded.");
         }
+        verifyFileType(mpf.getOriginalFilename());
 
         String classId = request.getParameter("classId");
         if(classId==null||classId.equals("")){
@@ -522,6 +533,7 @@ public class StandardController {
         if (StringUtils.isEmpty(mpf.getOriginalFilename())) {
             throw new EventProcessingException("No file uploaded.");
         }
+        verifyFileType(mpf.getOriginalFilename());
 
         String classId = request.getParameter("classId");
         if(classId==null||classId.equals("")){
@@ -598,6 +610,14 @@ public class StandardController {
     @ResponseBody
     public Object querySites(@RequestBody SiteSearchRequest search) throws RepositoryException, IOException {
         return this.repository.querySites(search);
+    }
+
+    @RequestMapping(value = {"/api/export_site"})
+    public void exportSite(SiteSearchRequest search,HttpServletResponse response) throws Exception {
+        search.setPageNumber(0);
+        search.setItemPerPage(Integer.MAX_VALUE);
+        List<Site> results = this.repository.querySites(search).getResults();
+        ExportUtil.exportExcel("等保标准",results,new String[]{"互联网应用网站名称","服务器位置","网站首页URL","等保定级","负责部门","联系人","联系方式"},new String[]{"siteName","sitePath","siteUrl","siteGrade","siteDept","siteContacts","siteContactWay"},response);
     }
 
     @RequestMapping(value = {"/api/site"}, method = {org.springframework.web.bind.annotation.RequestMethod.POST}, produces = {"application/json"})
@@ -736,6 +756,14 @@ public class StandardController {
         return GenericResponse.success();
     }
 
+    @RequestMapping(value = {"/api/export_vulnerability"})
+    public void exportVulnerability(VulnerabilitySearchRequest search,HttpServletResponse response) throws Exception {
+        search.setPageNumber(0);
+        search.setItemPerPage(Integer.MAX_VALUE);
+        List<Vulnerability> results = this.repository.queryVulnerabilities(search).getResults();
+        ExportUtil.exportExcel("漏洞管理",results,new String[]{"漏洞名称","数量","漏洞发现方","录入人","涉及URL","系统负责人","发现时间","解决时间"},new String[]{"name","quantity","discoverer","creater","url","director","discovererTime","solvingTime"},response);
+    }
+
     @RequestMapping(value="/api/risk_library",method = RequestMethod.POST)
     public Object queryRisks() throws Exception{
         return ResolveExcel.resolveRisks();
@@ -819,52 +847,10 @@ public class StandardController {
 
     @RequestMapping(value = {"/api/export_auditLogs"})
     public void exportAuditLogs(AuditSearchRequest search,HttpServletResponse response) throws Exception {
-        response.setHeader( "Content-Disposition", "attachment;filename=\""+ new String( "审计日志".getBytes( "gb2312" ), "ISO8859-1" )+ ".xls" + "\"" );
-
         search.setPageNumber(0);
         search.setItemPerPage(Integer.MAX_VALUE);
         List<AuditLog> auditLogs = this.repository.queryAuditLog(search).getResults();
-
-        HSSFWorkbook wb = new HSSFWorkbook();
-        HSSFSheet sheet = wb.createSheet("table");  //创建table工作薄
-        HSSFRow row;
-        HSSFCell cell;
-
-        //style
-        HSSFCellStyle cellStyle = wb.createCellStyle();
-        HSSFFont font = wb.createFont();
-        font.setBold(true);
-        font.setFontHeightInPoints((short)14);
-        cellStyle.setFont(font);
-
-        sheet.setColumnWidth(0, MSExcelUtil.pixel2WidthUnits(160));
-
-        //title
-        row = sheet.createRow(0);
-        cell = row.createCell(0);
-        cell.setCellValue("时间");
-        cell.setCellStyle(cellStyle);
-        cell = row.createCell(1);
-        cell.setCellValue("用户");
-        cell.setCellStyle(cellStyle);
-        cell = row.createCell(2);
-        cell.setCellValue("状态");
-        cell.setCellStyle(cellStyle);
-
-        SimpleDateFormat simpleDateFormat = new SimpleDateFormat("yyyy-MM-dd HH:mm:ss");
-        for(int i = 0; i < auditLogs.size(); i++) {
-            row = sheet.createRow(i+1);//创建表格行
-
-            cell = row.createCell(0);
-            cell.setCellValue(simpleDateFormat.format(auditLogs.get(i).getOperationDate()));
-            cell = row.createCell(1);
-            cell.setCellValue(auditLogs.get(i).getUserName());
-            cell = row.createCell(2);
-            cell.setCellValue(auditLogs.get(i).getOperation());
-        }
-
-        wb.write(response.getOutputStream());
-        wb.close();
+        ExportUtil.exportExcel("审计日志",auditLogs,new String[]{"时间","用户","状态"},new String[]{"operationDate","userName","operation"},response);
     }
 
     @RequestMapping(value = {"/api/backups"}, method = {org.springframework.web.bind.annotation.RequestMethod.POST}, produces = {"application/json"})

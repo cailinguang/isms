@@ -15,7 +15,8 @@ public class Site {
     private String siteDept;
     private String siteContacts;
 
-    private String siteDeptName;
+    private String siteContactWay;
+
 
     public Long getSiteId() {
         return siteId;
@@ -73,11 +74,11 @@ public class Site {
         this.siteContacts = siteContacts;
     }
 
-    public String getSiteDeptName() {
-        return siteDeptName;
+    public String getSiteContactWay() {
+        return siteContactWay;
     }
 
-    public void setSiteDeptName(String siteDeptName) {
-        this.siteDeptName = siteDeptName;
+    public void setSiteContactWay(String siteContactWay) {
+        this.siteContactWay = siteContactWay;
     }
 }

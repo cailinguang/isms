@@ -12,7 +12,7 @@
     </div>
     <div class="row" style="margin-top: 10px">
         <div class="col-md-3">
-            <form action="/login" method="post" onsubmit="return uatVersion()">
+            <form action="/login" method="post">
                 <div class="input-group">
                     <span class="input-group-addon" style="width: 100px">User Name</span>
                     <input type="text" class="form-control" name="username"/>

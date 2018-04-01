@@ -15,24 +15,26 @@
                 <#if !readonly>
                 <button id="create_button" class="btn btn-default" type="button">Create</button>
                 </#if>
+                <button id="export_button" class="btn btn-default" type="button">Export</button>
             </span>
         </div>
     </div>
     <br/>
-    <div id="standard_search_results"></div>
+    <div id="standard_search_results" class="table-responsive"></div>
 </div>
 
 <script id="sites" type="text/x-handlebars-template">
     <table class="table table-hover">
         <thead>
             <tr>
-                <th style="width:20%;min-width:180px;">互联网应用网站名称</th>
-                <th style="width:10%;min-width:150px;">服务器位置</th>
-                <th style="width:20%;min-width:150px;">网站首页URL</th>
-                <th style="width:10%;min-width:150px;">等保定级</th>
-                <th style="width:10%;min-width:150px;">负责部门</th>
-                <th style="width:10%;min-width:150px;">联系人</th>
-                <th style="width:10%;min-width:260px;"></th>
+                <th style="min-width:120px;">应用网站名称</th>
+                <th style="min-width:120px;">服务器位置</th>
+                <th style="min-width:120px;">网站首页URL</th>
+                <th style="min-width:80px;">等保定级</th>
+                <th style="min-width:80px;">负责部门</th>
+                <th style="min-width:80px;">联系人</th>
+                <th style="min-width:80px;">联系方式</th>
+                <th style="min-width:260px;"></th>
             </tr>
         </thead>
         <tbody>
@@ -42,8 +44,9 @@
                 <td>{{sitePath}}</td>
                 <td>{{siteUrl}}</td>
                 <td>{{siteGrade}}</td>
-                <td>{{siteDeptName}}</td>
+                <td>{{siteDept}}</td>
                 <td>{{siteContacts}}</td>
+                <td>{{siteContactWay}}</td>
                 <td style="text-align: center;width:200px;">
                     <button class="btn btn-default" evidence="{{this.id}}" action="evaluation">Evaluation</button>
                     <#if !readonly>
@@ -56,7 +59,7 @@
         </tbody>
         <tfoot>
             <tr>
-                <td colspan="7">
+                <td colspan="8">
                     <div style="float:left;" id="pageInfo">{{page-info this}}</div>
                     <div style="float:right;">
                         {{#if hasPrevPage}}<a id="prevPage" href="javascript:void(0)" style="margin-right:20px;">前一页</a>{{/if}}
@@ -67,29 +70,57 @@
         </tfoot>
     </table>
 </script>
-<div style="display:none" id="update_dialog">
-    <form>
-        <label for="update-siteId">网站名称:</label>
-        <input class="form-control" id="update-siteName">
+<div style="display:none;overflow: hidden;" id="update_dialog">
+    <form class="form-horizontal">
+        <div class="form-group">
+            <label class="col-sm-4 control-label"  for="update-siteName">网站名称:</label>
+            <div class="col-sm-7">
+                <input class="form-control" id="update-siteName" maxlength="64">
+            </div>
+        </div>
 
-        <label for="update-siteName">服务器位置:</label>
-        <input class="form-control" id="update-sitePath">
+        <div class="form-group">
+            <label class="col-sm-4 control-label"  for="update-sitePath">服务器位置:</label>
+            <div class="col-sm-7">
+                <input class="form-control" id="update-sitePath" maxlength="256">
+            </div>
+        </div>
 
-        <label for="update-siteName">网站首页URL:</label>
-        <input class="form-control" id="update-siteUrl">
+        <div class="form-group">
+            <label class="col-sm-4 control-label"  for="update-siteUrl">网站首页URL:</label>
+            <div class="col-sm-7">
+                <input class="form-control" id="update-siteUrl" maxlength="256">
+            </div>
+        </div>
 
-        <label for="update-siteName">等保定级:</label>
-        <input class="form-control" id="update-siteGrade">
+        <div class="form-group">
+            <label class="col-sm-4 control-label"  for="update-siteGrade">等保定级:</label>
+            <div class="col-sm-7">
+                <input class="form-control" id="update-siteGrade" maxlength="64">
+            </div>
+        </div>
 
-        <label for="update-siteName">负责部门:</label>
-        <select class="form-control selectpicker" id="update-siteDept" title="please select"  data-live-search="true">
-        <#list depts as d>
-            <option value="${d.deptId}">${d.deptName}</option>
-        </#list>
-        </select>
+        <div class="form-group">
+            <label class="col-sm-4 control-label"  for="update-siteDept">负责部门:</label>
+            <div class="col-sm-7">
+                <input class="form-control" id="update-siteDept" maxlength="64">
+            </div>
+        </div>
 
-        <label for="update-siteName">联系人:</label>
-        <input class="form-control" id="update-siteContracts">
+        <div class="form-group">
+            <label class="col-sm-4 control-label"  for="update-siteContacts">联系人:</label>
+            <div class="col-sm-7">
+                <input class="form-control" id="update-siteContacts" maxlength="64">
+            </div>
+        </div>
+
+        <div class="form-group">
+            <label class="col-sm-4 control-label"  for="update-siteContactWay">联系方式:</label>
+            <div class="col-sm-7">
+                <input class="form-control" id="update-siteContactWay" maxlength="256">
+            </div>
+        </div>
+
     </form>
     <div align="right">
         <button class="btn btn-primary" id="update-btn">Update</button>
@@ -109,7 +140,8 @@
     var updateSiteUrl = $("#update-siteUrl");
     var updateSiteGrade = $("#update-siteGrade");
     var updateSiteDept = $("#update-siteDept");
-    var updateSiteContracts = $("#update-siteContracts");
+    var updateSiteContacts = $("#update-siteContacts");
+    var updateSiteContactWay = $("#update-siteContactWay");
     var updateBtn = $("#update-btn");
 
     function setupUI(ui, sites) {
@@ -144,7 +176,8 @@
                                 updateSiteUrl.val(e.data.item.siteUrl);
                                 updateSiteGrade.val(e.data.item.siteGrade);
                                 updateSiteDept.val(e.data.item.siteDept).selectpicker('refresh');
-                                updateSiteContracts.val(e.data.item.siteContacts);
+                                updateSiteContacts.val(e.data.item.siteContacts);
+                                updateSiteContactWay.val(e.data.item.siteContactWay);
 
                                 updateBtn.html('Update').unbind();
                                 updateBtn.click(e.data,function(){
@@ -158,20 +191,22 @@
                                                 siteUrl:updateSiteUrl.val(),
                                                 siteGrade:updateSiteGrade.val(),
                                                 siteDept:updateSiteDept.val(),
-                                                siteContacts:updateSiteContracts.val()
+                                                siteContacts:updateSiteContacts.val(),
+                                                siteContactWay:updateSiteContactWay.val()
                                             },
                                             function (response) {
                                                 ui.find("[siteId='" + e.data.item.siteId + "'] td:eq(0)").html(response.siteName);
                                                 ui.find("[siteId='" + e.data.item.siteId + "'] td:eq(1)").html(response.sitePath);
                                                 ui.find("[siteId='" + e.data.item.siteId + "'] td:eq(2)").html(response.siteUrl);
                                                 ui.find("[siteId='" + e.data.item.siteId + "'] td:eq(3)").html(response.siteGrade);
-                                                ui.find("[siteId='" + e.data.item.siteId + "'] td:eq(4)").html(response.siteDeptName);
+                                                ui.find("[siteId='" + e.data.item.siteId + "'] td:eq(4)").html(response.siteDept);
                                                 ui.find("[siteId='" + e.data.item.siteId + "'] td:eq(5)").html(response.siteContacts);
+                                                ui.find("[siteId='" + e.data.item.siteId + "'] td:eq(6)").html(response.siteContactWay);
                                                 e.data.item = response;
                                                 dialog.dialog('close');
                                             });
                                 });
-                                dialog.dialog({modal: true,height:500,width:300,title:'Update Site'});
+                                dialog.dialog({modal: true,height:500,width:400,title:'Update Site'});
                             }
 
                         });
@@ -236,7 +271,8 @@
                         siteUrl:updateSiteUrl.val(),
                         siteGrade:updateSiteGrade.val(),
                         siteDept:updateSiteDept.val(),
-                        siteContacts:updateSiteContracts.val()
+                        siteContacts:updateSiteContacts.val(),
+                        siteContactWay:updateSiteContactWay.val()
                     },
                     function (response) {
                         var datas = [response];
@@ -247,10 +283,14 @@
                         $("#pageInfo").html(Handlebars.compile('{{page-info this}}')(window._response));
                     });
         });
-        dialog.dialog({modal: true,height:500,width:300,title:'Create Site'});
+        dialog.dialog({modal: true,height:500,width:400,title:'Create Site'});
     });
 
     updateSearchResults('',0);
+
+    $("#export_button").click(function () {
+        window.location.href='/api/export_site?siteName='+$("#search_string").prop("value");
+    });
 </script>
 </body>
 </html>

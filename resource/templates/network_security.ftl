@@ -17,6 +17,7 @@
     <div id="security-content"></div>
     <#if !readonly>
     <p class="text-right">
+        <button class="btn btn-default" type="button" onclick="location.href='/site'">Back</button>
         <button class="btn btn-default" type="button" id="update">Update</button>
         <#--<button class="btn btn-default" type="button" id="import">Import</button>-->
     </p>

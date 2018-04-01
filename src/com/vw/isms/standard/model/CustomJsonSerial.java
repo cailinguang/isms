@@ -21,7 +21,10 @@ class CustomJsonSerial extends JsonSerializer<Object> {
             f.setAccessible(true);
             try {
                 Object v = f.get(value);
-                if(v instanceof Long){
+                if(v==null){
+                    jgen.writeStringField(f.getName(),"");
+                }
+                else if(v instanceof Long){
                     jgen.writeStringField(f.getName(), String.valueOf(v));
                 }
                 else if(v instanceof Integer){

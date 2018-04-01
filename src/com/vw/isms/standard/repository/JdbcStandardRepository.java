@@ -1829,7 +1829,7 @@ public class JdbcStandardRepository
 
     @Override
     public PagingResult<Site> querySites(SiteSearchRequest search){
-        StringBuffer sql = new StringBuffer("select s.*,d.DEPT_NAME from APP.ISMS_SITE s left join APP.ISMS_DEPT d on s.SITE_DEPT=DEPT_ID ");
+        StringBuffer sql = new StringBuffer("select s.* from APP.ISMS_SITE s  ");
         Map<String, Object> values = new HashMap();
 
         if(!StringUtils.isEmpty(search.getSiteName())){
@@ -1847,21 +1847,21 @@ public class JdbcStandardRepository
                 site.setSiteUrl(rs.getString("SITE_URL"));
                 site.setSiteGrade(rs.getString("SITE_GRADE"));
                 site.setSiteDept(rs.getString("SITE_DEPT"));
-                site.setSiteDeptName(rs.getString("DEPT_NAME"));
+                site.setSiteContactWay(rs.getString("SITE_CONTACT_WAY"));
                 site.setSiteContacts(rs.getString("SITE_CONTACTS"));
                 return site;
             }
 
             @Override
             public int count() {
-                return namedTemplate.queryForObject(sql.toString().replace("s.*,d.DEPT_NAME","count(*)"),values,Integer.class);
+                return namedTemplate.queryForObject(sql.toString().replace("s.*","count(*)"),values,Integer.class);
             }
         });
     }
 
     @Override
     public Site querySiteById(Long siteId){
-        List<Site> sites = this.jdbcTemplate.query("select s.*,d.DEPT_NAME from APP.ISMS_SITE s left join APP.ISMS_DEPT d on s.SITE_DEPT=DEPT_ID where SITE_ID=?", new Object[]{siteId}, new RowMapper<Site>() {
+        List<Site> sites = this.jdbcTemplate.query("select s.* from APP.ISMS_SITE s  where SITE_ID=?", new Object[]{siteId}, new RowMapper<Site>() {
             @Override
             public Site mapRow(ResultSet rs, int i) throws SQLException {
                 Site site = new Site();
@@ -1871,7 +1871,7 @@ public class JdbcStandardRepository
                 site.setSiteUrl(rs.getString("SITE_URL"));
                 site.setSiteGrade(rs.getString("SITE_GRADE"));
                 site.setSiteDept(rs.getString("SITE_DEPT"));
-                site.setSiteDeptName(rs.getString("DEPT_NAME"));
+                site.setSiteContactWay(rs.getString("SITE_CONTACT_WAY"));
                 site.setSiteContacts(rs.getString("SITE_CONTACTS"));
                 return site;
             }
@@ -1889,7 +1889,8 @@ public class JdbcStandardRepository
                 .withColumnValue("SITE_URL",site.getSiteUrl())
                 .withColumnValue("SITE_GRADE",site.getSiteGrade())
                 .withColumnValue("SITE_DEPT",site.getSiteDept())
-                .withColumnValue("SITE_CONTACTS",site.getSiteContacts());
+                .withColumnValue("SITE_CONTACTS",site.getSiteContacts())
+                .withColumnValue("SITE_CONTACT_WAY",site.getSiteContactWay());
         insertion.insert(this.jdbcTemplate);
 
         //insert ISMS_SITE_NV
@@ -1905,7 +1906,8 @@ public class JdbcStandardRepository
                 .withColumnValue("SITE_URL",site.getSiteUrl())
                 .withColumnValue("SITE_GRADE",site.getSiteGrade())
                 .withColumnValue("SITE_DEPT",site.getSiteDept())
-                .withColumnValue("SITE_CONTACTS",site.getSiteContacts());
+                .withColumnValue("SITE_CONTACTS",site.getSiteContacts())
+                .withColumnValue("SITE_CONTACT_WAY",site.getSiteContactWay());
         update.update(this.namedTemplate);
     }
 
