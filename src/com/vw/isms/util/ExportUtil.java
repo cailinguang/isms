@@ -36,7 +36,7 @@ public class ExportUtil {
             cell = row.createCell(i);
             cell.setCellValue(headers[i]);
             cell.setCellStyle(cellStyle);
-            sheet.setColumnWidth(i, headers[i].getBytes().length*2*150);
+            sheet.setColumnWidth(i, headers[i].getBytes().length*2*200);
         }
 
 

@@ -181,6 +181,12 @@
 
                                 updateBtn.html('Update').unbind();
                                 updateBtn.click(e.data,function(){
+                                    dialog.find(':input ~ span').remove();
+                                    if(updateSiteName.val().trim()==''){
+                                        updateSiteName.after('<span class="help-block">Site Name cant empty.</span>');
+                                        return;
+                                    }
+
                                     IsmsRequester.requestJson(
                                             "/api/site",
                                             "PATCH",
@@ -252,11 +258,12 @@
     });
 
     $("#create_button").click(function () {
-        dialog.find(':input+span').remove();
+        dialog.find(':input ~ span').remove();
         dialog.find(':input').val('');
 
         updateBtn.html('Create').unbind();
         updateBtn.click(function(){
+            dialog.find(':input ~ span').remove();
             if(updateSiteName.val().trim()==''){
                 updateSiteName.after('<span class="help-block">Site Name cant empty.</span>');
                 return;
