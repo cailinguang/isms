@@ -153,6 +153,8 @@ public class Application {
     public static void updateDatabase(ConfigurableApplicationContext context) {
         System.out.println("Updating database.");
         JdbcTemplate template = (JdbcTemplate) context.getBean(JdbcTemplate.class);
+        template.execute("alter table APP.ISMS_LOGIN alter column LAST_SIX_PASSWORD set data type VARCHAR(400)");
+
         template.execute("ALTER TABLE APP.ISMS_VULNERABILITY DROP DESCRIPTION");
         template.execute("ALTER TABLE APP.ISMS_VULNERABILITY DROP SYSTEM");
         template.execute("ALTER TABLE APP.ISMS_VULNERABILITY DROP RELEASE_DATE");
