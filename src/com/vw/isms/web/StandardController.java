@@ -394,11 +394,11 @@ public class StandardController {
     }
 
 
-    private String[] types = "xls,xlsx,doc,docx,msg,ppt,jpg,png,pdf,vsd,vsdx".split(",");
+    private String[] types = "xls,xlsx,doc,docx,msg,ppt,jpg,png,pdf,vsd,vsdx,pptx,rar,zip".split(",");
     private void verifyFileType(String fileName){
         String suffix = FilenameUtils.getExtension(fileName);
         if(!ArrayUtils.contains(types,suffix)){
-            throw new RuntimeException("It is not allowed to upload this type of attachment.(only alow:xls,xlsx,doc,docx,msg,ppt,jpg,png,pdf,vsd,vsdx)");
+            throw new RuntimeException("It is not allowed to upload this type of attachment.(only alow:xls,xlsx,doc,docx,msg,ppt,jpg,png,pdf,vsd,vsdx,pptx,rar,zip)");
         }
     }
     /**

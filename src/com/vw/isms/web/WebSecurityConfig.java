@@ -50,8 +50,8 @@ public class WebSecurityConfig extends WebSecurityConfigurerAdapter {
         .loginPage("/login").usernameParameter("username").passwordParameter("password").failureUrl("/login?error").permitAll();
 
         urlRegistry.and().logout().addLogoutHandler(logoutHandler).logoutUrl("/logout").logoutSuccessUrl("/login?logout").permitAll()
-        .and().authorizeRequests().antMatchers("/", "/dist/**", "/js/**", "/images/**").permitAll();
-        //.and().authorizeRequests().antMatchers("/admin", "/api/admin/**").hasAuthority("PER_Admin")
+        .and().authorizeRequests().antMatchers("/", "/dist/**", "/js/**", "/images/**").permitAll()
+        .and().authorizeRequests().antMatchers("/backup").hasAuthority("PER_Admin");
         //.and().authorizeRequests().antMatchers("/create_standard","/create_evaluation").hasAnyRole(new String[]{"Admin", "User"});
 
 
