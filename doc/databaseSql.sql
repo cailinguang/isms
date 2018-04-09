@@ -261,7 +261,7 @@ insert into ISMS_LOGIN(USERNAME,LOGIN_COUNT,LAST_SIX_PASSWORD,LAST_CHANGE_PASS_T
 
 update ISMS_USERS set ROLE='ReadOnly' where ROLE = 'ROLE_READONLY_USER';
 update ISMS_USERS set ROLE='User' where ROLE = 'ROLE_USER';
-update ISMS_USERS set ROLE='User' where ROLE = 'ROLE_USER';
+update ISMS_USERS set ROLE='User' where ROLE = 'ROLE_ADMIN';
 update ISMS_USERS set USERNAME = 'useradmin',PASSWORD='$2a$10$ASu.9OouJBT0ZUkX47mwNeRY6UxCxB.thPxWbT04koyfOc4aaj/ZS' where USERNAME='admin';
 
 -- auto-generated definition

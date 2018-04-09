@@ -153,7 +153,7 @@ public class Application {
     public static void updateDatabase(ConfigurableApplicationContext context) {
         System.out.println("Updating database.");
         JdbcTemplate template = (JdbcTemplate) context.getBean(JdbcTemplate.class);
-        template.execute("alter table APP.ISMS_LOGIN alter column LAST_SIX_PASSWORD set data type VARCHAR(400)");
+
     }
 
     public static void main(String[] args)
