@@ -153,21 +153,7 @@ public class Application {
     public static void updateDatabase(ConfigurableApplicationContext context) {
         System.out.println("Updating database.");
         JdbcTemplate template = (JdbcTemplate) context.getBean(JdbcTemplate.class);
-        template.execute("alter table APP.ISMS_LOGIN alter column LAST_SIX_PASSWORD set data type VARCHAR(400)");
 
-        template.execute("ALTER TABLE APP.ISMS_VULNERABILITY DROP DESCRIPTION");
-        template.execute("ALTER TABLE APP.ISMS_VULNERABILITY DROP SYSTEM");
-        template.execute("ALTER TABLE APP.ISMS_VULNERABILITY DROP RELEASE_DATE");
-        template.execute("ALTER TABLE APP.ISMS_VULNERABILITY DROP SUGGESTION");
-        template.execute("ALTER TABLE APP.ISMS_VULNERABILITY ADD NAME varchar(64)");
-        template.execute("ALTER TABLE APP.ISMS_VULNERABILITY ADD QUANTITY int");
-        template.execute("ALTER TABLE APP.ISMS_VULNERABILITY ADD DISCOVERER varchar(64)");
-        template.execute("ALTER TABLE APP.ISMS_VULNERABILITY ADD CREATER varchar(64)");
-        template.execute("ALTER TABLE APP.ISMS_VULNERABILITY ADD URL varchar(256)");
-        template.execute("ALTER TABLE APP.ISMS_VULNERABILITY ADD DIRECTOR varchar(64)");
-        template.execute("ALTER TABLE APP.ISMS_VULNERABILITY ADD DISCOVERER_TIME DATE");
-        template.execute("ALTER TABLE APP.ISMS_VULNERABILITY ADD SOLVING_TIME DATE");
-        template.execute("ALTER TABLE APP.ISMS_SITE ADD SITE_CONTACT_WAY VARCHAR(256)");
     }
 
     public static void main(String[] args)
