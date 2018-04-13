@@ -1,13 +1,13 @@
 <nav class="navbar navbar-default">
     <div class="container-fluid">
         <div class="isms_header">
-            <div><img src="images/SAIClogo.png" alt="SAIC" style="float:left"></div>
-            <div><h1 style="padding: 40px">ISMS信息安全管理平台<small></small></h1></div>
+            <div><img src="images/logo.png" alt="SAIC" style="float:left"></div>
+            <div><h1 style="padding-bottom: 20px;padding-top:15px;">&nbsp;&nbsp;ISMS信息安全管理平台<small></small></h1></div>
         </div>
         <div id="navbar" class="navbar-collapse collapse">
             <ul class="nav navbar-nav">
-                <#--<li id="nav_basic" <#if requestURI=="/basic_info">class="active"</#if> ><a href="/basic_info">基础信息</a></li>-->
                 <#if auth??>
+                <li id="nav_basic" <#if requestURI=="/basic_info">class="active"</#if> ><a href="/basic_info">基础信息</a></li>
                 <#list menus as m>
                     <li id="nav_${m.menuId}" <#if requestURI==m.menuUrl>class="active"</#if> ><a href="${m.menuUrl}">${m.menuName}</a></li>
                 </#list>

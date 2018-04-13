@@ -20,7 +20,7 @@
         <button class="btn btn-default" type="button" onclick="location.href='/site'">Back</button>
         <button class="btn btn-default" type="button" id="update">Update</button>
         <#--<button class="btn btn-default" type="button" id="import">Import</button>-->
-        <button class="btn btn-default" type="button" id="export">Export</button>
+        <#--<button class="btn btn-default" type="button" id="export">Export</button>-->
     </p>
     </#if>
 
